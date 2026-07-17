@@ -885,7 +885,6 @@
     <string name="pref_download_concurrent_pages_summary">Paĝoj elŝutitaj sammomente por fonto</string>
     <string name="action_filter_excluded_scanlators">Filtri ekskluzivitajn skantradukistojn</string>
     <string name="download_bookmarked">Legosignita</string>
-    <string name="label_support_us">Subtenu nin</string>
     <string name="extensionStores">Etendaĵejoj</string>
     <string name="action.addExtensionStore">Aldoni etendaĵejon</string>
     <string name="extensionStoresScreen.emptyLabel">Vi ankoraŭ aldonis neniun etendaĵejon</string>
@@ -897,16 +896,4 @@
     <string name="extensionStoresScreen.deleteStore.title">Forigi etendaĵejon</string>
     <string name="extensionStoresScreen.deleteStore.body">Ĉu vi volas forigi la etendaĵejon \"%1$s\" (%2$s)?</string>
     <string name="pref_webtoon_vertical_navigator_on_left">Loki vertikalan navigilon ĉe la maldekstra flanko</string>
-    <string name="supportUsScreen.perks">Donacantoj ricevas aliron al ekskluzivaj kanaloj, kaj pli da avantaĝoj poste.</string>
-    <string name="supportUsScreen.donationPlatform.patreon">Patreon (preferata)</string>
-    <string name="supportUsScreen.donationPlatform.opencollective">OpenCollective</string>
-    <string name="supportUsScreen.currentlySupportedBy">Mihon estas nun finance subtenata de %d+ patronoj. Ni volas danki ĉiun el vi. Ni plibonigu Mihon eĉ pli kune.</string>
-    <string name="supportUsScreen.contactForDetailsMessage">Por alternativaj opcioj aŭ iaj ajn rilataj demandoj, aniĝu al nia Discord-servilo.</string>
-    <string name="supportUsScreen.contactPlatform">Discord</string>
-    <string name="donationCampaign.title">Ĉu vi ŝatas la apon?</string>
-    <string name="donationCampaign.paragraph1">Sal! Mi estas ĉefa programisto de Mihon kaj mi ŝatus peti vin konsideri finance subteni ĝian evoluigon. Kun sufiĉa subteno mi povos labori pri Mihon plentempe kaj koncentriĝi pri delonge ekzistantaj problemoj kaj ankaŭ pri tre petitaj funkcioj.</string>
-    <string name="donationCampaign.paragraph2">Vi povas donaci per Patreon (preferata) aŭ OpenCollective. Se vi havas demandojn aŭ vi volus subteni per alternativaj metodoj, ne hezitu kontakti min ĉe la Discord-servilo de Mihon.</string>
-    <string name="donationCampaign.paragraph3">Sendepende de tio, Mihon daŭre estos prizorgata de mi kaj la volontuloj, kaj ĝi restos malfermitkoda.</string>
-    <string name="donationCampaign.contactPlatform">Discord</string>
-    <string name="donationCampaign.dismiss">Kaŝi</string>
 </resources>

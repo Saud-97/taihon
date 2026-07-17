@@ -812,7 +812,6 @@
     <string name="author">Autor</string>
     <string name="scanlator">Equipa de tradução</string>
     <string name="action_display_unread_badge">Capítulos não lidos</string>
-    <string name="label_support_us">Apoie-nos</string>
     <string name="action_webview_close_tab">Fechar guia</string>
     <string name="theme_catppuccin">Catppuccin</string>
     <string name="theme_monochrome">Monocromático</string>
@@ -892,16 +891,4 @@
     <string name="migrationListScreen.migrateDialog.cancelLabel">Cancelar</string>
     <string name="migrationListScreen.progressDialog.cancelLabel">Cancelar</string>
     <string name="migrationListScreen.matchWithoutChapterToast">Nenhum capítulo encontrado, esta entrada não pode ser usada para migração</string>
-    <string name="supportUsScreen.perks">Patrons tem acesso a canais exclusivos, com mais recursos por vir.</string>
-    <string name="supportUsScreen.donationPlatform.patreon">Patreon (preferido)</string>
-    <string name="supportUsScreen.donationPlatform.opencollective">OpenCollective</string>
-    <string name="supportUsScreen.currentlySupportedBy">Mihon atualmente conta com o apoio de %d+ patrons. Queremos agradecer cada um de vocês. Vamos fazer Mihon ainda melhor juntos.</string>
-    <string name="supportUsScreen.contactForDetailsMessage">Para opções alternativas ou qualquer perguntas relacionadas, se junte ao nosso servidor no Discord.</string>
-    <string name="supportUsScreen.contactPlatform">Discord</string>
-    <string name="donationCampaign.title">Gosta da app?</string>
-    <string name="donationCampaign.paragraph1">Olá! Sou o programador principal por trás do Mihon, e gostaria de perguntar se consideraria apoiar o desenvolvimento financeiramente. Com apoio suficiente, poderei trabalhar integralmente no Mihon e focar em problemas pendentes tanto quanto em funcionalidades muito solicitadas.</string>
-    <string name="donationCampaign.paragraph2">Pode doar através do Patreon (preferencialmente) ou OpenCollective. Se tiver perguntas ou gostaria de apoiar a utilizar métodos alternativos, sinta-se livre para se aproximar através do servidor no Discord do Mihon.</string>
-    <string name="donationCampaign.paragraph3">Apesar disso, Mihon continuará a se mantido por mim e pelos voluntários e se manterá de código aberto.</string>
-    <string name="donationCampaign.contactPlatform">Discord</string>
-    <string name="donationCampaign.dismiss">Ignorar</string>
 </resources>

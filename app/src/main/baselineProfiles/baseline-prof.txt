@@ -33485,7 +33485,6 @@ HSPLtachiyomi/i18n/MR$strings;->getLabel_recent_updates()Ldev/icerock/moko/resou
 HSPLtachiyomi/i18n/MR$strings;->getLabel_settings()Ldev/icerock/moko/resources/StringResource;
 HSPLtachiyomi/i18n/MR$strings;->getLabel_sources()Ldev/icerock/moko/resources/StringResource;
 HSPLtachiyomi/i18n/MR$strings;->getLabel_stats()Ldev/icerock/moko/resources/StringResource;
-HSPLtachiyomi/i18n/MR$strings;->getLabel_support_us()Ldev/icerock/moko/resources/StringResource;
 HSPLtachiyomi/i18n/MR$strings;->getLandscape()Ldev/icerock/moko/resources/StringResource;
 HSPLtachiyomi/i18n/MR$strings;->getLatest()Ldev/icerock/moko/resources/StringResource;
 HSPLtachiyomi/i18n/MR$strings;->getLocal_filter_order_by()Ldev/icerock/moko/resources/StringResource;

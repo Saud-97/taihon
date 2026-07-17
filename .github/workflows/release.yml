@@ -13,19 +13,24 @@ concurrency:
 
 jobs:
   get_tag:
-    if: github.repository == 'mihonapp/mihon'
+    if: github.repository == 'Saud-97/taihon'
     name: Extract tag name
     runs-on: 'ubuntu-24.04'
     outputs:
       tag: ${{ steps.extract.outputs.tag }}
-
+      upstream: ${{ steps.extract.outputs.upstream }}
     steps:
       - name: Get tag name
         id: extract
-        run: echo "tag=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          UPSTREAM="${TAG%.*}"
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "upstream=$UPSTREAM" >> "$GITHUB_OUTPUT"
 
   build:
-    if: github.repository == 'mihonapp/mihon'
+    if: github.repository == 'Saud-97/taihon'
     name: Build
     runs-on: 'ubuntu-24.04'
     needs: get_tag
@@ -55,25 +60,25 @@ jobs:
         run: |
           set -e
 
-          mv app/build/outputs/apk/release/app-universal-release.apk mihon-${{ needs.get_tag.outputs.tag }}.apk
-          mv app/build/outputs/apk/release/app-arm64-v8a-release.apk mihon-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk
-          mv app/build/outputs/apk/release/app-armeabi-v7a-release.apk mihon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
-          mv app/build/outputs/apk/release/app-x86-release.apk mihon-x86-${{ needs.get_tag.outputs.tag }}.apk
-          mv app/build/outputs/apk/release/app-x86_64-release.apk mihon-x86_64-${{ needs.get_tag.outputs.tag }}.apk
+          mv app/build/outputs/apk/release/app-universal-release.apk taihon-${{ needs.get_tag.outputs.tag }}.apk
+          mv app/build/outputs/apk/release/app-arm64-v8a-release.apk taihon-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk
+          mv app/build/outputs/apk/release/app-armeabi-v7a-release.apk taihon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
+          mv app/build/outputs/apk/release/app-x86-release.apk taihon-x86-${{ needs.get_tag.outputs.tag }}.apk
+          mv app/build/outputs/apk/release/app-x86_64-release.apk taihon-x86_64-${{ needs.get_tag.outputs.tag }}.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: mihon
+          name: taihon
           path: |
-            mihon-${{ needs.get_tag.outputs.tag }}.apk
-            mihon-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk
-            mihon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
-            mihon-x86-${{ needs.get_tag.outputs.tag }}.apk
-            mihon-x86_64-${{ needs.get_tag.outputs.tag }}.apk
+            taihon-${{ needs.get_tag.outputs.tag }}.apk
+            taihon-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk
+            taihon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
+            taihon-x86-${{ needs.get_tag.outputs.tag }}.apk
+            taihon-x86_64-${{ needs.get_tag.outputs.tag }}.apk
 
   build_foss:
-    if: github.repository == 'mihonapp/mihon'
+    if: github.repository == 'Saud-97/taihon'
     name: Build (FOSS)
     runs-on: ubuntu-24.04
     needs: get_tag
@@ -105,21 +110,46 @@ jobs:
         run: |
           set -e
 
-          mv app/build/outputs/apk/foss/app-universal-foss.apk mihon-${{ needs.get_tag.outputs.tag }}-foss.apk
+          mv app/build/outputs/apk/foss/app-universal-foss.apk taihon-${{ needs.get_tag.outputs.tag }}-foss.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: mihon-foss
-          path: mihon-${{ needs.get_tag.outputs.tag }}-foss.apk
+          name: taihon-foss
+          path: taihon-${{ needs.get_tag.outputs.tag }}-foss.apk
 
   release:
-    if: github.repository == 'mihonapp/mihon'
+    if: github.repository == 'Saud-97/taihon'
     name: Create GitHub Release
     runs-on: ubuntu-24.04
     needs: [get_tag, build, build_foss]
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Find previous tag
+        id: previous
+        shell: bash
+        run: |
+          PREVIOUS_TAG=$(git tag --sort=-creatordate | sed -n '2p')
+
+          echo "tag=$PREVIOUS_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Generate changelog
+        shell: bash
+        run: |
+          {
+            echo "CHANGELOG<<EOF"
+            git log \
+              --no-merges \
+              --pretty='* %s — @%an' \
+              "${{ steps.previous.outputs.tag }}..${{ needs.get_tag.outputs.tag }}"
+            echo EOF
+          } >> "$GITHUB_ENV"
+
       - name: Download all artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -130,35 +160,45 @@ jobs:
         with:
           failOnError: false
           name: |
-            mihon
-            mihon-foss
+            taihon
+            taihon-foss
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
           tag_name: ${{ needs.get_tag.outputs.tag }}
-          name: Mihon ${{ needs.get_tag.outputs.tag }}
+          name: Taihon ${{ needs.get_tag.outputs.tag }}
           body: |
-            Consider supporting the development on [Patreon](https://www.patreon.com/mihon/membership) or [OpenCollective](https://opencollective.com/mihon/contribute) to keep Mihon improving!
+            ${{ env.CHANGELOG }}
 
-            Check out the [past release notes](https://github.com/mihonapp/mihon/releases) if you're upgrading from an earlier version.
+            ## 🔄 Upstream
+            Updated with the latest changes from **Mihon ${{ needs.get_tag.outputs.upstream }}**.
 
-            <!-->
+            ## ✨ New Features
+
+            ## ⚙️ Customizations
+
+            ## 🚀 Improvements
+
+            ## 🐛 Bug Fixes
 
 
 
-            <!-->
+            ---
+
+            **Full Changelog**
+            https://github.com/${{ github.repository }}/compare/${{ steps.previous.outputs.tag }}...${{ needs.get_tag.outputs.tag }}
 
             > [!TIP]
             >
-            > ### If you are unsure which version to download then go with `mihon-${{ needs.get_tag.outputs.tag }}.apk`
+            > If you are unsure which APK to download, use **`taihon-${{ needs.get_tag.outputs.tag }}.apk`**.
           files: |
-            mihon-${{ needs.get_tag.outputs.tag }}.apk
-            mihon-${{ needs.get_tag.outputs.tag }}-foss.apk
-            mihon-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk
-            mihon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
-            mihon-x86-${{ needs.get_tag.outputs.tag }}.apk
-            mihon-x86_64-${{ needs.get_tag.outputs.tag }}.apk
+            taihon-${{ needs.get_tag.outputs.tag }}.apk
+            taihon-${{ needs.get_tag.outputs.tag }}-foss.apk
+            taihon-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk
+            taihon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
+            taihon-x86-${{ needs.get_tag.outputs.tag }}.apk
+            taihon-x86_64-${{ needs.get_tag.outputs.tag }}.apk
           draft: true
           prerelease: false
           token: ${{ secrets.MIHON_BOT_TOKEN }}

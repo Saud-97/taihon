@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "82031285239",
-    "project_id": "mihonapp",
-    "storage_bucket": "mihonapp.appspot.com"
+    "project_number": "823016311544",
+    "project_id": "taihon-75391",
+    "storage_bucket": "taihon-75391.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:82031285239:android:336ed6dceef55c357594f2",
+        "mobilesdk_app_id": "1:823016311544:android:e186f0b3f01cc6483b090d",
         "android_client_info": {
-          "package_name": "app.mihon"
+          "package_name": "app.taihon"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDTvOxBQnuXADx5isKxoynPG0nlAO8bQbk"
+          "current_key": "AIzaSyAVLRB8tYnq_-5roNd-1SpmYhC5gbLRIic"
         }
       ],
       "services": {
@@ -26,15 +26,15 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:82031285239:android:b7440cbdd0d33c9d7594f2",
+        "mobilesdk_app_id": "1:823016311544:android:087778bc81b6323c3b090d",
         "android_client_info": {
-          "package_name": "app.mihon.debug"
+          "package_name": "app.taihon.debug"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDTvOxBQnuXADx5isKxoynPG0nlAO8bQbk"
+          "current_key": "AIzaSyAVLRB8tYnq_-5roNd-1SpmYhC5gbLRIic"
         }
       ],
       "services": {

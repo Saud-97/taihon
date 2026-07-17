@@ -37,13 +37,7 @@ class AppUpdateChecker {
     }
 }
 
-val GITHUB_REPO: String by lazy {
-    if (isPreviewBuildType) {
-        "mihonapp/mihon-preview"
-    } else {
-        "mihonapp/mihon"
-    }
-}
+val GITHUB_REPO = "Saud-97/taihon"
 
 val RELEASE_TAG = "v${BuildConfig.VERSION_NAME}"
 
