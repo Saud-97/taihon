@@ -31,8 +31,6 @@ class GetApplicationRelease(
 
         // Check if latest version is different from current version
         val isNewVersion = isNewVersion(
-            arguments.isPreview,
-            arguments.commitCount,
             arguments.versionName,
             release.version,
         )
@@ -43,8 +41,6 @@ class GetApplicationRelease(
     }
 
     private fun isNewVersion(
-        isPreview: Boolean,
-        commitCount: Int,
         versionName: String,
         versionTag: String,
     ): Boolean {
@@ -74,8 +70,6 @@ class GetApplicationRelease(
 
     data class Arguments(
         val isFoss: Boolean,
-        val isPreview: Boolean,
-        val commitCount: Int,
         val versionName: String,
         val repository: String,
         val forceCheck: Boolean = false,
