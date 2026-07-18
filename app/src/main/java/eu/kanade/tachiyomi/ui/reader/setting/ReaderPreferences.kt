@@ -215,7 +215,7 @@ class ReaderPreferences(
 
     companion object {
         const val WEBTOON_PADDING_MIN = 0
-        const val WEBTOON_PADDING_MAX = 25
+        const val WEBTOON_PADDING_MAX = 40
 
         const val MILLI_CONVERSION = 100
 
