@@ -255,6 +255,7 @@ object SettingsDataScreen : SearchableSettings {
                     preference = backupPreferences.backupInterval,
                     entries = mapOf(
                         0 to stringResource(MR.strings.off),
+                        3 to stringResource(MR.strings.update_6hour).replace("6", "3"),
                         6 to stringResource(MR.strings.update_6hour),
                         12 to stringResource(MR.strings.update_12hour),
                         24 to stringResource(MR.strings.update_24hour),
