@@ -16,6 +16,7 @@ sealed class Preference {
     sealed class PreferenceItem<T, R> : Preference() {
         abstract val subtitle: String?
         abstract val icon: ImageVector?
+        abstract val badge: ImageVector?
         abstract val onValueChanged: suspend (value: T) -> R
 
         /**
@@ -27,6 +28,7 @@ sealed class Preference {
             override val enabled: Boolean = true,
             val widget: @Composable (() -> Unit)? = null,
             val onClick: (() -> Unit)? = null,
+            override val badge: ImageVector? = null,
         ) : PreferenceItem<String, Unit>() {
             override val icon: ImageVector? = null
             override val onValueChanged: suspend (value: String) -> Unit = {}
@@ -41,6 +43,7 @@ sealed class Preference {
             override val subtitle: String? = null,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (value: Boolean) -> Boolean = { true },
+            override val badge: ImageVector? = null,
         ) : PreferenceItem<Boolean, Boolean>() {
             override val icon: ImageVector? = null
         }
@@ -57,6 +60,7 @@ sealed class Preference {
             @IntRange(from = 0) val steps: Int = with(valueRange) { (last - first) - 1 },
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (value: Int) -> Unit = {},
+            override val badge: ImageVector? = null,
         ) : PreferenceItem<Int, Unit>() {
             override val icon: ImageVector? = null
         }
@@ -75,6 +79,7 @@ sealed class Preference {
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (value: T) -> Boolean = { true },
+            override val badge: ImageVector? = null,
         ) : PreferenceItem<T, Boolean>() {
             internal fun internalSet(value: Any) = preference.set(value as T)
             internal suspend fun internalOnValueChanged(value: Any) = onValueChanged(value as T)
@@ -97,6 +102,7 @@ sealed class Preference {
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (value: String) -> Unit = {},
+            override val badge: ImageVector? = null,
         ) : PreferenceItem<String, Unit>()
 
         /**
@@ -122,6 +128,7 @@ sealed class Preference {
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (value: Set<T>) -> Boolean = { true },
+            override val badge: ImageVector? = null,
         ) : PreferenceItem<Set<T>, Boolean>() {
             internal fun internalSet(value: Set<Any?>) = preference.set(value as Set<T>)
             internal suspend fun internalOnValueChanged(value: Set<Any?>) = onValueChanged(value as Set<T>)
@@ -140,6 +147,7 @@ sealed class Preference {
             override val subtitle: String? = "%s",
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (value: String) -> Boolean = { true },
+            override val badge: ImageVector? = null,
         ) : PreferenceItem<String, Boolean>() {
             override val icon: ImageVector? = null
         }
@@ -151,6 +159,7 @@ sealed class Preference {
             val tracker: Tracker,
             val login: () -> Unit,
             val logout: () -> Unit,
+            override val badge: ImageVector? = null,
         ) : PreferenceItem<String, Unit>() {
             override val title: String = ""
             override val enabled: Boolean = true
@@ -161,6 +170,7 @@ sealed class Preference {
 
         data class InfoPreference(
             override val title: String,
+            override val badge: ImageVector? = null,
         ) : PreferenceItem<String, Unit>() {
             override val enabled: Boolean = true
             override val subtitle: String? = null
@@ -170,6 +180,7 @@ sealed class Preference {
 
         data class CustomPreference(
             override val title: String,
+            override val badge: ImageVector? = null,
             val content: @Composable () -> Unit,
         ) : PreferenceItem<Unit, Unit>() {
             override val enabled: Boolean = true

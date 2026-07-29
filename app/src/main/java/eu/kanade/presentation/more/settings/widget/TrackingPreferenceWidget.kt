@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,7 @@ fun TrackingPreferenceWidget(
     modifier: Modifier = Modifier,
     tracker: Tracker,
     isLoggedIn: Boolean,
+    badge: ImageVector? = null,
     onClick: (() -> Unit)? = null,
 ) {
     val highlighted = LocalPreferenceHighlighted.current
@@ -42,25 +44,39 @@ fun TrackingPreferenceWidget(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TrackLogoIcon(tracker)
-            Column(
+            Box(
                 modifier = Modifier.weight(1f),
             ) {
-                Text(
-                    text = tracker.name,
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    maxLines = 1,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontSize = TitleFontSize,
-                    fontWeight = FontWeight.Medium,
-                )
-                val displayName = tracker.getDisplayUsername()
-                if (isLoggedIn && displayName.isNotBlank()) {
+                Column {
                     Text(
-                        text = displayName,
+                        text = tracker.name,
                         modifier = Modifier.padding(horizontal = 16.dp),
                         maxLines = 1,
-                        style = MaterialTheme.typography.bodyMedium,
-                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontSize = TitleFontSize,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    val displayName = tracker.getDisplayUsername()
+                    if (isLoggedIn && displayName.isNotBlank()) {
+                        Text(
+                            text = displayName,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            maxLines = 1,
+                            style = MaterialTheme.typography.bodyMedium,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+
+                if (badge != null) {
+                    Icon(
+                        imageVector = badge,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(end = 16.dp)
+                            .size(14.dp),
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
             }

@@ -2,6 +2,7 @@ package eu.kanade.presentation.more.settings.widget
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material3.Icon
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
@@ -22,6 +24,7 @@ fun TextPreferenceWidget(
     title: String? = null,
     subtitle: String? = null,
     icon: ImageVector? = null,
+    badge: ImageVector? = null,
     iconTint: Color = MaterialTheme.colorScheme.primary,
     widget: @Composable (() -> Unit)? = null,
     onPreferenceClick: (() -> Unit)? = null,
@@ -49,6 +52,18 @@ fun TextPreferenceWidget(
                     imageVector = icon,
                     tint = iconTint,
                     contentDescription = null,
+                )
+            }
+        } else {
+            null
+        },
+        badge = if (badge != null) {
+            {
+                Icon(
+                    imageVector = badge,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
         } else {

@@ -182,6 +182,7 @@ fun SliderItem(
     valueString: String = value.toString(),
     labelStyle: TextStyle = MaterialTheme.typography.bodyMedium,
     pillColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    badge: ImageVector? = null,
 ) {
     BaseSliderItem(
         value = value,
@@ -192,6 +193,7 @@ fun SliderItem(
         onChange = onChange,
         titleStyle = labelStyle,
         pillColor = pillColor,
+        badge = badge,
         modifier = Modifier.padding(
             horizontal = SettingsItemsPaddings.Horizontal,
             vertical = SettingsItemsPaddings.Vertical,
@@ -212,6 +214,7 @@ fun BaseSliderItem(
     titleStyle: TextStyle = MaterialTheme.typography.titleLarge,
     subtitleStyle: TextStyle = MaterialTheme.typography.bodySmall,
     pillColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    badge: ImageVector? = null,
 ) {
     val haptic = LocalHapticFeedback.current
     Column(
@@ -242,6 +245,15 @@ fun BaseSliderItem(
                 style = MaterialTheme.typography.bodyMedium,
                 color = pillColor,
             )
+
+            if (badge != null) {
+                Icon(
+                    imageVector = badge,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
         }
         Slider(
             value = value,

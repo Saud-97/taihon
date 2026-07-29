@@ -40,6 +40,7 @@ internal fun BasePreferenceWidget(
     title: String? = null,
     subcomponent: @Composable (ColumnScope.() -> Unit)? = null,
     icon: @Composable (() -> Unit)? = null,
+    badge: @Composable (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     widget: @Composable (() -> Unit)? = null,
 ) {
@@ -59,22 +60,36 @@ internal fun BasePreferenceWidget(
                 content = { icon() },
             )
         }
-        Column(
+
+        Box(
             modifier = Modifier
                 .weight(1f)
                 .padding(vertical = PrefsVerticalPadding),
         ) {
-            if (!title.isNullOrBlank()) {
-                Text(
-                    modifier = Modifier.padding(horizontal = PrefsHorizontalPadding),
-                    text = title,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 2,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontSize = TitleFontSize,
-                )
+            Column {
+                if (!title.isNullOrBlank()) {
+                    Text(
+                        modifier = Modifier.padding(horizontal = PrefsHorizontalPadding),
+                        text = title,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 2,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontSize = TitleFontSize,
+                    )
+                }
+
+                subcomponent?.invoke(this)
             }
-            subcomponent?.invoke(this)
+
+            if (badge != null) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(end = PrefsHorizontalPadding),
+                ) {
+                    badge()
+                }
+            }
         }
         if (widget != null) {
             Box(

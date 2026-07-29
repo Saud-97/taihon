@@ -18,6 +18,7 @@ fun SwitchPreferenceWidget(
     title: String,
     subtitle: String? = null,
     icon: ImageVector? = null,
+    badge: ImageVector? = null,
     checked: Boolean = false,
     onCheckedChanged: (Boolean) -> Unit,
 ) {
@@ -26,6 +27,7 @@ fun SwitchPreferenceWidget(
         title = title,
         subtitle = subtitle,
         icon = icon,
+        badge = badge,
         widget = {
             Switch(
                 checked = checked,

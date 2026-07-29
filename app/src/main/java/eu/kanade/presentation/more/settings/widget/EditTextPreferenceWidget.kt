@@ -30,6 +30,7 @@ fun EditTextPreferenceWidget(
     title: String,
     subtitle: String?,
     icon: ImageVector?,
+    badge: ImageVector? = null,
     value: String,
     onConfirm: suspend (String) -> Boolean,
 ) {
@@ -39,6 +40,7 @@ fun EditTextPreferenceWidget(
         title = title,
         subtitle = subtitle?.format(value),
         icon = icon,
+        badge = badge,
         onPreferenceClick = { isDialogShown = true },
     )
 
