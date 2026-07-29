@@ -36,8 +36,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.vectorResource
 import androidx.core.net.toUri
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -49,6 +51,7 @@ import eu.kanade.presentation.more.settings.screen.data.StorageInfo
 import eu.kanade.presentation.more.settings.widget.BasePreferenceWidget
 import eu.kanade.presentation.more.settings.widget.PrefsHorizontalPadding
 import eu.kanade.presentation.util.relativeTimeSpanString
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.create.BackupCreateJob
 import eu.kanade.tachiyomi.data.backup.restore.BackupRestoreJob
 import eu.kanade.tachiyomi.data.cache.ChapterCache
@@ -186,6 +189,8 @@ object SettingsDataScreen : SearchableSettings {
         val navigator = LocalNavigator.currentOrThrow
 
         val lastAutoBackup by backupPreferences.lastAutoBackupTimestamp.collectAsState()
+        val backupRetention by backupPreferences.backupRetention.collectAsState()
+        val backupInterval by backupPreferences.backupInterval.collectAsState()
 
         val chooseBackup = rememberLauncherForActivityResult(
             object : ActivityResultContracts.GetContent() {
@@ -267,6 +272,17 @@ object SettingsDataScreen : SearchableSettings {
                         BackupCreateJob.setupTask(context, it)
                         true
                     },
+                    badge = ImageVector.vectorResource(R.drawable.ic_mihon),
+                ),
+                Preference.PreferenceItem.SliderPreference(
+                    value = backupRetention,
+                    valueRange = 4..100,
+                    title = stringResource(MR.strings.pref_backup_retention),
+                    subtitle = stringResource(MR.strings.pref_backup_retention_info),
+                    onValueChanged = { backupPreferences.backupRetention.set(it) },
+                    badge = ImageVector.vectorResource(R.drawable.ic_mihon),
+                    steps = 0,
+                    enabled = backupInterval > 0,
                 ),
                 Preference.PreferenceItem.InfoPreference(
                     stringResource(MR.strings.backup_info) + "\n\n" +

@@ -64,7 +64,7 @@ class BackupCreator(
                 dir?.listFiles { _, filename -> FILENAME_REGEX.matches(filename) }
                     .orEmpty()
                     .sortedByDescending { it.name }
-                    .drop(MAX_AUTO_BACKUPS - 1)
+                    .drop(backupPreferences.backupRetention.get() - 1)
                     .forEach { it.delete() }
 
                 // Create new file to place backup
@@ -154,7 +154,6 @@ class BackupCreator(
     }
 
     companion object {
-        private const val MAX_AUTO_BACKUPS: Int = 4
         private val FILENAME_REGEX = """${BuildConfig.APPLICATION_ID}_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}.tachibk""".toRegex()
 
         fun getFilename(): String {
