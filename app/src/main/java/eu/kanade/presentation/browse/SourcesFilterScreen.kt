@@ -61,6 +61,20 @@ private fun SourcesFilterContent(
     FastScrollLazyColumn(
         contentPadding = contentPadding,
     ) {
+        state.localSource?.let { source ->
+            item(
+                key = "source-filter-local",
+                contentType = "source-filter-item",
+            ) {
+                SourcesFilterItem(
+                    modifier = Modifier.animateItem(),
+                    source = source,
+                    enabled = "${source.id}" !in state.disabledSources,
+                    onClickItem = onClickSource,
+                )
+            }
+        }
+
         state.items.forEach { (language, sources) ->
             val enabled = language in state.enabledLanguages
             item(
