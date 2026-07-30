@@ -80,20 +80,20 @@ internal fun BasePreferenceWidget(
 
                 subcomponent?.invoke(this)
             }
+        }
 
-            if (badge != null) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(end = PrefsHorizontalPadding),
-                ) {
-                    badge()
-                }
-            }
+        if (badge != null) {
+            Box(
+                modifier = Modifier.padding(start = PrefsHorizontalPadding),
+                content = { badge() },
+            )
         }
         if (widget != null) {
             Box(
-                modifier = Modifier.padding(end = PrefsHorizontalPadding),
+                modifier = Modifier.padding(
+                    start = if (badge != null) 8.dp else PrefsHorizontalPadding,
+                    end = PrefsHorizontalPadding,
+                ),
                 content = { widget() },
             )
         }
