@@ -263,7 +263,11 @@ object HomeScreen : Screen() {
                     }
                     BrowseTab::class.isInstance(tab) -> {
                         val count by produceState(initialValue = 0) {
-                            Injekt.get<SourcePreferences>().extensionUpdatesCount.changes()
+                            val pref = Injekt.get<SourcePreferences>()
+                            combine(
+                                pref.showExtensionUpdatesCount.changes(),
+                                pref.extensionUpdatesCount.changes(),
+                            ) { show, count -> if (show) count else 0 }
                                 .collectLatest { value = it }
                         }
                         if (count > 0) {
