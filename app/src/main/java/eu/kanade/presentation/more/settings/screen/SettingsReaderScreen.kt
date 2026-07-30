@@ -327,7 +327,7 @@ object SettingsReaderScreen : SearchableSettings {
                     title = stringResource(MR.strings.pref_webtoon_side_padding),
                     valueString = numberFormat.format(webtoonSidePadding / 100f),
                     onValueChanged = { webtoonSidePaddingPref.set(it) },
-                    badge = ImageVector.vectorResource(R.drawable.ic_mihon),
+                    badge = ImageVector.vectorResource(R.drawable.ic_taihon),
                 ),
                 Preference.PreferenceItem.ListPreference(
                     preference = readerPreferences.readerHideThreshold,

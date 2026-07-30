@@ -164,7 +164,7 @@ private fun ColumnScope.WebtoonViewerSettings(viewModel: ReaderSettingsViewModel
             viewModel.preferences.webtoonSidePadding.set(it)
         },
         pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        badge = ImageVector.vectorResource(R.drawable.ic_mihon),
+        badge = ImageVector.vectorResource(R.drawable.ic_taihon),
     )
 
     CheckboxItem(

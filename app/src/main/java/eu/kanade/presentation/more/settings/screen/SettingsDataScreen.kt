@@ -272,7 +272,7 @@ object SettingsDataScreen : SearchableSettings {
                         BackupCreateJob.setupTask(context, it)
                         true
                     },
-                    badge = ImageVector.vectorResource(R.drawable.ic_mihon),
+                    badge = ImageVector.vectorResource(R.drawable.ic_taihon),
                 ),
                 Preference.PreferenceItem.SliderPreference(
                     value = backupRetention,
@@ -280,7 +280,7 @@ object SettingsDataScreen : SearchableSettings {
                     title = stringResource(MR.strings.pref_backup_retention),
                     subtitle = stringResource(MR.strings.pref_backup_retention_info),
                     onValueChanged = { backupPreferences.backupRetention.set(it) },
-                    badge = ImageVector.vectorResource(R.drawable.ic_mihon),
+                    badge = ImageVector.vectorResource(R.drawable.ic_taihon),
                     steps = 0,
                     enabled = backupInterval > 0,
                 ),
