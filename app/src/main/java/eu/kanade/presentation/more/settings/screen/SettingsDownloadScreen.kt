@@ -8,10 +8,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.util.fastMap
 import eu.kanade.presentation.category.visualName
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.widget.TriStateListDialog
+import eu.kanade.tachiyomi.R
 import tachiyomi.domain.category.interactor.GetCategories
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.download.service.DownloadPreferences
@@ -35,6 +38,7 @@ object SettingsDownloadScreen : SearchableSettings {
 
         val downloadPreferences = remember { Injekt.get<DownloadPreferences>() }
         val parallelSourceLimit by downloadPreferences.parallelSourceLimit.collectAsState()
+        val parallelChapterLimit by downloadPreferences.parallelChapterLimit.collectAsState()
         val parallelPageLimit by downloadPreferences.parallelPageLimit.collectAsState()
         return listOf(
             Preference.PreferenceItem.SwitchPreference(
@@ -55,6 +59,14 @@ object SettingsDownloadScreen : SearchableSettings {
                 valueRange = 1..10,
                 title = stringResource(MR.strings.pref_download_concurrent_sources),
                 onValueChanged = { downloadPreferences.parallelSourceLimit.set(it) },
+            ),
+            Preference.PreferenceItem.SliderPreference(
+                value = parallelChapterLimit,
+                valueRange = 1..5,
+                title = stringResource(MR.strings.pref_download_concurrent_chapters),
+                subtitle = stringResource(MR.strings.pref_download_concurrent_chapters_summary),
+                onValueChanged = { downloadPreferences.parallelChapterLimit.set(it) },
+                badge = ImageVector.vectorResource(R.drawable.ic_taihon),
             ),
             Preference.PreferenceItem.SliderPreference(
                 value = parallelPageLimit,

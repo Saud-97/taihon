@@ -195,15 +195,21 @@ class Downloader(
             val activeDownloadsFlow = combine(
                 queueState,
                 downloadPreferences.parallelSourceLimit.changes(),
-            ) { a, b -> a to b }.transformLatest { (queue, parallelCount) ->
+                downloadPreferences.parallelChapterLimit.changes(),
+            ) { queue, sourceLimit, chapterLimit ->
+                Triple(queue, sourceLimit, chapterLimit)
+            }.transformLatest { (queue, sourceLimit, chapterLimit) ->
                 while (true) {
                     val activeDownloads = queue.asSequence()
                         // Ignore completed downloads, leave them in the queue
                         .filter { it.status.value <= Download.State.DOWNLOADING.value }
                         .groupBy { it.source }
                         .toList()
-                        .take(parallelCount)
-                        .map { (_, downloads) -> downloads.first() }
+                        .take(sourceLimit)
+                        .flatMap { (_, downloads) ->
+                            downloads.take(chapterLimit)
+                        }
+                        .toList()
                     emit(activeDownloads)
 
                     if (activeDownloads.isEmpty()) break

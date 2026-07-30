@@ -528,7 +528,13 @@
     <string name="split_tall_images_summary">Improves reader performance</string>
     <string name="pref_download_concurrent_sources">Concurrent source downloads</string>
     <string name="pref_download_concurrent_pages">Concurrent page downloads</string>
-    <string name="pref_download_concurrent_pages_summary">Pages downloaded simultaneously per source</string>
+    <string name="pref_download_concurrent_pages_summary">Pages downloaded simultaneously per
+        chapter
+    </string>
+    <string name="pref_download_concurrent_chapters">Concurrent chapter downloads</string>
+    <string name="pref_download_concurrent_chapters_summary">Chapters downloaded simultaneously per
+        source
+    </string>
 
     <!-- Tracking section -->
     <string name="tracking_guide">Tracking guide</string>
