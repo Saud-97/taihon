@@ -36,7 +36,6 @@ import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.theme.header
 import tachiyomi.presentation.core.util.plus
-import tachiyomi.source.local.isLocal
 
 @Composable
 fun SourcesScreen(
@@ -167,6 +166,8 @@ fun SourceOptionsDialog(
     onClickPin: () -> Unit,
     onClickDisable: () -> Unit,
     onDismiss: () -> Unit,
+    onClickSettings: (() -> Unit)? = null,
+    onClickUninstall: (() -> Unit)? = null,
 ) {
     AlertDialog(
         title = {
@@ -174,6 +175,15 @@ fun SourceOptionsDialog(
         },
         text = {
             Column {
+                onClickSettings?.let {
+                    Text(
+                        text = stringResource(MR.strings.action_settings),
+                        modifier = Modifier
+                            .clickable(onClick = it)
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                    )
+                }
                 val textId = if (Pin.Pinned in source.pin) MR.strings.action_unpin else MR.strings.action_pin
                 Text(
                     text = stringResource(textId),
@@ -182,11 +192,18 @@ fun SourceOptionsDialog(
                         .fillMaxWidth()
                         .padding(vertical = 16.dp),
                 )
-                if (!source.isLocal()) {
+                Text(
+                    text = stringResource(MR.strings.action_disable),
+                    modifier = Modifier
+                        .clickable(onClick = onClickDisable)
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                )
+                onClickUninstall?.let {
                     Text(
-                        text = stringResource(MR.strings.action_disable),
+                        text = stringResource(MR.strings.ext_uninstall),
                         modifier = Modifier
-                            .clickable(onClick = onClickDisable)
+                            .clickable(onClick = it)
                             .fillMaxWidth()
                             .padding(vertical = 16.dp),
                     )

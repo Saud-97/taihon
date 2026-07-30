@@ -6,6 +6,8 @@ import eu.kanade.domain.source.interactor.GetEnabledSources
 import eu.kanade.domain.source.interactor.ToggleSource
 import eu.kanade.domain.source.interactor.ToggleSourcePin
 import eu.kanade.presentation.browse.SourceUiModel
+import eu.kanade.tachiyomi.extension.ExtensionManager
+import eu.kanade.tachiyomi.source.ConfigurableSource
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
@@ -17,6 +19,7 @@ import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.source.model.Pin
 import tachiyomi.domain.source.model.Source
+import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.TreeMap
@@ -25,6 +28,8 @@ class SourcesViewModel(
     private val getEnabledSources: GetEnabledSources = Injekt.get(),
     private val toggleSource: ToggleSource = Injekt.get(),
     private val toggleSourcePin: ToggleSourcePin = Injekt.get(),
+    private val sourceManager: SourceManager = Injekt.get(),
+    private val extensionManager: ExtensionManager = Injekt.get(),
 ) : StateViewModel<SourcesViewModel.State>(State()) {
 
     private val _events = Channel<Event>(Int.MAX_VALUE)
@@ -87,7 +92,30 @@ class SourcesViewModel(
     }
 
     fun showSourceDialog(source: Source) {
-        mutableState.update { it.copy(dialog = Dialog(source)) }
+        val extension = extensionManager.installedExtensionsFlow.value
+            .find { ext -> ext.sources.any { it.id == source.id } }
+        val hasCustomSettings = sourceManager.get(source.id) is ConfigurableSource
+        val canUninstall = extension != null
+        val canOpenSettings = hasCustomSettings || extension != null
+
+        mutableState.update {
+            it.copy(
+                dialog = Dialog(
+                    source = source,
+                    canUninstall = canUninstall,
+                    canOpenSettings = canOpenSettings,
+                    hasCustomSettings = hasCustomSettings,
+                    extensionPkgName = extension?.pkgName,
+                ),
+            )
+        }
+    }
+
+    fun uninstallExtension(source: Source) {
+        val extension = extensionManager.installedExtensionsFlow.value
+            .find { ext -> ext.sources.any { it.id == source.id } }
+            ?: return
+        extensionManager.uninstallExtension(extension)
     }
 
     fun closeDialog() {
@@ -98,7 +126,13 @@ class SourcesViewModel(
         data object FailedFetchingSources : Event
     }
 
-    data class Dialog(val source: Source)
+    data class Dialog(
+        val source: Source,
+        val canUninstall: Boolean,
+        val canOpenSettings: Boolean,
+        val hasCustomSettings: Boolean,
+        val extensionPkgName: String?,
+    )
 
     @Immutable
     data class State(
