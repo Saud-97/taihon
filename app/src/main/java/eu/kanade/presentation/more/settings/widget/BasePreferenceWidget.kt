@@ -67,31 +67,33 @@ internal fun BasePreferenceWidget(
                 .padding(vertical = PrefsVerticalPadding),
         ) {
             Column {
-                if (!title.isNullOrBlank()) {
-                    Text(
-                        modifier = Modifier.padding(horizontal = PrefsHorizontalPadding),
-                        text = title,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 2,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontSize = TitleFontSize,
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (!title.isNullOrBlank()) {
+                        Text(
+                            modifier = Modifier.padding(start = PrefsHorizontalPadding),
+                            text = title,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 2,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontSize = TitleFontSize,
+                        )
+                    }
+                    if (badge != null) {
+                        Box(
+                            modifier = Modifier.padding(start = 8.dp),
+                            content = { badge() },
+                        )
+                    }
                 }
 
                 subcomponent?.invoke(this)
             }
         }
 
-        if (badge != null) {
-            Box(
-                modifier = Modifier.padding(start = PrefsHorizontalPadding),
-                content = { badge() },
-            )
-        }
         if (widget != null) {
             Box(
                 modifier = Modifier.padding(
-                    start = if (badge != null) 8.dp else PrefsHorizontalPadding,
+                    start = PrefsHorizontalPadding,
                     end = PrefsHorizontalPadding,
                 ),
                 content = { widget() },

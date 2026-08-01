@@ -1,7 +1,6 @@
 package eu.kanade.presentation.more.settings.widget
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material3.Surface
@@ -32,7 +31,6 @@ fun SwitchPreferenceWidget(
             Switch(
                 checked = checked,
                 onCheckedChange = null,
-                modifier = Modifier.padding(start = TrailingWidgetBuffer),
             )
         },
         onPreferenceClick = { onCheckedChanged(!checked) },

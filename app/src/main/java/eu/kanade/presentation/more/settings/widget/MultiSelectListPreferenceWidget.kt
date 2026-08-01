@@ -1,5 +1,8 @@
 package eu.kanade.presentation.more.settings.widget
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -10,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.window.DialogProperties
 import tachiyomi.i18n.MR
@@ -69,20 +73,37 @@ fun <T> MultiSelectListPreferenceWidget(
                 usePlatformDefaultWidth = true,
             ),
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        onValuesChange(selected.toMutableSet())
-                        isDialogShown = false
-                    },
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(text = stringResource(MR.strings.action_ok))
+                    TextButton(
+                        onClick = {
+                            selected.clear()
+                            selected.addAll(entries.keys)
+                        },
+                    ) {
+                        Text(text = stringResource(MR.strings.action_select_all))
+                    }
+                    TextButton(
+                        onClick = { selected.clear() },
+                    ) {
+                        Text(text = stringResource(MR.strings.action_reset))
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    TextButton(onClick = { isDialogShown = false }) {
+                        Text(text = stringResource(MR.strings.action_cancel))
+                    }
+                    TextButton(
+                        onClick = {
+                            onValuesChange(selected.toMutableSet())
+                            isDialogShown = false
+                        },
+                    ) {
+                        Text(text = stringResource(MR.strings.action_ok))
+                    }
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { isDialogShown = false }) {
-                    Text(text = stringResource(MR.strings.action_cancel))
-                }
-            },
+            dismissButton = null,
         )
     }
 }

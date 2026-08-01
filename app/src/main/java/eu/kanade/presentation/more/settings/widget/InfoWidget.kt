@@ -55,7 +55,7 @@ internal fun InfoWidget(
                     imageVector = badge,
                     contentDescription = null,
                     modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = MaterialTheme.colorScheme.primaryContainer,
                 )
             }
         }

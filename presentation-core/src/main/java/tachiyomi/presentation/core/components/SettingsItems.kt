@@ -228,10 +228,22 @@ fun BaseSliderItem(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = titleStyle,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = title,
+                        style = titleStyle,
+                    )
+                    if (badge != null) {
+                        Icon(
+                            imageVector = badge,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .padding(start = 8.dp)
+                                .size(14.dp),
+                            tint = MaterialTheme.colorScheme.primaryContainer,
+                        )
+                    }
+                }
                 if (subtitle != null) {
                     Text(
                         text = subtitle,
@@ -245,15 +257,6 @@ fun BaseSliderItem(
                 style = MaterialTheme.typography.bodyMedium,
                 color = pillColor,
             )
-
-            if (badge != null) {
-                Icon(
-                    imageVector = badge,
-                    contentDescription = null,
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-            }
         }
         Slider(
             value = value,
