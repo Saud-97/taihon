@@ -13,7 +13,6 @@ class StringExtensionsTest {
         assertEquals("Manga's", "Manga's".normalizeApostrophe())
         assertEquals("O'clock", "O'clock".normalizeApostrophe())
         assertEquals("Manga's", "Manga’s".normalizeApostrophe())
-
     }
 
     @Test

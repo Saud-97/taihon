@@ -590,12 +590,11 @@ class ReaderViewModel @JvmOverloads constructor(
      */
     suspend fun updateHistory() {
         getCurrentChapter()?.let { readerChapter ->
-            if (incognitoMode) return@let
-
-            val chapterId = readerChapter.chapter.id!!
             val endTime = Date()
             val sessionReadDuration = chapterReadStartTime?.let { endTime.time - it } ?: 0
+            if (incognitoMode || sessionReadDuration < 1000) return@let
 
+            val chapterId = readerChapter.chapter.id!!
             upsertHistory.await(HistoryUpdate(chapterId, endTime, sessionReadDuration))
             chapterReadStartTime = null
         }
