@@ -33,7 +33,7 @@ android {
         applicationId = "app.taihon"
 
         versionCode = 26
-        versionName = "0.20.1.0"
+        versionName = "0.20.1.1"
 
         buildConfigField("String", "COMMIT_COUNT", "\"${getLatestCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getLatestCommitSha()}\"")
