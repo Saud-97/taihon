@@ -15,12 +15,14 @@ import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.screen.browse.ExtensionStoresScreen
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.authenticate
 import mihon.domain.extension.interactor.GetExtensionStoreCountAsFlow
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -36,18 +38,17 @@ object SettingsBrowseScreen : SearchableSettings {
         val navigator = LocalNavigator.currentOrThrow
 
         val sourcePreferences = remember { Injekt.get<SourcePreferences>() }
+        val extensionManager = remember { Injekt.get<ExtensionManager>() }
         val getExtensionStoreCountAsFlow = remember { Injekt.get<GetExtensionStoreCountAsFlow>() }
 
         val reposCount by getExtensionStoreCountAsFlow().collectAsState(0)
+        val installedExtensions by extensionManager.installedExtensionsFlow.collectAsState()
+        val smartApostropheNormalization by sourcePreferences.smartApostropheNormalization.collectAsState()
 
         return listOf(
             Preference.PreferenceGroup(
-                title = stringResource(MR.strings.label_sources),
+                title = stringResource(MR.strings.label_extensions),
                 preferenceItems = listOf(
-                    Preference.PreferenceItem.SwitchPreference(
-                        preference = sourcePreferences.hideInLibraryItems,
-                        title = stringResource(MR.strings.pref_hide_in_library_items),
-                    ),
                     Preference.PreferenceItem.TextPreference(
                         title = stringResource(MR.strings.extensionStores),
                         subtitle = pluralStringResource(MR.plurals.num_repos, reposCount.toInt(), reposCount),
@@ -56,8 +57,33 @@ object SettingsBrowseScreen : SearchableSettings {
                         },
                     ),
                     Preference.PreferenceItem.SwitchPreference(
-                        preference = sourcePreferences.showExtensionUpdatesCount,
-                        title = stringResource(MR.strings.pref_extension_update_show_tab_badge),
+                        preference = sourcePreferences.hideExtensionUpdatesCount,
+                        title = stringResource(MR.strings.pref_extension_update_hide_browse_badge),
+                        badge = ImageVector.vectorResource(R.drawable.ic_taihon),
+                    ),
+                ),
+            ),
+
+            Preference.PreferenceGroup(
+                title = stringResource(MR.strings.label_sources),
+                preferenceItems = listOf(
+                    Preference.PreferenceItem.SwitchPreference(
+                        preference = sourcePreferences.hideInLibraryItems,
+                        title = stringResource(MR.strings.pref_hide_in_library_items),
+                    ),
+
+                    Preference.PreferenceItem.SwitchPreference(
+                        preference = sourcePreferences.smartApostropheNormalization,
+                        title = stringResource(MR.strings.pref_smart_apostrophe_normalization),
+                        subtitle = stringResource(MR.strings.pref_smart_apostrophe_normalization_summary),
+                        badge = ImageVector.vectorResource(R.drawable.ic_taihon),
+                    ),
+                    Preference.PreferenceItem.MultiSelectListPreference(
+                        preference = sourcePreferences.smartApostropheNormalizationExceptions,
+                        entries = installedExtensions.associate { it.pkgName to it.name },
+                        title = stringResource(MR.strings.pref_smart_apostrophe_normalization_exceptions),
+                        subtitle = stringResource(MR.strings.exclude),
+                        enabled = smartApostropheNormalization,
                         badge = ImageVector.vectorResource(R.drawable.ic_taihon),
                     ),
                 ),

@@ -265,9 +265,9 @@ object HomeScreen : Screen() {
                         val count by produceState(initialValue = 0) {
                             val pref = Injekt.get<SourcePreferences>()
                             combine(
-                                pref.showExtensionUpdatesCount.changes(),
+                                pref.hideExtensionUpdatesCount.changes(),
                                 pref.extensionUpdatesCount.changes(),
-                            ) { show, count -> if (show) count else 0 }
+                            ) { hide, count -> if (!hide) count else 0 }
                                 .collectLatest { value = it }
                         }
                         if (count > 0) {

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.util.lang.normalizeApostrophe
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
@@ -147,6 +148,9 @@ abstract class SearchViewModel(
         }
 
         searchJob = viewModelScope.launchIO {
+            val smartNormalizationEnabled = preferences.smartApostropheNormalization.get()
+            val exceptions = preferences.smartApostropheNormalizationExceptions.get()
+
             sources.map { source ->
                 async {
                     if (state.value.items[source] !is SearchItemResult.Loading) {
@@ -154,8 +158,16 @@ abstract class SearchViewModel(
                     }
 
                     try {
+                        val pkgName = extensionManager.getExtensionPackage(source.id)
+                        val isNormalized = smartNormalizationEnabled && pkgName !in exceptions
+                        val normalizedQuery = if (isNormalized) {
+                            query.normalizeApostrophe(fuzzy = true)
+                        } else {
+                            query
+                        }
+
                         val page = withContext(coroutineDispatcher) {
-                            source.getSearchManga(1, query, source.getFilterList())
+                            source.getSearchManga(1, normalizedQuery, source.getFilterList())
                         }
 
                         val titles = page.mangas

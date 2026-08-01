@@ -6,8 +6,10 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import eu.kanade.domain.source.service.SourcePreferences
+import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.getNameForMangaInfo
+import eu.kanade.tachiyomi.util.lang.normalizeApostrophe
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -44,6 +46,7 @@ class MigrationListViewModel(
     extraSearchQuery: String?,
     private val preferences: SourcePreferences = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
+    private val extensionManager: ExtensionManager = Injekt.get(),
     private val getManga: GetManga = Injekt.get(),
     private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
     private val getChaptersByMangaId: GetChaptersByMangaId = Injekt.get(),
@@ -195,7 +198,16 @@ class MigrationListViewModel(
             val searchResult = if (deepSearchMode) {
                 smartSearchEngine.deepSearch(source, manga.title)
             } else {
-                smartSearchEngine.regularSearch(source, manga.title)
+                val smartNormalizationEnabled = preferences.smartApostropheNormalization.get()
+                val exceptions = preferences.smartApostropheNormalizationExceptions.get()
+                val pkgName = extensionManager.getExtensionPackage(source.id)
+                val isNormalized = smartNormalizationEnabled && pkgName !in exceptions
+                val query = if (isNormalized) {
+                    manga.title.normalizeApostrophe(fuzzy = true)
+                } else {
+                    manga.title
+                }
+                smartSearchEngine.regularSearch(source, query)
             }
 
             if (searchResult == null || (searchResult.url == manga.url && source.id == manga.source)) return null

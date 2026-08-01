@@ -54,7 +54,7 @@ class SourcePreferences(
 
     val extensionUpdatesCount: Preference<Int> = preferenceStore.getInt("ext_updates_count", 0)
 
-    val showExtensionUpdatesCount: Preference<Boolean> = preferenceStore.getBoolean("ext_show_updates_count", true)
+    val hideExtensionUpdatesCount: Preference<Boolean> = preferenceStore.getBoolean("ext_hide_updates_count", false)
 
     val trustedExtensions: Preference<Set<String>> = preferenceStore.getStringSet(
         Preference.appStateKey("trusted_extensions"),
@@ -87,5 +87,15 @@ class SourcePreferences(
     val migrationHideWithoutUpdates: Preference<Boolean> = preferenceStore.getBoolean(
         "migration_hide_without_updates",
         false,
+    )
+
+    val smartApostropheNormalization: Preference<Boolean> = preferenceStore.getBoolean(
+        "smart_apostrophe_normalization",
+        true,
+    )
+
+    val smartApostropheNormalizationExceptions: Preference<Set<String>> = preferenceStore.getStringSet(
+        "smart_apostrophe_normalization_exceptions",
+        emptySet(),
     )
 }
