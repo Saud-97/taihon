@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.PkceUtil
+import eu.kanade.tachiyomi.util.lang.normalizeApostrophe
 import kotlinx.serialization.json.Json
 import okhttp3.FormBody
 import okhttp3.Headers
@@ -178,7 +179,7 @@ class MyAnimeListApi(
             val myListSearchResult = getListPage(offset)
 
             val matches = myListSearchResult.data
-                .filter { it.node.title.contains(query, ignoreCase = true) }
+                .filter { it.node.title.normalizeApostrophe().contains(query.normalizeApostrophe(), ignoreCase = true) }
                 .map { parseSearchItem(it.node) }
 
             // Check next page if there's more

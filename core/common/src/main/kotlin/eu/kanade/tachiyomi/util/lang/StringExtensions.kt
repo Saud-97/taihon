@@ -40,6 +40,25 @@ fun String.compareToCaseInsensitiveNaturalOrder(other: String): Int {
 }
 
 /**
+ * Normalizes different forms of apostrophes.
+ *
+ * @param fuzzy if true, apostrophes followed by 1-2 characters are dropped with those characters,
+ * others are replaced with spaces. If false, all are normalized to ASCII apostrophe (').
+ */
+fun String.normalizeApostrophe(fuzzy: Boolean = false): String {
+    val variants = "['\u2019\u2018\u02BC\u02B9\u2032\u201B\u055A\uA78C\uFF07]"
+    if (!fuzzy) {
+        return this.replace(Regex(variants), "'")
+    }
+
+    return this.replace(Regex(variants), "'")
+        .replace(Regex("'[a-zA-Z0-9]{1,2}(?:\\b|$)"), "")
+        .replace("'", " ")
+        .replace(Regex("\\s+"), " ")
+        .trim()
+}
+
+/**
  * Returns the size of the string as the number of bytes.
  */
 fun String.byteSize(): Int {

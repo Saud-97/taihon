@@ -1,6 +1,7 @@
 package mihon.feature.library
 
 import eu.kanade.tachiyomi.ui.library.LibraryItem
+import eu.kanade.tachiyomi.util.lang.normalizeApostrophe
 import mihon.domain.library.model.search.AndNode
 import mihon.domain.library.model.search.ComparisonField
 import mihon.domain.library.model.search.ComparisonQueryNode
@@ -36,17 +37,31 @@ private fun GeneralQueryNode.matches(item: LibraryItem): Boolean {
     val match = MangaField.entries.any { field ->
         if (field.fieldOnly) return@any false
 
+        val normalizedValue = value.normalizeApostrophe()
         when (field) {
-            MangaField.TITLE -> manga.title.contains(value, ignoreCase = true)
-            MangaField.AUTHOR -> manga.author?.contains(value, ignoreCase = true) ?: false
-            MangaField.ARTIST -> manga.artist?.contains(value, ignoreCase = true) ?: false
-            MangaField.DESCRIPTION -> manga.description?.contains(value, ignoreCase = true) ?: false
-            MangaField.GENRE -> manga.genre?.any { it.contains(value, ignoreCase = true) } ?: false
-            MangaField.SOURCE -> {
-                item.sourceName.contains(value, ignoreCase = true) ||
-                    (value.equals("local", ignoreCase = true) && manga.source == LocalSource.ID)
+            MangaField.TITLE -> manga.title.normalizeApostrophe().contains(normalizedValue, ignoreCase = true)
+            MangaField.AUTHOR -> manga.author?.normalizeApostrophe()?.contains(normalizedValue, ignoreCase = true)
+                ?: false
+
+            MangaField.ARTIST -> manga.artist?.normalizeApostrophe()?.contains(normalizedValue, ignoreCase = true)
+                ?: false
+
+            MangaField.DESCRIPTION -> manga.description?.normalizeApostrophe()?.contains(
+                normalizedValue,
+                ignoreCase = true,
+            )
+                ?: false
+
+            MangaField.GENRE -> manga.genre?.any {
+                it.normalizeApostrophe().contains(normalizedValue, ignoreCase = true)
             }
-            MangaField.NOTES -> manga.notes.contains(value, ignoreCase = true)
+                ?: false
+            MangaField.SOURCE -> {
+                item.sourceName.normalizeApostrophe().contains(normalizedValue, ignoreCase = true) ||
+                    (normalizedValue.equals("local", ignoreCase = true) && manga.source == LocalSource.ID)
+            }
+
+            MangaField.NOTES -> manga.notes.normalizeApostrophe().contains(normalizedValue, ignoreCase = true)
 
             // field-only queries; unreachable; added here to make `when` exhaustive
             MangaField.LANGUAGE, MangaField.SOURCE_ID -> error("How did we get here?")
@@ -57,46 +72,47 @@ private fun GeneralQueryNode.matches(item: LibraryItem): Boolean {
 
 private fun FieldQueryNode.matches(item: LibraryItem): Boolean {
     val manga = item.libraryManga.manga
+    val normalizedValue = value.normalizeApostrophe()
 
     val match = when (field) {
         MangaField.GENRE -> {
-            if (value.isEmpty()) {
+            if (normalizedValue.isEmpty()) {
                 manga.genre.isNullOrEmpty()
             } else {
-                manga.genre?.any { it.contains(value, ignoreCase = true) } ?: false
+                manga.genre?.any { it.normalizeApostrophe().contains(normalizedValue, ignoreCase = true) } ?: false
             }
         }
 
         MangaField.SOURCE -> {
-            if (value.isEmpty()) {
+            if (normalizedValue.isEmpty()) {
                 item.sourceName.isEmpty()
             } else {
-                item.sourceName.contains(value, ignoreCase = true) ||
-                    (value.equals("local", ignoreCase = true) && manga.source == LocalSource.ID)
+                item.sourceName.normalizeApostrophe().contains(normalizedValue, ignoreCase = true) ||
+                    (normalizedValue.equals("local", ignoreCase = true) && manga.source == LocalSource.ID)
             }
         }
 
         MangaField.SOURCE_ID -> {
-            value.toLongOrNull()?.let { it == manga.source } ?: false
+            normalizedValue.toLongOrNull()?.let { it == manga.source } ?: false
         }
 
         else -> {
             val text = when (field) {
-                MangaField.TITLE -> manga.title
-                MangaField.AUTHOR -> manga.author
-                MangaField.ARTIST -> manga.artist
-                MangaField.DESCRIPTION -> manga.description
-                MangaField.NOTES -> manga.notes
+                MangaField.TITLE -> manga.title.normalizeApostrophe()
+                MangaField.AUTHOR -> manga.author?.normalizeApostrophe()
+                MangaField.ARTIST -> manga.artist?.normalizeApostrophe()
+                MangaField.DESCRIPTION -> manga.description?.normalizeApostrophe()
+                MangaField.NOTES -> manga.notes.normalizeApostrophe()
                 MangaField.LANGUAGE -> item.sourceLanguage
 
                 // unreachable; added here to make `when` exhaustive
                 MangaField.GENRE, MangaField.SOURCE, MangaField.SOURCE_ID -> error("How did we get here?")
             }
 
-            if (value.isEmpty()) {
+            if (normalizedValue.isEmpty()) {
                 text.isNullOrEmpty()
             } else {
-                text?.contains(value, ignoreCase = true) ?: false
+                text?.contains(normalizedValue, ignoreCase = true) ?: false
             }
         }
     }
