@@ -18,6 +18,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.util.fastAll
@@ -85,6 +86,7 @@ data object LibraryTab : Tab {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
         val haptic = LocalHapticFeedback.current
+        val focusManager = LocalFocusManager.current
 
         val viewModel = viewModel<LibraryViewModel>()
         val settingsViewModel = viewModel<LibrarySettingsViewModel>()
@@ -209,12 +211,24 @@ data object LibraryTab : Tab {
                         onGlobalSearchClicked = {
                             navigator.push(GlobalSearchScreen(viewModel.state.value.searchQuery ?: ""))
                         },
+                        onDismissSearch = {
+                            focusManager.clearFocus()
+                            viewModel.search(null)
+                        },
                         getItemCountForCategory = { state.getItemCountForCategory(it) },
                         getDisplayMode = { viewModel.getDisplayMode() },
                         getColumnsForOrientation = { viewModel.getColumnsForOrientation(it) },
                         getItemsForCategory = { state.getItemsForCategory(it) },
                     )
                 }
+            }
+        }
+
+        val tabNavigator = LocalTabNavigator.current
+        LaunchedEffect(tabNavigator.current) {
+            if (tabNavigator.current != LibraryTab && state.searchQuery == "") {
+                focusManager.clearFocus()
+                viewModel.search(null)
             }
         }
 
