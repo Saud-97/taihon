@@ -1,5 +1,7 @@
 package eu.kanade.presentation.manga.components
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.FilterList
@@ -24,6 +26,7 @@ import eu.kanade.presentation.manga.DownloadAction
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.theme.active
+import tachiyomi.presentation.core.util.clickableNoIndication
 
 @Composable
 fun MangaToolbar(
@@ -47,6 +50,7 @@ fun MangaToolbar(
     titleAlphaProvider: () -> Float,
     backgroundAlphaProvider: () -> Float,
     modifier: Modifier = Modifier,
+    onClickTitle: (() -> Unit)? = null,
 ) {
     val isActionMode = actionModeCounter > 0
     AppBar(
@@ -54,7 +58,22 @@ fun MangaToolbar(
             if (isActionMode) {
                 AppBarTitle(actionModeCounter.toString())
             } else {
-                AppBarTitle(title, modifier = Modifier.alpha(titleAlphaProvider()))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(
+                            if (onClickTitle != null) {
+                                Modifier.clickableNoIndication(onClick = onClickTitle)
+                            } else {
+                                Modifier
+                            },
+                        ),
+                ) {
+                    AppBarTitle(
+                        title = title,
+                        modifier = Modifier.alpha(titleAlphaProvider()),
+                    )
+                }
             }
         },
         modifier = modifier,
