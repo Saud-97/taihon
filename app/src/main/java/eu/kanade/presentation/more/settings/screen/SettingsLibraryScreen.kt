@@ -9,7 +9,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.util.fastMap
 import androidx.core.content.ContextCompat
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -18,6 +20,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.category.visualName
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.widget.TriStateListDialog
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.category.CategoryScreen
 import kotlinx.coroutines.launch
@@ -256,6 +259,12 @@ object SettingsLibraryScreen : SearchableSettings {
                 Preference.PreferenceItem.SwitchPreference(
                     preference = libraryPreferences.hideMissingChapters,
                     title = stringResource(MR.strings.pref_hide_missing_chapter_indicators),
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = libraryPreferences.resumeLastSeenPage,
+                    title = stringResource(MR.strings.pref_resume_last_seen_page),
+                    subtitle = stringResource(MR.strings.pref_resume_last_seen_page_summary),
+                    badge = ImageVector.vectorResource(R.drawable.ic_taihon),
                 ),
             ),
         )

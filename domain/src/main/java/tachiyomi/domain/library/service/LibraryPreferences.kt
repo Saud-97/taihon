@@ -215,6 +215,11 @@ class LibraryPreferences(
         false,
     )
 
+    val resumeLastSeenPage: Preference<Boolean> = preferenceStore.getBoolean(
+        "pref_resume_last_seen_page",
+        true,
+    )
+
     // endregion
 
     enum class ChapterSwipeAction {

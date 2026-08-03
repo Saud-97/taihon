@@ -237,7 +237,7 @@ class ReaderViewModel @JvmOverloads constructor(
                 if (chapterPageIndex >= 0) {
                     // Restore from SavedState
                     currentChapter.requestedPage = chapterPageIndex
-                } else if (!currentChapter.chapter.read) {
+                } else if (!currentChapter.chapter.read || libraryPreferences.resumeLastSeenPage.get()) {
                     currentChapter.requestedPage = currentChapter.chapter.last_page_read
                 }
                 chapterId = currentChapter.chapter.id!!
@@ -286,7 +286,14 @@ class ReaderViewModel @JvmOverloads constructor(
 
                     val context = Injekt.get<Application>()
                     val source = sourceManager.getOrStub(manga.source)
-                    loader = ChapterLoader(context, downloadManager, downloadProvider, manga, source)
+                    loader = ChapterLoader(
+                        context,
+                        downloadManager,
+                        downloadProvider,
+                        manga,
+                        source,
+                        libraryPreferences.resumeLastSeenPage.get(),
+                    )
 
                     loadChapter(loader!!, chapterList.first { chapterId == it.chapter.id })
                     Result.success(true)
