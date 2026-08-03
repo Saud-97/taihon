@@ -31,6 +31,9 @@ object SettingsReaderScreen : SearchableSettings {
     override fun getPreferences(): List<Preference> {
         val readerPref = remember { Injekt.get<ReaderPreferences>() }
 
+        val pageTransitionDistance by readerPref.pageTransitionDistance.collectAsState()
+        val pageTransitionSpeed by readerPref.pageTransitionSpeed.collectAsState()
+
         return listOf(
             Preference.PreferenceItem.ListPreference(
                 preference = readerPref.defaultReadingMode,
@@ -60,6 +63,50 @@ object SettingsReaderScreen : SearchableSettings {
             Preference.PreferenceItem.SwitchPreference(
                 preference = readerPref.pageTransitions,
                 title = stringResource(MR.strings.pref_page_transitions),
+                onValueChanged = { newValue ->
+                    if (!newValue) {
+                        readerPref.pageTransitionSpeed.set(0)
+                    }
+                    true
+                },
+            ),
+            Preference.PreferenceItem.SliderPreference(
+                value = if (pageTransitionSpeed == 0) 0 else (1050 - pageTransitionSpeed) / 50,
+                valueRange = 0..20,
+                steps = 19,
+                title = stringResource(MR.strings.pref_page_transition_speed),
+                valueString = if (pageTransitionSpeed == 0) {
+                    stringResource(MR.strings.label_default)
+                } else {
+                    stringResource(MR.strings.pref_flash_duration_summary, pageTransitionSpeed)
+                },
+                onValueChanged = { sliderValue ->
+                    val newSpeed = if (sliderValue == 0) 0 else 1050 - sliderValue * 50
+                    readerPref.pageTransitionSpeed.set(newSpeed)
+                    if (newSpeed > 0) {
+                        readerPref.pageTransitions.set(true)
+                    }
+                },
+                badge = ImageVector.vectorResource(R.drawable.ic_taihon),
+            ),
+            Preference.PreferenceItem.SliderPreference(
+                value = when (pageTransitionDistance) {
+                    0 -> 0
+                    else -> (pageTransitionDistance - 5) / 5
+                },
+                valueRange = 0..19,
+                steps = 18,
+                title = stringResource(MR.strings.pref_page_transition_distance),
+                valueString = if (pageTransitionDistance == 0 || pageTransitionDistance == 75) {
+                    stringResource(MR.strings.label_default)
+                } else {
+                    "$pageTransitionDistance%"
+                },
+                onValueChanged = { sliderValue ->
+                    val newDistance = if (sliderValue == 0) 0 else sliderValue * 5 + 5
+                    readerPref.pageTransitionDistance.set(newDistance)
+                },
+                badge = ImageVector.vectorResource(R.drawable.ic_taihon),
             ),
             getDisplayGroup(readerPreferences = readerPref),
             getEInkGroup(readerPreferences = readerPref),
