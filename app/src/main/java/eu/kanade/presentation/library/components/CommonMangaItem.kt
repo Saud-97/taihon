@@ -124,6 +124,15 @@ fun MangaCompactGridItem(
 private fun BoxScope.CoverTextOverlay(
     title: String,
     onClickContinueReading: (() -> Unit)? = null,
+    style: TextStyle = MaterialTheme.typography.titleSmall.copy(
+        color = Color.White,
+        shadow = Shadow(
+            color = Color.Black,
+            blurRadius = 4f,
+        ),
+    ),
+    padding: Dp = 8.dp,
+    fillMaxHeight: Float = 0.33f,
 ) {
     Box(
         modifier = Modifier
@@ -134,7 +143,7 @@ private fun BoxScope.CoverTextOverlay(
                     1f to Color(0xAA000000),
                 ),
             )
-            .fillMaxHeight(0.33f)
+            .fillMaxHeight(fillMaxHeight)
             .fillMaxWidth()
             .align(Alignment.BottomCenter),
     )
@@ -145,15 +154,9 @@ private fun BoxScope.CoverTextOverlay(
         GridItemTitle(
             modifier = Modifier
                 .weight(1f)
-                .padding(8.dp),
+                .padding(padding),
             title = title,
-            style = MaterialTheme.typography.titleSmall.copy(
-                color = Color.White,
-                shadow = Shadow(
-                    color = Color.Black,
-                    blurRadius = 4f,
-                ),
-            ),
+            style = style,
             minLines = 1,
         )
         if (onClickContinueReading != null) {
@@ -185,6 +188,7 @@ fun MangaComfortableGridItem(
     coverBadgeStart: (@Composable RowScope.() -> Unit)? = null,
     coverBadgeEnd: (@Composable RowScope.() -> Unit)? = null,
     onClickContinueReading: (() -> Unit)? = null,
+    coverText: String? = null,
 ) {
     GridItemSelectable(
         isSelected = isSelected,
@@ -204,7 +208,22 @@ fun MangaComfortableGridItem(
                 badgesStart = coverBadgeStart,
                 badgesEnd = coverBadgeEnd,
                 content = {
-                    if (onClickContinueReading != null) {
+                    if (coverText != null) {
+                        CoverTextOverlay(
+                            title = coverText,
+                            onClickContinueReading = onClickContinueReading,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = Color.White.copy(alpha = 0.85f),
+                                shadow = Shadow(
+                                    color = Color.Black,
+                                    blurRadius = 4f,
+                                ),
+                                fontSize = 6.sp,
+                            ),
+                            padding = 2.dp,
+                            fillMaxHeight = 0.25f,
+                        )
+                    } else if (onClickContinueReading != null) {
                         ContinueReadingButton(
                             size = ContinueReadingButtonSizeLarge,
                             iconSize = ContinueReadingButtonIconSizeLarge,
