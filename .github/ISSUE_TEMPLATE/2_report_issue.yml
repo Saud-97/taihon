@@ -52,7 +52,7 @@ body:
       label: Taihon version
       description: You can find your Taihon version in **More → About**.
       placeholder: |
-        Example: "0.20.2"
+        Example: "0.20.3"
     validations:
       required: true
 
