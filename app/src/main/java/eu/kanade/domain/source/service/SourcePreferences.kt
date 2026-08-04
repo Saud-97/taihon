@@ -98,4 +98,9 @@ class SourcePreferences(
         "smart_apostrophe_normalization_exceptions",
         emptySet(),
     )
+
+    val globalSearchEnrichResults: Preference<Boolean> = preferenceStore.getBoolean(
+        "global_search_enrich_results",
+        true,
+    )
 }

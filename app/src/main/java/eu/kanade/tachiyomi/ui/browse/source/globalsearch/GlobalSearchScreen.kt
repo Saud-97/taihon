@@ -69,6 +69,7 @@ class GlobalSearchScreen(
                 onChangeSearchQuery = viewModel::updateSearchQuery,
                 onSearch = { viewModel.search() },
                 getManga = { viewModel.getManga(it) },
+                getMangaDetails = { viewModel.getMangaDetails(it) },
                 onChangeSearchFilter = viewModel::setSourceFilter,
                 onToggleResults = viewModel::toggleFilterResults,
                 onClickSource = {

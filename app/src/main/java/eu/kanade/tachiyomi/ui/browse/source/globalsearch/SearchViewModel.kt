@@ -17,17 +17,25 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import mihon.core.viewmodel.StateViewModel
 import mihon.domain.manga.model.toDomainManga
 import tachiyomi.core.common.preference.toggle
 import tachiyomi.core.common.util.lang.launchIO
+import tachiyomi.domain.chapter.interactor.GetChaptersByMangaId
+import tachiyomi.domain.chapter.interactor.SetMangaDefaultChapterFlags
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.NetworkToLocalManga
 import tachiyomi.domain.manga.model.Manga
+import tachiyomi.domain.manga.model.MangaUpdate
 import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.time.Instant
 import java.util.concurrent.Executors
 
 abstract class SearchViewModel(
@@ -38,10 +46,18 @@ abstract class SearchViewModel(
     private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
     private val getManga: GetManga = Injekt.get(),
     private val preferences: SourcePreferences = Injekt.get(),
+    private val updateMangaFromRemote: mihon.domain.source.interactor.UpdateMangaFromRemote = Injekt.get(),
+    private val getChaptersByMangaId: GetChaptersByMangaId = Injekt.get(),
+    private val updateManga: eu.kanade.domain.manga.interactor.UpdateManga = Injekt.get(),
+    private val setMangaDefaultChapterFlags: SetMangaDefaultChapterFlags = Injekt.get(),
 ) : StateViewModel<SearchViewModel.State>(initialState) {
 
     private val coroutineDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
     private var searchJob: Job? = null
+
+    private val globalSemaphore = Semaphore(10)
+    private val sourceMutexes = mutableMapOf<Long, Mutex>()
+    private val sessionCache = mutableSetOf<Long>()
 
     private val enabledLanguages = sourcePreferences.enabledLanguages.get()
     private val disabledSources = sourcePreferences.disabledSources.get()
@@ -64,6 +80,92 @@ abstract class SearchViewModel(
         viewModelScope.launch {
             preferences.globalSearchFilterState.changes().collectLatest { state ->
                 mutableState.update { it.copy(onlyShowHasResults = state) }
+            }
+        }
+    }
+
+    private suspend fun fetchMangaDetails(manga: Manga) {
+        if (manga.id in sessionCache) {
+            val chapters = getChaptersByMangaId.await(manga.id)
+            updateMangaDetails(
+                manga.id,
+                MangaDetails(
+                    chapterCount = chapters.size,
+                    latestChapter = chapters.maxOfOrNull { it.chapterNumber },
+                    isLoading = false,
+                ),
+            )
+            return
+        }
+
+        val isCacheValid = Instant.now().toEpochMilli() < manga.nextUpdate
+
+        if (isCacheValid) {
+            val chapters = getChaptersByMangaId.await(manga.id)
+            updateMangaDetails(
+                manga.id,
+                MangaDetails(
+                    chapterCount = chapters.size,
+                    latestChapter = chapters.maxOfOrNull { it.chapterNumber },
+                    isLoading = false,
+                ),
+            )
+            sessionCache.add(manga.id)
+            return
+        }
+
+        updateMangaDetails(
+            manga.id,
+            state.value.mangaDetails[manga.id]?.copy(isLoading = true) ?: MangaDetails(0, null, true),
+        )
+
+        val mutex = synchronized(sourceMutexes) {
+            sourceMutexes.getOrPut(manga.source) { Mutex() }
+        }
+
+        mutex.withLock {
+            globalSemaphore.withPermit {
+                try {
+                    updateMangaFromRemote(manga, fetchDetails = true, fetchChapters = true).getOrThrow()
+                    setMangaDefaultChapterFlags.await(manga)
+                    updateManga.await(
+                        MangaUpdate(
+                            id = manga.id,
+                            nextUpdate = Instant.now().toEpochMilli() + 60 * 60 * 1000L,
+                        ),
+                    )
+
+                    val chapters = getChaptersByMangaId.await(manga.id)
+                    updateMangaDetails(
+                        manga.id,
+                        MangaDetails(
+                            chapterCount = chapters.size,
+                            latestChapter = chapters.maxOfOrNull { it.chapterNumber },
+                            isLoading = false,
+                        ),
+                    )
+                    sessionCache.add(manga.id)
+                } catch (e: Exception) {
+                    updateMangaDetails(
+                        manga.id,
+                        state.value.mangaDetails[manga.id]?.copy(isLoading = false) ?: MangaDetails(0, null, false),
+                    )
+                }
+            }
+        }
+    }
+
+    private fun updateMangaDetails(mangaId: Long, details: MangaDetails) {
+        mutableState.update {
+            it.copy(mangaDetails = it.mangaDetails + (mangaId to details))
+        }
+    }
+
+    @Composable
+    fun getMangaDetails(manga: Manga): androidx.compose.runtime.State<MangaDetails?> {
+        return produceState<MangaDetails?>(initialValue = null, manga.id) {
+            state.collectLatest {
+                value = it.mangaDetails[manga.id]
             }
         }
     }
@@ -177,6 +279,13 @@ abstract class SearchViewModel(
 
                         if (isActive) {
                             updateItem(source, SearchItemResult.Success(titles))
+                            if (preferences.globalSearchEnrichResults.get()) {
+                                titles.forEach { title ->
+                                    viewModelScope.launchIO {
+                                        fetchMangaDetails(title)
+                                    }
+                                }
+                            }
                         }
                     } catch (e: Exception) {
                         if (isActive) {
@@ -220,12 +329,19 @@ abstract class SearchViewModel(
         val sourceFilter: SourceFilter = SourceFilter.PinnedOnly,
         val onlyShowHasResults: Boolean = false,
         val items: Map<Source, SearchItemResult> = mapOf(),
+        val mangaDetails: Map<Long, MangaDetails> = mapOf(),
         val dialog: Dialog? = null,
     ) {
         val progress: Int = items.count { it.value !is SearchItemResult.Loading }
         val total: Int = items.size
         val filteredItems = items.filter { (_, result) -> result.isVisible(onlyShowHasResults) }
     }
+
+    data class MangaDetails(
+        val chapterCount: Int,
+        val latestChapter: Double?,
+        val isLoading: Boolean = false,
+    )
 
     sealed interface Dialog {
         data class Migrate(val target: Manga, val current: Manga) : Dialog

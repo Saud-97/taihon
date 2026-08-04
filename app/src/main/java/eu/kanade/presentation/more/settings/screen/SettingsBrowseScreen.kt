@@ -73,6 +73,13 @@ object SettingsBrowseScreen : SearchableSettings {
                     ),
 
                     Preference.PreferenceItem.SwitchPreference(
+                        preference = sourcePreferences.globalSearchEnrichResults,
+                        title = stringResource(MR.strings.pref_global_search_enrich_results),
+                        subtitle = stringResource(MR.strings.pref_global_search_enrich_results_summary),
+                        badge = ImageVector.vectorResource(R.drawable.ic_taihon),
+                    ),
+
+                    Preference.PreferenceItem.SwitchPreference(
                         preference = sourcePreferences.smartApostropheNormalization,
                         title = stringResource(MR.strings.pref_smart_apostrophe_normalization),
                         subtitle = stringResource(MR.strings.pref_smart_apostrophe_normalization_summary),

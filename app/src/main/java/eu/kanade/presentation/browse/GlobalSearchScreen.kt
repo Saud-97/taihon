@@ -27,6 +27,7 @@ fun GlobalSearchScreen(
     onChangeSearchFilter: (SourceFilter) -> Unit,
     onToggleResults: () -> Unit,
     getManga: @Composable (Manga) -> State<Manga>,
+    getMangaDetails: @Composable (Manga) -> State<SearchViewModel.MangaDetails?>,
     onClickSource: (Source) -> Unit,
     onClickItem: (Manga) -> Unit,
     onLongClickItem: (Manga) -> Unit,
@@ -53,6 +54,7 @@ fun GlobalSearchScreen(
             items = state.filteredItems,
             contentPadding = paddingValues,
             getManga = getManga,
+            getMangaDetails = getMangaDetails,
             onClickSource = onClickSource,
             onClickItem = onClickItem,
             onLongClickItem = onLongClickItem,
@@ -65,6 +67,7 @@ internal fun GlobalSearchContent(
     items: Map<Source, SearchItemResult>,
     contentPadding: PaddingValues,
     getManga: @Composable (Manga) -> State<Manga>,
+    getMangaDetails: @Composable (Manga) -> State<SearchViewModel.MangaDetails?>,
     onClickSource: (Source) -> Unit,
     onClickItem: (Manga) -> Unit,
     onLongClickItem: (Manga) -> Unit,
@@ -91,6 +94,7 @@ internal fun GlobalSearchContent(
                             GlobalSearchCardRow(
                                 titles = result.result,
                                 getManga = getManga,
+                                getMangaDetails = getMangaDetails,
                                 onClick = onClickItem,
                                 onLongClick = onLongClickItem,
                             )

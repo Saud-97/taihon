@@ -556,6 +556,13 @@
 
       <!-- Browse section -->
     <string name="pref_hide_in_library_items">Hide entries already in library</string>
+    <string name="pref_global_search_enrich_results">Enrich global search results with manga
+        details
+    </string>
+    <string name="pref_global_search_enrich_results_summary">Search results are progressively
+        enriched with the latest available chapter, total chapter count, and comprehensive manga
+        metadata.
+    </string>
     <string name="pref_extension_update_hide_browse_badge">Hide pending extension update badge on
         the Browse tab
     </string>

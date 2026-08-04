@@ -35,6 +35,7 @@ class MigrateSearchScreen(private val mangaId: Long) : Screen() {
             onChangeSearchQuery = viewModel::updateSearchQuery,
             onSearch = { viewModel.search() },
             getManga = { viewModel.getManga(it) },
+            getMangaDetails = { viewModel.getMangaDetails(it) },
             onChangeSearchFilter = viewModel::setSourceFilter,
             onToggleResults = viewModel::toggleFilterResults,
             onClickSource = { navigator.push(MigrateSourceSearchScreen(state.from!!, it.id, state.searchQuery)) },
