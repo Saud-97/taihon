@@ -52,7 +52,7 @@ abstract class SearchViewModel(
     private val setMangaDefaultChapterFlags: SetMangaDefaultChapterFlags = Injekt.get(),
 ) : StateViewModel<SearchViewModel.State>(initialState) {
 
-    private val coroutineDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
+    private val coroutineDispatcher = Executors.newFixedThreadPool(10).asCoroutineDispatcher()
     private var searchJob: Job? = null
 
     private val globalSemaphore = Semaphore(10)
