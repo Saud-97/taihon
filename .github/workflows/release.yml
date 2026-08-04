@@ -134,7 +134,15 @@ jobs:
         id: previous
         shell: bash
         run: |
-          PREVIOUS_TAG=$(git tag --sort=-creatordate | sed -n '2p')
+          CURRENT_TAG="${{ needs.get_tag.outputs.tag }}"
+
+          PREVIOUS_TAG=$(
+            git tag --sort=version:refname |
+            awk -v current="$CURRENT_TAG" '
+              $0 == current { print prev; exit }
+              { prev = $0 }
+            '
+          )
 
           echo "tag=$PREVIOUS_TAG" >> "$GITHUB_OUTPUT"
 
