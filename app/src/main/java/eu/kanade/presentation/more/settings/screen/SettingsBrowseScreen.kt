@@ -47,6 +47,33 @@ object SettingsBrowseScreen : SearchableSettings {
 
         return listOf(
             Preference.PreferenceGroup(
+                title = stringResource(MR.strings.label_sources),
+                preferenceItems = listOf(
+                    Preference.PreferenceItem.SwitchPreference(
+                        preference = sourcePreferences.hideInLibraryItems,
+                        title = stringResource(MR.strings.pref_hide_in_library_items),
+                    ),
+                ),
+            ),
+
+            Preference.PreferenceGroup(
+                title = stringResource(MR.strings.pref_category_nsfw_content),
+                preferenceItems = listOf(
+                    Preference.PreferenceItem.SwitchPreference(
+                        preference = sourcePreferences.showNsfwSource,
+                        title = stringResource(MR.strings.pref_show_nsfw_source),
+                        subtitle = stringResource(MR.strings.requires_app_restart),
+                        onValueChanged = {
+                            (context as FragmentActivity).authenticate(
+                                title = context.stringResource(MR.strings.pref_category_nsfw_content),
+                            )
+                        },
+                    ),
+                    Preference.PreferenceItem.InfoPreference(stringResource(MR.strings.parental_controls_info)),
+                ),
+            ),
+
+            Preference.PreferenceGroup(
                 title = stringResource(MR.strings.label_extensions),
                 preferenceItems = listOf(
                     Preference.PreferenceItem.TextPreference(
@@ -65,20 +92,8 @@ object SettingsBrowseScreen : SearchableSettings {
             ),
 
             Preference.PreferenceGroup(
-                title = stringResource(MR.strings.label_sources),
+                title = stringResource(MR.strings.action_global_search),
                 preferenceItems = listOf(
-                    Preference.PreferenceItem.SwitchPreference(
-                        preference = sourcePreferences.hideInLibraryItems,
-                        title = stringResource(MR.strings.pref_hide_in_library_items),
-                    ),
-
-                    Preference.PreferenceItem.SwitchPreference(
-                        preference = sourcePreferences.globalSearchEnrichResults,
-                        title = stringResource(MR.strings.pref_global_search_enrich_results),
-                        subtitle = stringResource(MR.strings.pref_global_search_enrich_results_summary),
-                        badge = ImageVector.vectorResource(R.drawable.ic_taihon),
-                    ),
-
                     Preference.PreferenceItem.SwitchPreference(
                         preference = sourcePreferences.smartApostropheNormalization,
                         title = stringResource(MR.strings.pref_smart_apostrophe_normalization),
@@ -93,22 +108,12 @@ object SettingsBrowseScreen : SearchableSettings {
                         enabled = smartApostropheNormalization,
                         badge = ImageVector.vectorResource(R.drawable.ic_taihon),
                     ),
-                ),
-            ),
-            Preference.PreferenceGroup(
-                title = stringResource(MR.strings.pref_category_nsfw_content),
-                preferenceItems = listOf(
                     Preference.PreferenceItem.SwitchPreference(
-                        preference = sourcePreferences.showNsfwSource,
-                        title = stringResource(MR.strings.pref_show_nsfw_source),
-                        subtitle = stringResource(MR.strings.requires_app_restart),
-                        onValueChanged = {
-                            (context as FragmentActivity).authenticate(
-                                title = context.stringResource(MR.strings.pref_category_nsfw_content),
-                            )
-                        },
+                        preference = sourcePreferences.globalSearchEnrichResults,
+                        title = stringResource(MR.strings.pref_global_search_enrich_results),
+                        subtitle = stringResource(MR.strings.pref_global_search_enrich_results_summary),
+                        badge = ImageVector.vectorResource(R.drawable.ic_taihon),
                     ),
-                    Preference.PreferenceItem.InfoPreference(stringResource(MR.strings.parental_controls_info)),
                 ),
             ),
         )
