@@ -100,6 +100,16 @@ class LibraryPreferences(
         TriState.DISABLED,
     )
 
+    fun filterSource(id: Long): Preference<TriState> = preferenceStore.getEnum(
+        "pref_filter_library_source_${id}_v2",
+        TriState.DISABLED,
+    )
+
+    val filterOrphanedSources: Preference<TriState> = preferenceStore.getEnum(
+        "pref_filter_library_orphaned_sources_v2",
+        TriState.DISABLED,
+    )
+
     // endregion
 
     // region Badges

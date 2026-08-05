@@ -151,6 +151,31 @@ private fun ColumnScope.FilterPage(
             }
         }
     }
+
+    val sources by viewModel.sourcesFlow.collectAsState()
+    if (sources.isNotEmpty()) {
+        HeadingItem(MR.strings.label_sources)
+        val installedSources = remember(sources) { sources.filterNot { it.isStub } }
+        val hasOrphaned = remember(sources) { sources.any { it.isStub } }
+
+        installedSources.map { source ->
+            val filterSource by viewModel.libraryPreferences.filterSource(source.id).collectAsState()
+            TriStateItem(
+                label = source.visualName,
+                state = filterSource,
+                onClick = { viewModel.toggleSource(source.id) },
+            )
+        }
+
+        if (hasOrphaned) {
+            val filterOrphaned by viewModel.libraryPreferences.filterOrphanedSources.collectAsState()
+            TriStateItem(
+                label = stringResource(MR.strings.ext_obsolete),
+                state = filterOrphaned,
+                onClick = { viewModel.toggleOrphanedSources() },
+            )
+        }
+    }
 }
 
 @Composable

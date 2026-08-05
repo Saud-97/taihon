@@ -99,11 +99,14 @@ class LibraryViewModel(
                 getCategories.subscribe(),
                 getFavoritesFlow(),
                 combine(getTracksPerManga.subscribe(), getTrackingFiltersFlow(), ::Pair),
-                getLibraryItemPreferencesFlow(),
-            ) { searchQuery, categories, favorites, (tracksMap, trackingFilters), itemPreferences ->
+                combine(getSourceFiltersFlow(), getLibraryItemPreferencesFlow(), ::Pair),
+            ) { searchQuery, categories, favorites, tracksData, sourceData ->
+                val (tracksMap, trackingFilters) = tracksData
+                val (sourceFiltersPair, itemPreferences) = sourceData
+                val (sourceFilters, orphanedSourceFilter) = sourceFiltersPair
                 val showSystemCategory = favorites.any { it.libraryManga.categories.contains(0) }
                 val filteredFavorites = favorites
-                    .applyFilters(tracksMap, trackingFilters, itemPreferences)
+                    .applyFilters(tracksMap, trackingFilters, sourceFilters, orphanedSourceFilter, itemPreferences)
                     .let { libraryItems ->
                         if (searchQuery.isNullOrEmpty()) {
                             libraryItems
@@ -169,7 +172,8 @@ class LibraryViewModel(
         combine(
             getLibraryItemPreferencesFlow(),
             getTrackingFiltersFlow(),
-        ) { prefs, trackFilters ->
+            getSourceFiltersFlow(),
+        ) { prefs, trackFilters, (sourceFilters, orphanedSourceFilter) ->
             listOf(
                 prefs.filterDownloaded,
                 prefs.filterUnread,
@@ -178,6 +182,8 @@ class LibraryViewModel(
                 prefs.filterCompleted,
                 prefs.filterIntervalCustom,
                 *trackFilters.values.toTypedArray(),
+                *sourceFilters.values.toTypedArray(),
+                orphanedSourceFilter,
             )
                 .any { it != TriState.DISABLED }
         }
@@ -193,6 +199,8 @@ class LibraryViewModel(
     private fun List<LibraryItem>.applyFilters(
         trackMap: Map<Long, List<Track>>,
         trackingFilter: Map<Long, TriState>,
+        sourceFilter: Map<Long, TriState>,
+        orphanedSourceFilter: TriState,
         preferences: ItemPreferences,
     ): List<LibraryItem> {
         val downloadedOnly = preferences.globalFilterDownloaded
@@ -249,6 +257,27 @@ class LibraryViewModel(
             !isExcluded && isIncluded
         }
 
+        val excludedSources = sourceFilter.filter { it.value == TriState.ENABLED_NOT }.keys
+        val includedSources = sourceFilter.filter { it.value == TriState.ENABLED_IS }.keys
+        val orphanedIsExcluded = orphanedSourceFilter == TriState.ENABLED_NOT
+        val orphanedIsIncluded = orphanedSourceFilter == TriState.ENABLED_IS
+
+        val filterFnSource: (LibraryItem) -> Boolean = { item ->
+            val sourceId = item.libraryManga.manga.source
+            val source = sourceManager.get(sourceId)
+            val isOrphaned = source == null || source is StubSource
+
+            val isExcluded = if (isOrphaned) orphanedIsExcluded else sourceId in excludedSources
+            val isAnyIncluded = includedSources.isNotEmpty() || orphanedIsIncluded
+            val isIncluded = if (isAnyIncluded) {
+                if (isOrphaned) orphanedIsIncluded else sourceId in includedSources
+            } else {
+                true
+            }
+
+            !isExcluded && isIncluded
+        }
+
         return fastFilter {
             filterFnDownloaded(it) &&
                 filterFnUnread(it) &&
@@ -256,7 +285,8 @@ class LibraryViewModel(
                 filterFnBookmarked(it) &&
                 filterFnCompleted(it) &&
                 filterFnIntervalCustom(it) &&
-                filterFnTracking(it)
+                filterFnTracking(it) &&
+                filterFnSource(it)
         }
     }
 
@@ -466,6 +496,23 @@ class LibraryViewModel(
                 combine(filterFlows) { it.toMap() }
             }
         }
+    }
+
+    private fun getSourceFiltersFlow(): Flow<Pair<Map<Long, TriState>, TriState>> {
+        return sourceManager.sources
+            .map { sources -> sources.filterNot { it is StubSource }.map { it.id }.toSet() }
+            .distinctUntilChanged()
+            .flatMapLatest { sourceIds ->
+                if (sourceIds.isEmpty()) {
+                    libraryPreferences.filterOrphanedSources.changes().map { emptyMap<Long, TriState>() to it }
+                } else {
+                    val filterFlows = sourceIds.map { id ->
+                        libraryPreferences.filterSource(id).changes().map { id to it }
+                    }
+                    combine(filterFlows) { it.toMap() }
+                        .combine(libraryPreferences.filterOrphanedSources.changes(), ::Pair)
+                }
+            }
     }
 
     /**

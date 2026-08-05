@@ -3,8 +3,10 @@ package eu.kanade.tachiyomi.ui.library
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.domain.base.BasePreferences
+import eu.kanade.domain.source.interactor.GetSourcesWithFavoriteCount
 import eu.kanade.tachiyomi.data.track.TrackerManager
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.TriState
@@ -26,6 +28,7 @@ class LibrarySettingsViewModel(
     private val setDisplayMode: SetDisplayMode = Injekt.get(),
     private val setSortModeForCategory: SetSortModeForCategory = Injekt.get(),
     trackerManager: TrackerManager = Injekt.get(),
+    getSourcesWithFavoriteCount: GetSourcesWithFavoriteCount = Injekt.get(),
 ) : ViewModel() {
 
     val trackersFlow = trackerManager.loggedInTrackersFlow()
@@ -33,6 +36,14 @@ class LibrarySettingsViewModel(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds),
             initialValue = trackerManager.loggedInTrackers(),
+        )
+
+    val sourcesFlow = getSourcesWithFavoriteCount.subscribe()
+        .map { list -> list.map { it.first } }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds),
+            initialValue = emptyList(),
         )
 
     fun toggleFilter(preference: (LibraryPreferences) -> Preference<TriState>) {
@@ -43,6 +54,14 @@ class LibrarySettingsViewModel(
 
     fun toggleTracker(id: Int) {
         toggleFilter { libraryPreferences.filterTracking(id) }
+    }
+
+    fun toggleSource(id: Long) {
+        toggleFilter { libraryPreferences.filterSource(id) }
+    }
+
+    fun toggleOrphanedSources() {
+        toggleFilter { libraryPreferences.filterOrphanedSources }
     }
 
     fun setDisplayMode(mode: LibraryDisplayMode) {
