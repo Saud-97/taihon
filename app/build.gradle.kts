@@ -32,8 +32,8 @@ android {
     defaultConfig {
         applicationId = "app.taihon"
 
-        versionCode = 28
-        versionName = "0.20.3.1"
+        versionCode = 29
+        versionName = "0.20.4"
 
         buildConfigField("String", "COMMIT_COUNT", "\"${getLatestCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getLatestCommitSha()}\"")
