@@ -35,6 +35,22 @@ fun BadgeGroup(
 
 @Composable
 fun Badge(
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.secondary,
+    shape: Shape = RectangleShape,
+    content: @Composable RowScope.() -> Unit,
+) {
+    Row(
+        modifier = modifier
+            .clip(shape)
+            .background(color),
+    ) {
+        content()
+    }
+}
+
+@Composable
+fun Badge(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.secondary,

@@ -278,6 +278,14 @@ private fun ColumnScope.DisplayPage(
         pref = viewModel.libraryPreferences.localBadge,
     )
     CheckboxItem(
+        label = stringResource(MR.strings.label_sources) + " (${stringResource(MR.strings.ext_installed)})",
+        pref = viewModel.libraryPreferences.sourceInstalledBadge,
+    )
+    CheckboxItem(
+        label = stringResource(MR.strings.label_sources) + " (${stringResource(MR.strings.ext_obsolete)})",
+        pref = viewModel.libraryPreferences.sourceOrphanedBadge,
+    )
+    CheckboxItem(
         label = stringResource(MR.strings.action_display_language_badge),
         pref = viewModel.libraryPreferences.languageBadge,
     )

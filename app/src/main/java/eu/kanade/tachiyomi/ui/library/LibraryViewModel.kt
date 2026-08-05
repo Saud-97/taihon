@@ -59,6 +59,7 @@ import tachiyomi.domain.manga.interactor.GetLibraryManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaUpdate
 import tachiyomi.domain.manga.model.applyFilter
+import tachiyomi.domain.source.model.StubSource
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.track.interactor.GetTracksPerManga
 import tachiyomi.domain.track.model.Track
@@ -67,6 +68,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
+import tachiyomi.domain.source.model.Source as DomainSource
 
 class LibraryViewModel(
     private val getLibraryManga: GetLibraryManga = Injekt.get(),
@@ -359,6 +361,8 @@ class LibraryViewModel(
             libraryPreferences.unreadBadge.changes(),
             libraryPreferences.localBadge.changes(),
             libraryPreferences.languageBadge.changes(),
+            libraryPreferences.sourceInstalledBadge.changes(),
+            libraryPreferences.sourceOrphanedBadge.changes(),
             libraryPreferences.autoUpdateMangaRestrictions.changes(),
 
             preferences.downloadedOnly.changes(),
@@ -374,14 +378,16 @@ class LibraryViewModel(
                 unreadBadge = it[1] as Boolean,
                 localBadge = it[2] as Boolean,
                 languageBadge = it[3] as Boolean,
-                skipOutsideReleasePeriod = LibraryPreferences.MANGA_OUTSIDE_RELEASE_PERIOD in (it[4] as Set<*>),
-                globalFilterDownloaded = it[5] as Boolean,
-                filterDownloaded = it[6] as TriState,
-                filterUnread = it[7] as TriState,
-                filterStarted = it[8] as TriState,
-                filterBookmarked = it[9] as TriState,
-                filterCompleted = it[10] as TriState,
-                filterIntervalCustom = it[11] as TriState,
+                sourceInstalledBadge = it[4] as Boolean,
+                sourceOrphanedBadge = it[5] as Boolean,
+                skipOutsideReleasePeriod = LibraryPreferences.MANGA_OUTSIDE_RELEASE_PERIOD in (it[6] as Set<*>),
+                globalFilterDownloaded = it[7] as Boolean,
+                filterDownloaded = it[8] as TriState,
+                filterUnread = it[9] as TriState,
+                filterStarted = it[10] as TriState,
+                filterBookmarked = it[11] as TriState,
+                filterCompleted = it[12] as TriState,
+                filterIntervalCustom = it[13] as TriState,
             )
         }
     }
@@ -420,6 +426,23 @@ class LibraryViewModel(
                             sourceManager.getOrStub(manga.manga.source).lang
                         } else {
                             ""
+                        },
+                        source = sourceManager.getOrStub(manga.manga.source).let {
+                            val isStub = it is StubSource
+                            val showSource =
+                                (isStub && preferences.sourceOrphanedBadge) ||
+                                    (!isStub && preferences.sourceInstalledBadge)
+                            if (showSource) {
+                                DomainSource(
+                                    id = it.id,
+                                    lang = it.lang,
+                                    name = it.name,
+                                    supportsLatest = it.supportsLatest,
+                                    isStub = isStub,
+                                )
+                            } else {
+                                null
+                            }
                         },
                     ),
                 )
@@ -748,6 +771,8 @@ class LibraryViewModel(
         val unreadBadge: Boolean,
         val localBadge: Boolean,
         val languageBadge: Boolean,
+        val sourceInstalledBadge: Boolean,
+        val sourceOrphanedBadge: Boolean,
         val skipOutsideReleasePeriod: Boolean,
 
         val globalFilterDownloaded: Boolean,

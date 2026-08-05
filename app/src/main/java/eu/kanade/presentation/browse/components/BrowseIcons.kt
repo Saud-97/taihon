@@ -45,35 +45,36 @@ fun SourceIcon(
     modifier: Modifier = Modifier,
 ) {
     val icon = source.icon
+    val iconModifier = modifier.takeIf { it != Modifier } ?: modifier.then(defaultModifier)
 
     when {
-        source.isStub && icon == null -> {
+        (source.isStub && icon == null) -> {
             Image(
                 imageVector = Icons.Filled.Warning,
                 contentDescription = null,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
-                modifier = modifier.then(defaultModifier),
+                modifier = iconModifier,
             )
         }
         icon != null -> {
             Image(
                 bitmap = icon,
                 contentDescription = null,
-                modifier = modifier.then(defaultModifier),
+                modifier = iconModifier,
             )
         }
         source.isLocal() -> {
             Image(
                 painter = painterResource(R.mipmap.ic_local_source),
                 contentDescription = null,
-                modifier = modifier.then(defaultModifier),
+                modifier = iconModifier,
             )
         }
         else -> {
             Image(
                 painter = painterResource(R.mipmap.ic_default_source),
                 contentDescription = null,
-                modifier = modifier.then(defaultModifier),
+                modifier = iconModifier,
             )
         }
     }
