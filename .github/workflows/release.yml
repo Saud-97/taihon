@@ -180,7 +180,7 @@ jobs:
             ${{ env.CHANGELOG }}
 
             ## 🔄 Upstream
-            Updated with the latest changes from **Mihon ${{ needs.get_tag.outputs.upstream }}**.
+            Updated with the latest changes from **Mihon ${{ needs.get_tag.outputs.tag }}**.
 
             ## ✨ New Features
 
