@@ -15,7 +15,7 @@ object TelemetryConfig {
 
     fun init(context: Context) {
         // To stop forks/test builds from polluting our data
-        if (!context.isMihonProductionApp()) return
+        if (!context.isTaihonProductionApp()) return
 
         // Check if Google Play Services is available before initializing Firebase
         if (!isGooglePlayServicesAvailable(context)) {
@@ -52,15 +52,15 @@ object TelemetryConfig {
         crashlytics?.isCrashlyticsCollectionEnabled = enabled
     }
 
-    private fun Context.isMihonProductionApp(): Boolean {
-        if (packageName !in MIHON_PACKAGES) return false
+    private fun Context.isTaihonProductionApp(): Boolean {
+        if (packageName != TAIHON_PACKAGE) return false
 
         return packageManager.getPackageInfo(packageName, SignatureFlags)
             .getCertificateFingerprints()
-            .any { it == MIHON_CERTIFICATE_FINGERPRINT }
+            .any { it == TAIHON_CERTIFICATE_FINGERPRINT }
     }
 }
 
-private val MIHON_PACKAGES = hashSetOf("app.mihon", "app.mihon.debug")
-private const val MIHON_CERTIFICATE_FINGERPRINT =
-    "9A:DD:65:5A:78:E9:6C:4E:C7:A5:3E:F8:9D:CC:B5:57:CB:5D:76:74:89:FA:C5:E7:85:D6:71:A5:A7:5D:4D:A2"
+private const val TAIHON_PACKAGE = "app.taihon"
+private const val TAIHON_CERTIFICATE_FINGERPRINT =
+    "AD:FF:AA:D7:51:5C:B0:C6:42:44:7A:32:80:77:F1:18:B2:6B:05:17:B8:16:CC:36:68:48:6A:DF:1B:36:CF:3B"
