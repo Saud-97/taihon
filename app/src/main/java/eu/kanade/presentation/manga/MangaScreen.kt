@@ -296,28 +296,16 @@ private fun MangaScreenSmallImpl(
 
     val density = LocalDensity.current
 
-    val isCurrentChapterVisible by remember(currentlyReadingIndex) {
-        derivedStateOf {
-            if (currentlyReadingIndex == -1) return@derivedStateOf true
-            chapterListState.layoutInfo.visibleItemsInfo.fastAny { it.index == currentlyReadingIndex }
-        }
-    }
-
     val isFarAbove = remember(currentlyReadingIndex) {
         derivedStateOf {
-            if (currentlyReadingIndex == -1 || isCurrentChapterVisible) return@derivedStateOf false
-            val firstVisible = chapterListState.firstVisibleItemIndex
-            val visibleCount = chapterListState.layoutInfo.visibleItemsInfo.size
-            currentlyReadingIndex < firstVisible - visibleCount
+            currentlyReadingIndex != -1 && currentlyReadingIndex < chapterListState.firstVisibleItemIndex
         }
     }
 
     val isFarBelow = remember(currentlyReadingIndex) {
         derivedStateOf {
-            if (currentlyReadingIndex == -1 || isCurrentChapterVisible) return@derivedStateOf false
             val lastVisible = chapterListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            val visibleCount = chapterListState.layoutInfo.visibleItemsInfo.size
-            currentlyReadingIndex > lastVisible + visibleCount
+            currentlyReadingIndex != -1 && currentlyReadingIndex > lastVisible
         }
     }
 
@@ -668,28 +656,16 @@ fun MangaScreenLargeImpl(
         state.chapters.fastAny { it.chapter.read }
     }
 
-    val isCurrentChapterVisible by remember(currentlyReadingIndex) {
-        derivedStateOf {
-            if (currentlyReadingIndex == -1) return@derivedStateOf true
-            chapterListState.layoutInfo.visibleItemsInfo.fastAny { it.index == currentlyReadingIndex }
-        }
-    }
-
     val isFarAbove = remember(currentlyReadingIndex) {
         derivedStateOf {
-            if (currentlyReadingIndex == -1 || isCurrentChapterVisible) return@derivedStateOf false
-            val firstVisible = chapterListState.firstVisibleItemIndex
-            val visibleCount = chapterListState.layoutInfo.visibleItemsInfo.size
-            currentlyReadingIndex < firstVisible - visibleCount
+            currentlyReadingIndex != -1 && currentlyReadingIndex < chapterListState.firstVisibleItemIndex
         }
     }
 
     val isFarBelow = remember(currentlyReadingIndex) {
         derivedStateOf {
-            if (currentlyReadingIndex == -1 || isCurrentChapterVisible) return@derivedStateOf false
             val lastVisible = chapterListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            val visibleCount = chapterListState.layoutInfo.visibleItemsInfo.size
-            currentlyReadingIndex > lastVisible + visibleCount
+            currentlyReadingIndex != -1 && currentlyReadingIndex > lastVisible
         }
     }
 
