@@ -40,6 +40,11 @@ class BasePreferences(
         GLUtil.SAFE_TEXTURE_LIMIT,
     )
 
+    val allowHardwareBitmapForCovers: Preference<Boolean> = preferenceStore.getBoolean(
+        "pref_allow_hardware_bitmap_covers",
+        true,
+    )
+
     val alwaysDecodeLongStripWithSSIV: Preference<Boolean> = preferenceStore.getBoolean(
         "pref_always_decode_long_strip_with_ssiv",
         false,

@@ -42,7 +42,9 @@ import coil3.asDrawable
 import coil3.imageLoader
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import coil3.request.allowHardware
 import coil3.size.Size
+import eu.kanade.domain.base.BasePreferences
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.DropdownMenu
@@ -53,6 +55,9 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.clickableNoIndication
+import tachiyomi.presentation.core.util.collectAsState
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 @Composable
 fun MangaCoverDialog(
@@ -64,6 +69,9 @@ fun MangaCoverDialog(
     onEditClick: ((EditCoverAction) -> Unit)?,
     onDismissRequest: () -> Unit,
 ) {
+    val basePreferences = remember { Injekt.get<BasePreferences>() }
+    val allowHardware by basePreferences.allowHardwareBitmapForCovers.collectAsState()
+
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(
@@ -169,13 +177,15 @@ fun MangaCoverDialog(
                             .data(manga)
                             .size(Size.ORIGINAL)
                             .memoryCachePolicy(CachePolicy.DISABLED)
+                            .allowHardware(allowHardware)
                             .target { image ->
                                 val drawable = image.asDrawable(view.context.resources)
                                 // Copy bitmap in case it came from memory cache
                                 // Because SSIV needs to thoroughly read the image
+                                val config = if (allowHardware) Bitmap.Config.HARDWARE else Bitmap.Config.ARGB_8888
                                 val copy = (drawable as? BitmapDrawable)
                                     ?.bitmap
-                                    ?.copy(Bitmap.Config.HARDWARE, false)
+                                    ?.copy(config, false)
                                     ?.toDrawable(view.context.resources)
                                     ?: drawable
                                 view.setImage(copy, ReaderPageImageView.Config(zoomDuration = 500))
