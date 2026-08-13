@@ -31,6 +31,7 @@ import eu.kanade.domain.extension.interactor.TrustExtension
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.screen.advanced.ClearDatabaseScreen
 import eu.kanade.presentation.more.settings.screen.debug.DebugInfoScreen
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.data.library.MetadataUpdateJob
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -305,7 +306,7 @@ object SettingsAdvancedScreen : SearchableSettings {
                     preference = basePreferences.allowHardwareBitmapForCovers,
                     title = stringResource(MR.strings.pref_allow_hardware_bitmap_covers),
                     subtitle = stringResource(MR.strings.pref_allow_hardware_bitmap_covers_summary),
-                    badge = ImageVector.vectorResource(eu.kanade.tachiyomi.R.drawable.ic_taihon),
+                    badge = ImageVector.vectorResource(R.drawable.ic_taihon),
                 ),
                 Preference.PreferenceItem.TextPreference(
                     title = stringResource(MR.strings.pref_reset_viewer_flags),

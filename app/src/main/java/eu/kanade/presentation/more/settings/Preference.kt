@@ -25,12 +25,12 @@ sealed class Preference {
         data class TextPreference(
             override val title: String,
             override val subtitle: String? = null,
+            override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
             val widget: @Composable (() -> Unit)? = null,
             val onClick: (() -> Unit)? = null,
             override val badge: ImageVector? = null,
         ) : PreferenceItem<String, Unit>() {
-            override val icon: ImageVector? = null
             override val onValueChanged: suspend (value: String) -> Unit = {}
         }
 
@@ -41,12 +41,11 @@ sealed class Preference {
             val preference: PreferenceData<Boolean>,
             override val title: String,
             override val subtitle: String? = null,
+            override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (value: Boolean) -> Boolean = { true },
             override val badge: ImageVector? = null,
-        ) : PreferenceItem<Boolean, Boolean>() {
-            override val icon: ImageVector? = null
-        }
+        ) : PreferenceItem<Boolean, Boolean>()
 
         /**
          * A [PreferenceItem] that provides a slider to select an integer number.
@@ -193,6 +192,7 @@ sealed class Preference {
     data class PreferenceGroup(
         override val title: String,
         override val enabled: Boolean = true,
+        val badge: ImageVector? = null,
 
         val preferenceItems: List<PreferenceItem<out Any, out Any>>,
     ) : Preference()

@@ -54,7 +54,10 @@ fun PreferenceScreen(
 
                     item {
                         Column {
-                            PreferenceGroupHeader(title = preference.title)
+                            PreferenceGroupHeader(
+                                title = preference.title,
+                                badge = preference.badge,
+                            )
                         }
                     }
                     items(preference.preferenceItems) { item ->
