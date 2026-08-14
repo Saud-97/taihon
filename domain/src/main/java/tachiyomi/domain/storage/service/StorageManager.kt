@@ -24,6 +24,10 @@ class StorageManager(
 
     private var baseDir: UniFile? = getBaseDir(storagePreferences.baseStorageDirectory.get())
 
+    private var downloadsDir: UniFile? = null
+    private var backupsDir: UniFile? = null
+    private var localSourceDir: UniFile? = null
+
     private val _changes: Channel<Unit> = Channel(Channel.UNLIMITED)
     val changes = _changes.receiveAsFlow()
         .shareIn(scope, SharingStarted.Lazily, 1)
@@ -34,10 +38,13 @@ class StorageManager(
             .distinctUntilChanged()
             .onEach { uri ->
                 baseDir = getBaseDir(uri)
+                downloadsDir = null
+                backupsDir = null
+                localSourceDir = null
                 baseDir?.let { parent ->
-                    parent.createDirectory(AUTOMATIC_BACKUPS_PATH)
-                    parent.createDirectory(LOCAL_SOURCE_PATH)
-                    parent.createDirectory(DOWNLOADS_PATH).also {
+                    backupsDir = parent.createDirectory(AUTOMATIC_BACKUPS_PATH)
+                    localSourceDir = parent.createDirectory(LOCAL_SOURCE_PATH)
+                    downloadsDir = parent.createDirectory(DOWNLOADS_PATH).also {
                         DiskUtil.createNoMediaFile(it, context)
                     }
                 }
@@ -51,16 +58,23 @@ class StorageManager(
             .takeIf { it?.exists() == true }
     }
 
+    @Synchronized
     fun getAutomaticBackupsDirectory(): UniFile? {
-        return baseDir?.createDirectory(AUTOMATIC_BACKUPS_PATH)
+        return backupsDir ?: if (baseDir?.name == AUTOMATIC_BACKUPS_PATH) {
+            baseDir
+        } else {
+            baseDir?.createDirectory(AUTOMATIC_BACKUPS_PATH)
+        }?.also { backupsDir = it }
     }
 
+    @Synchronized
     fun getDownloadsDirectory(): UniFile? {
-        return baseDir?.createDirectory(DOWNLOADS_PATH)
+        return downloadsDir ?: baseDir?.createDirectory(DOWNLOADS_PATH).also { downloadsDir = it }
     }
 
+    @Synchronized
     fun getLocalSourceDirectory(): UniFile? {
-        return baseDir?.createDirectory(LOCAL_SOURCE_PATH)
+        return localSourceDir ?: baseDir?.createDirectory(LOCAL_SOURCE_PATH).also { localSourceDir = it }
     }
 }
 
