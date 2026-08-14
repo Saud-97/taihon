@@ -101,7 +101,10 @@ object DiskUtil {
      * Scans the given file so that it can be shown in gallery apps, for example.
      */
     fun scanMedia(context: Context, uri: Uri) {
-        MediaScannerConnection.scanFile(context, arrayOf(uri.path), null, null)
+        val path = uri.path
+        if (uri.scheme == "file" && path != null) {
+            MediaScannerConnection.scanFile(context, arrayOf(path), null, null)
+        }
     }
 
     /**
