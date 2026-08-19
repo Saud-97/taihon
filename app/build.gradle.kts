@@ -73,7 +73,7 @@ android {
 
     buildTypes {
         val debug = getByName("debug") {
-            applicationIdSuffix = ".debug"
+            applicationIdSuffix = ".dev"
             versionNameSuffix = "-${getLatestCommitCount()}"
             isPseudoLocalesEnabled = true
         }
@@ -99,9 +99,6 @@ android {
 
             matchingFallbacks.addAll(commonMatchingFallbacks)
         }
-    }
-
-    sourceSets {
     }
 
     splits {
