@@ -1,45 +1,81 @@
 {
   "project_info": {
-    "project_number": "823016311544",
-    "project_id": "taihon-75391",
-    "storage_bucket": "taihon-75391.firebasestorage.app"
+    "project_number": "860721443431",
+    "project_id": "taihon",
+    "storage_bucket": "taihon.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:823016311544:android:e186f0b3f01cc6483b090d",
+        "mobilesdk_app_id": "1:860721443431:android:829cda7a0363f2362c1ac2",
         "android_client_info": {
           "package_name": "app.taihon"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "860721443431-urvi7qha8rj7a3j6vgik10fe92o671r7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.taihon",
+            "certificate_hash": "8293bf61a28c651e125be92e59249a0b09e7c08e"
+          }
+        },
+        {
+          "client_id": "860721443431-nfl3ava8u28lkndiq3vcmvjq4q7qajkj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAVLRB8tYnq_-5roNd-1SpmYhC5gbLRIic"
+          "current_key": "AIzaSyCODWLs4CBo8hHGmfTVK3RT_nUsMo8J2Gs"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "860721443431-nfl3ava8u28lkndiq3vcmvjq4q7qajkj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:823016311544:android:087778bc81b6323c3b090d",
+        "mobilesdk_app_id": "1:860721443431:android:3f0e884dc3655d912c1ac2",
         "android_client_info": {
-          "package_name": "app.taihon.debug"
+          "package_name": "app.taihon.dev"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "860721443431-i2j0aagqqunv9nshe1glsvln4067v846.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.taihon.dev",
+            "certificate_hash": "bd9ab68a33c28dd24aead58ebfdca00128618260"
+          }
+        },
+        {
+          "client_id": "860721443431-nfl3ava8u28lkndiq3vcmvjq4q7qajkj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAVLRB8tYnq_-5roNd-1SpmYhC5gbLRIic"
+          "current_key": "AIzaSyCODWLs4CBo8hHGmfTVK3RT_nUsMo8J2Gs"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "860721443431-nfl3ava8u28lkndiq3vcmvjq4q7qajkj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
