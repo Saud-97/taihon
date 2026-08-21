@@ -1,15 +1,10 @@
 package eu.kanade.presentation.manga
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -19,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -28,14 +22,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SmallExtendedFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
@@ -88,6 +79,7 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.shouldExpandFAB
 import tachiyomi.source.local.isLocal
+import taihon.feature.manga.ui.components.TaihonMangaScrollControls
 import kotlin.time.Instant
 
 @Composable
@@ -295,33 +287,9 @@ private fun MangaScreenSmallImpl(
     }
 
     val density = LocalDensity.current
-
-    val isFarAbove = remember(currentlyReadingIndex) {
-        derivedStateOf {
-            currentlyReadingIndex != -1 && currentlyReadingIndex < chapterListState.firstVisibleItemIndex
-        }
-    }
-
-    val isFarBelow = remember(currentlyReadingIndex) {
-        derivedStateOf {
-            val lastVisible = chapterListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            currentlyReadingIndex != -1 && currentlyReadingIndex > lastVisible
-        }
-    }
-
     val centerOffset = remember {
         derivedStateOf {
             -(chapterListState.layoutInfo.viewportSize.height / 2 - with(density) { 72.dp.roundToPx() } / 2)
-        }
-    }
-
-    val isScrolledDown by remember {
-        derivedStateOf { chapterListState.firstVisibleItemIndex > 0 }
-    }
-    val isNotAtBottom by remember {
-        derivedStateOf {
-            val lastVisible = chapterListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            lastVisible < chapterListState.layoutInfo.totalItemsCount - 1
         }
     }
 
@@ -507,71 +475,13 @@ private fun MangaScreenSmallImpl(
                     }
                 }
 
-                AnimatedVisibility(
-                    visible = isScrolledDown && !isAnySelected,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = topPadding + 16.dp),
-                ) {
-                    SuggestionChip(
-                        onClick = {
-                            scope.launch {
-                                if (isFarAbove.value) {
-                                    chapterListState.animateScrollToItem(currentlyReadingIndex, centerOffset.value)
-                                } else {
-                                    chapterListState.animateScrollToItem(0)
-                                }
-                            }
-                        },
-                        label = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowUpward,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                )
-                                Spacer(modifier = Modifier.size(8.dp))
-                                Text(text = stringResource(MR.strings.action_move_to_top))
-                            }
-                        },
-                    )
-                }
-
-                AnimatedVisibility(
-                    visible = isNotAtBottom && !isAnySelected,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 16.dp),
-                ) {
-                    SuggestionChip(
-                        onClick = {
-                            scope.launch {
-                                if (isFarBelow.value) {
-                                    chapterListState.animateScrollToItem(currentlyReadingIndex, centerOffset.value)
-                                } else {
-                                    chapterListState.animateScrollToItem(
-                                        chapterListState.layoutInfo.totalItemsCount - 1,
-                                    )
-                                }
-                            }
-                        },
-                        label = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowDownward,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                )
-                                Spacer(modifier = Modifier.size(8.dp))
-                                Text(text = stringResource(MR.strings.action_move_to_bottom))
-                            }
-                        },
-                    )
-                }
+                TaihonMangaScrollControls(
+                    chapterListState = chapterListState,
+                    currentlyReadingIndex = currentlyReadingIndex,
+                    isAnySelected = isAnySelected,
+                    topPadding = topPadding,
+                    centerOffset = centerOffset.value,
+                )
             }
         }
     }
@@ -656,32 +566,9 @@ fun MangaScreenLargeImpl(
         state.chapters.fastAny { it.chapter.read }
     }
 
-    val isFarAbove = remember(currentlyReadingIndex) {
-        derivedStateOf {
-            currentlyReadingIndex != -1 && currentlyReadingIndex < chapterListState.firstVisibleItemIndex
-        }
-    }
-
-    val isFarBelow = remember(currentlyReadingIndex) {
-        derivedStateOf {
-            val lastVisible = chapterListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            currentlyReadingIndex != -1 && currentlyReadingIndex > lastVisible
-        }
-    }
-
     val centerOffset = remember {
         derivedStateOf {
             -(chapterListState.layoutInfo.viewportSize.height / 2 - with(density) { 72.dp.roundToPx() } / 2)
-        }
-    }
-
-    val isScrolledDown by remember {
-        derivedStateOf { chapterListState.firstVisibleItemIndex > 0 }
-    }
-    val isNotAtBottom by remember {
-        derivedStateOf {
-            val lastVisible = chapterListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            lastVisible < chapterListState.layoutInfo.totalItemsCount - 1
         }
     }
 
@@ -856,77 +743,13 @@ fun MangaScreenLargeImpl(
                             }
                         }
 
-                        AnimatedVisibility(
-                            visible = isScrolledDown && !isAnySelected,
-                            enter = fadeIn(),
-                            exit = fadeOut(),
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .padding(top = contentPadding.calculateTopPadding() + 16.dp),
-                        ) {
-                            SuggestionChip(
-                                onClick = {
-                                    scope.launch {
-                                        if (isFarAbove.value) {
-                                            chapterListState.animateScrollToItem(
-                                                currentlyReadingIndex,
-                                                centerOffset.value,
-                                            )
-                                        } else {
-                                            chapterListState.animateScrollToItem(0)
-                                        }
-                                    }
-                                },
-                                label = {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.ArrowUpward,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(16.dp),
-                                        )
-                                        Spacer(modifier = Modifier.size(8.dp))
-                                        Text(text = stringResource(MR.strings.action_move_to_top))
-                                    }
-                                },
-                            )
-                        }
-
-                        AnimatedVisibility(
-                            visible = isNotAtBottom && !isAnySelected,
-                            enter = fadeIn(),
-                            exit = fadeOut(),
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 16.dp),
-                        ) {
-                            SuggestionChip(
-                                onClick = {
-                                    scope.launch {
-                                        if (isFarBelow.value) {
-                                            chapterListState.animateScrollToItem(
-                                                currentlyReadingIndex,
-                                                centerOffset.value,
-                                            )
-                                        } else {
-                                            chapterListState.animateScrollToItem(
-                                                chapterListState.layoutInfo.totalItemsCount - 1,
-                                            )
-                                        }
-                                    }
-                                },
-                                label = {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.ArrowDownward,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(16.dp),
-                                        )
-                                        Spacer(modifier = Modifier.size(8.dp))
-                                        Text(text = stringResource(MR.strings.action_move_to_bottom))
-                                    }
-                                },
-                            )
-                        }
+                        TaihonMangaScrollControls(
+                            chapterListState = chapterListState,
+                            currentlyReadingIndex = currentlyReadingIndex,
+                            isAnySelected = isAnySelected,
+                            topPadding = contentPadding.calculateTopPadding(),
+                            centerOffset = centerOffset.value,
+                        )
                     }
                 },
             )

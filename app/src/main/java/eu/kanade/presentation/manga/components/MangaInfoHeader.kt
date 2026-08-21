@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.PersonOutline
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material.icons.outlined.Block
@@ -108,6 +107,7 @@ import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.clickableNoIndication
 import tachiyomi.presentation.core.util.secondaryItemAlpha
+import taihon.feature.manga.ui.components.TaihonMangaContinueChip
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.math.roundToInt
@@ -265,38 +265,24 @@ fun ExpandableMangaDescription(
     Column(modifier = modifier) {
         if (nextUnreadChapter != null) {
             val isChapterStarted = nextUnreadChapter.lastPageRead > 0
-            val actionLabel = if (isChapterStarted) {
-                stringResource(MR.strings.migrationConfigScreen_continueButtonText)
-            } else {
-                stringResource(MR.strings.action_start)
-            }
+            val actionLabel =
+                stringResource(
+                    if (isChapterStarted) {
+                        MR.strings.migrationConfigScreen_continueButtonText
+                    } else {
+                        MR.strings.action_start
+                    },
+                )
             val readingLabel = stringResource(MR.strings.reading).lowercase()
             val chapterLabel = stringResource(
                 MR.strings.display_mode_chapter,
                 formatChapterNumber(nextUnreadChapter.chapterNumber),
             )
             val resumeText = "$actionLabel $readingLabel $chapterLabel"
-            SuggestionChip(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 8.dp),
-                onClick = onResumeClicked,
-                label = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.PlayArrow,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                        )
-                        Spacer(modifier = Modifier.size(8.dp))
-                        Text(text = resumeText)
-                    }
-                },
+
+            TaihonMangaContinueChip(
+                resumeText = resumeText,
+                onResumeClicked = onResumeClicked,
             )
         }
 
