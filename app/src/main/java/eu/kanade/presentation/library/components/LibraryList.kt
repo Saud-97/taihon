@@ -12,6 +12,7 @@ import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.domain.manga.model.MangaCover
 import tachiyomi.presentation.core.components.FastScrollLazyColumn
 import tachiyomi.presentation.core.util.plus
+import taihon.feature.ui.components.TaihonSourceBadge
 
 @Composable
 internal fun LibraryList(
@@ -60,7 +61,7 @@ internal fun LibraryList(
                         isLocal = libraryItem.badges.isLocal,
                         sourceLanguage = libraryItem.badges.sourceLanguage,
                     )
-                    SourceBadge(source = libraryItem.badges.source)
+                    TaihonSourceBadge(source = libraryItem.badges.source)
                 },
                 onLongClick = { onLongClick(libraryItem.libraryManga) },
                 onClick = { onClick(libraryItem.libraryManga) },

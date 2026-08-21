@@ -1,4 +1,4 @@
-package eu.kanade.presentation.browse.components
+package taihon.feature.ui.components
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode

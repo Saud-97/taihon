@@ -27,6 +27,7 @@ import tachiyomi.presentation.core.components.Badge
 import tachiyomi.presentation.core.components.BadgeGroup
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
+import taihon.feature.ui.components.TaihonLoadingBadge
 
 @Composable
 fun GlobalSearchCardRow(

@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.domain.manga.model.MangaCover
+import taihon.feature.ui.components.TaihonSourceBadge
 
 @Composable
 internal fun LibraryComfortableGrid(
@@ -52,7 +53,7 @@ internal fun LibraryComfortableGrid(
                         isLocal = libraryItem.badges.isLocal,
                         sourceLanguage = libraryItem.badges.sourceLanguage,
                     )
-                    SourceBadge(source = libraryItem.badges.source)
+                    TaihonSourceBadge(source = libraryItem.badges.source)
                 },
                 onLongClick = { onLongClick(libraryItem.libraryManga) },
                 onClick = { onClick(libraryItem.libraryManga) },
