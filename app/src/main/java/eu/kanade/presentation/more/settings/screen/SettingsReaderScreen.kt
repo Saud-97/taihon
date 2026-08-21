@@ -17,6 +17,8 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
+import taihon.core.common.TaihonConstants
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.text.NumberFormat
@@ -30,9 +32,10 @@ object SettingsReaderScreen : SearchableSettings {
     @Composable
     override fun getPreferences(): List<Preference> {
         val readerPref = remember { Injekt.get<ReaderPreferences>() }
+        val taihonPref = remember { Injekt.get<TaihonPreferences>() }
 
-        val pageTransitionDistance by readerPref.pageTransitionDistance.collectAsState()
-        val pageTransitionSpeed by readerPref.pageTransitionSpeed.collectAsState()
+        val pageTransitionDistance by taihonPref.pageTransitionDistance.collectAsState()
+        val pageTransitionSpeed by taihonPref.pageTransitionSpeed.collectAsState()
 
         return listOf(
             Preference.PreferenceItem.ListPreference(
@@ -65,7 +68,7 @@ object SettingsReaderScreen : SearchableSettings {
                 title = stringResource(MR.strings.pref_page_transitions),
                 onValueChanged = { newValue ->
                     if (!newValue) {
-                        readerPref.pageTransitionSpeed.set(0)
+                        taihonPref.pageTransitionSpeed.set(0)
                     }
                     true
                 },
@@ -82,7 +85,7 @@ object SettingsReaderScreen : SearchableSettings {
                 },
                 onValueChanged = { sliderValue ->
                     val newSpeed = if (sliderValue == 0) 0 else 1050 - sliderValue * 50
-                    readerPref.pageTransitionSpeed.set(newSpeed)
+                    taihonPref.pageTransitionSpeed.set(newSpeed)
                     if (newSpeed > 0) {
                         readerPref.pageTransitions.set(true)
                     }
@@ -104,7 +107,7 @@ object SettingsReaderScreen : SearchableSettings {
                 },
                 onValueChanged = { sliderValue ->
                     val newDistance = if (sliderValue == 0) 0 else sliderValue * 5 + 5
-                    readerPref.pageTransitionDistance.set(newDistance)
+                    taihonPref.pageTransitionDistance.set(newDistance)
                 },
                 badge = ImageVector.vectorResource(R.drawable.ic_taihon),
             ),
@@ -368,9 +371,7 @@ object SettingsReaderScreen : SearchableSettings {
                 ),
                 Preference.PreferenceItem.SliderPreference(
                     value = webtoonSidePadding,
-                    valueRange = ReaderPreferences.let {
-                        it.WEBTOON_PADDING_MIN..it.WEBTOON_PADDING_MAX
-                    },
+                    valueRange = ReaderPreferences.WEBTOON_PADDING_MIN..TaihonConstants.WEBTOON_PADDING_MAX,
                     title = stringResource(MR.strings.pref_webtoon_side_padding),
                     valueString = numberFormat.format(webtoonSidePadding / 100f),
                     onValueChanged = { webtoonSidePaddingPref.set(it) },

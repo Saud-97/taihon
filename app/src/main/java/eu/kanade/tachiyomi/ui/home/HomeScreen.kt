@@ -56,6 +56,7 @@ import tachiyomi.presentation.core.components.material.NavigationBar
 import tachiyomi.presentation.core.components.material.NavigationRail
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.pluralStringResource
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -264,8 +265,9 @@ object HomeScreen : Screen() {
                     BrowseTab::class.isInstance(tab) -> {
                         val count by produceState(initialValue = 0) {
                             val pref = Injekt.get<SourcePreferences>()
+                            val taihonPref = Injekt.get<TaihonPreferences>()
                             combine(
-                                pref.hideExtensionUpdatesCount.changes(),
+                                taihonPref.hideExtensionUpdatesCount.changes(),
                                 pref.extensionUpdatesCount.changes(),
                             ) { hide, count -> if (!hide) count else 0 }
                                 .collectLatest { value = it }

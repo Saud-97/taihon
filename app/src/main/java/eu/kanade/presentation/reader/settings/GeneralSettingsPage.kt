@@ -168,10 +168,10 @@ internal fun ColumnScope.GeneralPage(viewModel: ReaderSettingsViewModel) {
     val pageTransitionsPref = viewModel.preferences.pageTransitions
     val pageTransitions by pageTransitionsPref.collectAsState()
 
-    val pageTransitionDistancePref = viewModel.preferences.pageTransitionDistance
+    val pageTransitionDistancePref = viewModel.taihonPreferences.pageTransitionDistance
     val pageTransitionDistance by pageTransitionDistancePref.collectAsState()
 
-    val pageTransitionSpeedPref = viewModel.preferences.pageTransitionSpeed
+    val pageTransitionSpeedPref = viewModel.taihonPreferences.pageTransitionSpeed
     val pageTransitionSpeed by pageTransitionSpeedPref.collectAsState()
 
     LaunchedEffect(pageTransitions) {

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -16,6 +17,7 @@ class ReaderSettingsViewModel(
     val onChangeReadingMode: (ReadingMode) -> Unit,
     val onChangeOrientation: (ReaderOrientation) -> Unit,
     val preferences: ReaderPreferences = Injekt.get(),
+    val taihonPreferences: TaihonPreferences = Injekt.get(),
 ) : ViewModel() {
 
     val viewerFlow = readerState

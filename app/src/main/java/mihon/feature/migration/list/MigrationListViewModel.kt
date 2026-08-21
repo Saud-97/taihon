@@ -38,6 +38,7 @@ import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.NetworkToLocalManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -45,6 +46,7 @@ class MigrationListViewModel(
     mangaIds: Collection<Long>,
     extraSearchQuery: String?,
     private val preferences: SourcePreferences = Injekt.get(),
+    private val taihonPreferences: TaihonPreferences = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
     private val extensionManager: ExtensionManager = Injekt.get(),
     private val getManga: GetManga = Injekt.get(),
@@ -198,8 +200,8 @@ class MigrationListViewModel(
             val searchResult = if (deepSearchMode) {
                 smartSearchEngine.deepSearch(source, manga.title)
             } else {
-                val smartNormalizationEnabled = preferences.smartApostropheNormalization.get()
-                val exceptions = preferences.smartApostropheNormalizationExceptions.get()
+                val smartNormalizationEnabled = taihonPreferences.smartApostropheNormalization.get()
+                val exceptions = taihonPreferences.smartApostropheNormalizationExceptions.get()
                 val pkgName = extensionManager.getExtensionPackage(source.id)
                 val isNormalized = smartNormalizationEnabled && pkgName !in exceptions
                 val query = if (isNormalized) {

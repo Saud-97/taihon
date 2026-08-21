@@ -49,6 +49,7 @@ import tachiyomi.domain.manga.model.MangaWithChapterCount
 import tachiyomi.domain.manga.model.toMangaUpdate
 import tachiyomi.domain.source.interactor.GetRemoteManga
 import tachiyomi.domain.source.service.SourceManager
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.time.Clock
@@ -59,6 +60,7 @@ class BrowseSourceViewModel(
     listingQuery: String?,
     sourceManager: SourceManager = Injekt.get(),
     sourcePreferences: SourcePreferences = Injekt.get(),
+    private val taihonPreferences: TaihonPreferences = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
     private val getRemoteManga: GetRemoteManga = Injekt.get(),
@@ -121,8 +123,8 @@ class BrowseSourceViewModel(
         .distinctUntilChanged()
         .map { listing ->
             val pkgName = extensionManager.getExtensionPackage(sourceId)
-            val isNormalized = sourcePreferences.smartApostropheNormalization.get() &&
-                pkgName !in sourcePreferences.smartApostropheNormalizationExceptions.get()
+            val isNormalized = taihonPreferences.smartApostropheNormalization.get() &&
+                pkgName !in taihonPreferences.smartApostropheNormalizationExceptions.get()
             val query = if (isNormalized) {
                 listing.query?.normalizeApostrophe(fuzzy = true) ?: ""
             } else {

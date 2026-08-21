@@ -29,6 +29,7 @@ import tachiyomi.domain.manga.interactor.GetFavorites
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.repository.MangaRepository
 import tachiyomi.i18n.MR
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.FileOutputStream
@@ -44,6 +45,7 @@ class BackupCreator(
     private val parser: ProtoBuf = Injekt.get(),
     private val getFavorites: GetFavorites = Injekt.get(),
     private val backupPreferences: BackupPreferences = Injekt.get(),
+    private val taihonPreferences: TaihonPreferences = Injekt.get(),
     private val mangaRepository: MangaRepository = Injekt.get(),
 
     private val categoriesBackupCreator: CategoriesBackupCreator = CategoriesBackupCreator(),
@@ -64,7 +66,7 @@ class BackupCreator(
                 dir?.listFiles { _, filename -> FILENAME_REGEX.matches(filename) }
                     .orEmpty()
                     .sortedByDescending { it.name }
-                    .drop(backupPreferences.backupRetention.get() - 1)
+                    .drop(taihonPreferences.backupRetention.get() - 1)
                     .forEach { it.delete() }
 
                 // Create new file to place backup

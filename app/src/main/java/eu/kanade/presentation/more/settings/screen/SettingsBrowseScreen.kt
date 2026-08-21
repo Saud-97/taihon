@@ -23,6 +23,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -38,12 +39,13 @@ object SettingsBrowseScreen : SearchableSettings {
         val navigator = LocalNavigator.currentOrThrow
 
         val sourcePreferences = remember { Injekt.get<SourcePreferences>() }
+        val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
         val extensionManager = remember { Injekt.get<ExtensionManager>() }
         val getExtensionStoreCountAsFlow = remember { Injekt.get<GetExtensionStoreCountAsFlow>() }
 
         val reposCount by getExtensionStoreCountAsFlow().collectAsState(0)
         val installedExtensions by extensionManager.installedExtensionsFlow.collectAsState()
-        val smartApostropheNormalization by sourcePreferences.smartApostropheNormalization.collectAsState()
+        val smartApostropheNormalization by taihonPreferences.smartApostropheNormalization.collectAsState()
 
         return listOf(
             Preference.PreferenceGroup(
@@ -84,7 +86,7 @@ object SettingsBrowseScreen : SearchableSettings {
                         },
                     ),
                     Preference.PreferenceItem.SwitchPreference(
-                        preference = sourcePreferences.hideExtensionUpdatesCount,
+                        preference = taihonPreferences.hideExtensionUpdatesCount,
                         title = stringResource(MR.strings.pref_extension_update_hide_browse_badge),
                         badge = ImageVector.vectorResource(R.drawable.ic_taihon),
                     ),
@@ -95,13 +97,13 @@ object SettingsBrowseScreen : SearchableSettings {
                 title = stringResource(MR.strings.action_global_search),
                 preferenceItems = listOf(
                     Preference.PreferenceItem.SwitchPreference(
-                        preference = sourcePreferences.smartApostropheNormalization,
+                        preference = taihonPreferences.smartApostropheNormalization,
                         title = stringResource(MR.strings.pref_smart_apostrophe_normalization),
                         subtitle = stringResource(MR.strings.pref_smart_apostrophe_normalization_summary),
                         badge = ImageVector.vectorResource(R.drawable.ic_taihon),
                     ),
                     Preference.PreferenceItem.MultiSelectListPreference(
-                        preference = sourcePreferences.smartApostropheNormalizationExceptions,
+                        preference = taihonPreferences.smartApostropheNormalizationExceptions,
                         entries = installedExtensions.associate { it.pkgName to it.name },
                         title = stringResource(MR.strings.pref_smart_apostrophe_normalization_exceptions),
                         subtitle = stringResource(MR.strings.exclude),
@@ -109,7 +111,7 @@ object SettingsBrowseScreen : SearchableSettings {
                         badge = ImageVector.vectorResource(R.drawable.ic_taihon),
                     ),
                     Preference.PreferenceItem.SwitchPreference(
-                        preference = sourcePreferences.globalSearchEnrichResults,
+                        preference = taihonPreferences.globalSearchEnrichResults,
                         title = stringResource(MR.strings.pref_global_search_enrich_results),
                         subtitle = stringResource(MR.strings.pref_global_search_enrich_results_summary),
                         badge = ImageVector.vectorResource(R.drawable.ic_taihon),

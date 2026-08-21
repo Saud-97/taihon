@@ -159,7 +159,7 @@ private fun ColumnScope.FilterPage(
         val hasOrphaned = remember(sources) { sources.any { it.isStub } }
 
         installedSources.map { source ->
-            val filterSource by viewModel.libraryPreferences.filterSource(source.id).collectAsState()
+            val filterSource by viewModel.taihonPreferences.filterSource(source.id).collectAsState()
             TriStateItem(
                 label = source.visualName,
                 state = filterSource,
@@ -168,7 +168,7 @@ private fun ColumnScope.FilterPage(
         }
 
         if (hasOrphaned) {
-            val filterOrphaned by viewModel.libraryPreferences.filterOrphanedSources.collectAsState()
+            val filterOrphaned by viewModel.taihonPreferences.filterOrphanedSources.collectAsState()
             TriStateItem(
                 label = stringResource(MR.strings.ext_obsolete),
                 state = filterOrphaned,
@@ -304,11 +304,11 @@ private fun ColumnScope.DisplayPage(
     )
     CheckboxItem(
         label = stringResource(MR.strings.label_sources) + " (${stringResource(MR.strings.ext_installed)})",
-        pref = viewModel.libraryPreferences.sourceInstalledBadge,
+        pref = viewModel.taihonPreferences.sourceInstalledBadge,
     )
     CheckboxItem(
         label = stringResource(MR.strings.label_sources) + " (${stringResource(MR.strings.ext_obsolete)})",
-        pref = viewModel.libraryPreferences.sourceOrphanedBadge,
+        pref = viewModel.taihonPreferences.sourceOrphanedBadge,
     )
     CheckboxItem(
         label = stringResource(MR.strings.action_display_language_badge),

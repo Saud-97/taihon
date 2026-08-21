@@ -24,6 +24,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import tachiyomi.core.common.util.system.logcat
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -85,7 +86,7 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
             .threshold
 
     init {
-        Injekt.get<ReaderPreferences>().pageTransitionDistance.changes()
+        Injekt.get<TaihonPreferences>().pageTransitionDistance.changes()
             .onEach { layoutManager.extraLayoutSpace = scrollDistance }
             .launchIn(scope)
 

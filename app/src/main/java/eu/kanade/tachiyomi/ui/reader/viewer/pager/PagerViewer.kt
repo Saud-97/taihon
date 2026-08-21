@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.InsertPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
-import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NavigationRegion
 import kotlinx.coroutines.MainScope
@@ -25,6 +24,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import tachiyomi.core.common.util.system.logcat
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -61,7 +61,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
         } catch (_: Exception) {
         }
 
-        Injekt.get<ReaderPreferences>().pageTransitionSpeed.changes()
+        Injekt.get<TaihonPreferences>().pageTransitionSpeed.changes()
             .onEach { setNextTransitionSpeed(it) }
             .launchIn(scope)
     }

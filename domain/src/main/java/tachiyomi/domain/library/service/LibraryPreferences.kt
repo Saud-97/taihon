@@ -100,16 +100,6 @@ class LibraryPreferences(
         TriState.DISABLED,
     )
 
-    fun filterSource(id: Long): Preference<TriState> = preferenceStore.getEnum(
-        "pref_filter_library_source_${id}_v2",
-        TriState.DISABLED,
-    )
-
-    val filterOrphanedSources: Preference<TriState> = preferenceStore.getEnum(
-        "pref_filter_library_orphaned_sources_v2",
-        TriState.DISABLED,
-    )
-
     // endregion
 
     // region Badges
@@ -121,10 +111,6 @@ class LibraryPreferences(
     val localBadge: Preference<Boolean> = preferenceStore.getBoolean("display_local_badge", true)
 
     val languageBadge: Preference<Boolean> = preferenceStore.getBoolean("display_language_badge", false)
-
-    val sourceInstalledBadge: Preference<Boolean> = preferenceStore.getBoolean("display_source_installed_badge", false)
-
-    val sourceOrphanedBadge: Preference<Boolean> = preferenceStore.getBoolean("display_source_orphaned_badge", true)
 
     val newShowUpdatesCount: Preference<Boolean> = preferenceStore.getBoolean("library_show_updates_count", true)
     val newUpdatesCount: Preference<Int> = preferenceStore.getInt(
@@ -227,11 +213,6 @@ class LibraryPreferences(
     val disallowNonAsciiFilenames: Preference<Boolean> = preferenceStore.getBoolean(
         "disallow_non_ascii_filenames",
         false,
-    )
-
-    val resumeLastSeenPage: Preference<Boolean> = preferenceStore.getBoolean(
-        "pref_resume_last_seen_page",
-        true,
     )
 
     // endregion

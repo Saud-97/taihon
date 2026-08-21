@@ -64,6 +64,7 @@ import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.track.interactor.GetTracksPerManga
 import tachiyomi.domain.track.model.Track
 import tachiyomi.source.local.isLocal
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.random.Random
@@ -86,6 +87,7 @@ class LibraryViewModel(
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
     private val downloadCache: DownloadCache = Injekt.get(),
+    private val taihonPreferences: TaihonPreferences = Injekt.get(),
     private val trackerManager: TrackerManager = Injekt.get(),
 ) : StateViewModel<LibraryViewModel.State>(State()) {
 
@@ -391,8 +393,8 @@ class LibraryViewModel(
             libraryPreferences.unreadBadge.changes(),
             libraryPreferences.localBadge.changes(),
             libraryPreferences.languageBadge.changes(),
-            libraryPreferences.sourceInstalledBadge.changes(),
-            libraryPreferences.sourceOrphanedBadge.changes(),
+            taihonPreferences.sourceInstalledBadge.changes(),
+            taihonPreferences.sourceOrphanedBadge.changes(),
             libraryPreferences.autoUpdateMangaRestrictions.changes(),
 
             preferences.downloadedOnly.changes(),
@@ -504,13 +506,13 @@ class LibraryViewModel(
             .distinctUntilChanged()
             .flatMapLatest { sourceIds ->
                 if (sourceIds.isEmpty()) {
-                    libraryPreferences.filterOrphanedSources.changes().map { emptyMap<Long, TriState>() to it }
+                    taihonPreferences.filterOrphanedSources.changes().map { emptyMap<Long, TriState>() to it }
                 } else {
                     val filterFlows = sourceIds.map { id ->
-                        libraryPreferences.filterSource(id).changes().map { id to it }
+                        taihonPreferences.filterSource(id).changes().map { id to it }
                     }
                     combine(filterFlows) { it.toMap() }
-                        .combine(libraryPreferences.filterOrphanedSources.changes(), ::Pair)
+                        .combine(taihonPreferences.filterOrphanedSources.changes(), ::Pair)
                 }
             }
     }

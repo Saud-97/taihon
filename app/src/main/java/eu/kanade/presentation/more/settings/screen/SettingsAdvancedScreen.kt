@@ -68,6 +68,7 @@ import tachiyomi.domain.manga.interactor.ResetViewerFlags
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -85,6 +86,7 @@ object SettingsAdvancedScreen : SearchableSettings {
         val navigator = LocalNavigator.currentOrThrow
 
         val basePreferences = remember { Injekt.get<BasePreferences>() }
+        val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
         val networkPreferences = remember { Injekt.get<NetworkPreferences>() }
         val libraryPreferences = remember { Injekt.get<LibraryPreferences>() }
 
@@ -127,7 +129,7 @@ object SettingsAdvancedScreen : SearchableSettings {
             getBackgroundActivityGroup(),
             getDataGroup(),
             getNetworkGroup(networkPreferences = networkPreferences),
-            getLibraryGroup(libraryPreferences = libraryPreferences),
+            getLibraryGroup(libraryPreferences = libraryPreferences, taihonPreferences = taihonPreferences),
             getReaderGroup(basePreferences = basePreferences),
             getExtensionsGroup(basePreferences = basePreferences),
         )
@@ -290,10 +292,10 @@ object SettingsAdvancedScreen : SearchableSettings {
     @Composable
     private fun getLibraryGroup(
         libraryPreferences: LibraryPreferences,
+        taihonPreferences: TaihonPreferences,
     ): Preference.PreferenceGroup {
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
-        val basePreferences = remember { Injekt.get<BasePreferences>() }
 
         return Preference.PreferenceGroup(
             title = stringResource(MR.strings.label_library),
@@ -303,7 +305,7 @@ object SettingsAdvancedScreen : SearchableSettings {
                     onClick = { MetadataUpdateJob.startNow(context) },
                 ),
                 Preference.PreferenceItem.SwitchPreference(
-                    preference = basePreferences.allowHardwareBitmapForCovers,
+                    preference = taihonPreferences.allowHardwareBitmapForCovers,
                     title = stringResource(MR.strings.pref_allow_hardware_bitmap_covers),
                     subtitle = stringResource(MR.strings.pref_allow_hardware_bitmap_covers_summary),
                     badge = ImageVector.vectorResource(R.drawable.ic_taihon),

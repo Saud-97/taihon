@@ -76,6 +76,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -102,13 +103,14 @@ object SettingsDataScreen : SearchableSettings {
     @Composable
     override fun getPreferences(): List<Preference> {
         val backupPreferences = Injekt.get<BackupPreferences>()
+        val taihonPreferences = Injekt.get<TaihonPreferences>()
         val storagePreferences = Injekt.get<StoragePreferences>()
 
         return listOf(
             getStorageLocationPref(storagePreferences = storagePreferences),
             Preference.PreferenceItem.InfoPreference(stringResource(MR.strings.pref_storage_location_info)),
 
-            getBackupAndRestoreGroup(backupPreferences = backupPreferences),
+            getBackupAndRestoreGroup(backupPreferences = backupPreferences, taihonPreferences = taihonPreferences),
             getDataGroup(),
             getExportGroup(),
         )
@@ -184,12 +186,15 @@ object SettingsDataScreen : SearchableSettings {
     }
 
     @Composable
-    private fun getBackupAndRestoreGroup(backupPreferences: BackupPreferences): Preference.PreferenceGroup {
+    private fun getBackupAndRestoreGroup(
+        backupPreferences: BackupPreferences,
+        taihonPreferences: TaihonPreferences,
+    ): Preference.PreferenceGroup {
         val context = LocalContext.current
         val navigator = LocalNavigator.currentOrThrow
 
         val lastAutoBackup by backupPreferences.lastAutoBackupTimestamp.collectAsState()
-        val backupRetention by backupPreferences.backupRetention.collectAsState()
+        val backupRetention by taihonPreferences.backupRetention.collectAsState()
         val backupInterval by backupPreferences.backupInterval.collectAsState()
 
         val chooseBackup = rememberLauncherForActivityResult(
@@ -279,7 +284,7 @@ object SettingsDataScreen : SearchableSettings {
                     valueRange = 4..100,
                     title = stringResource(MR.strings.pref_backup_retention),
                     subtitle = stringResource(MR.strings.pref_backup_retention_info),
-                    onValueChanged = { backupPreferences.backupRetention.set(it) },
+                    onValueChanged = { taihonPreferences.backupRetention.set(it) },
                     badge = ImageVector.vectorResource(R.drawable.ic_taihon),
                     steps = 0,
                     enabled = backupInterval > 0,

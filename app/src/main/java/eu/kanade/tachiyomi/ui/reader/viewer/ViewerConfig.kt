@@ -6,11 +6,16 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import tachiyomi.core.common.preference.Preference
+import taihon.domain.preferences.TaihonPreferences
 
 /**
  * Common configuration for all viewers.
  */
-abstract class ViewerConfig(readerPreferences: ReaderPreferences, private val scope: CoroutineScope) {
+abstract class ViewerConfig(
+    readerPreferences: ReaderPreferences,
+    taihonPreferences: TaihonPreferences,
+    private val scope: CoroutineScope,
+) {
 
     var imagePropertyChangedListener: (() -> Unit)? = null
 
@@ -54,10 +59,10 @@ abstract class ViewerConfig(readerPreferences: ReaderPreferences, private val sc
         readerPreferences.pageTransitions
             .register({ usePageTransitions = it })
 
-        readerPreferences.pageTransitionDistance
+        taihonPreferences.pageTransitionDistance
             .register({ pageTransitionDistance = it })
 
-        readerPreferences.pageTransitionSpeed
+        taihonPreferences.pageTransitionSpeed
             .register({ pageTransitionDuration = it })
 
         readerPreferences.doubleTapAnimSpeed

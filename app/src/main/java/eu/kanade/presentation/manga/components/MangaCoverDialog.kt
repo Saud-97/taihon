@@ -44,7 +44,6 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.size.Size
-import eu.kanade.domain.base.BasePreferences
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.DropdownMenu
@@ -56,6 +55,7 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.clickableNoIndication
 import tachiyomi.presentation.core.util.collectAsState
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -69,8 +69,8 @@ fun MangaCoverDialog(
     onEditClick: ((EditCoverAction) -> Unit)?,
     onDismissRequest: () -> Unit,
 ) {
-    val basePreferences = remember { Injekt.get<BasePreferences>() }
-    val allowHardware by basePreferences.allowHardwareBitmapForCovers.collectAsState()
+    val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
+    val allowHardware by taihonPreferences.allowHardwareBitmapForCovers.collectAsState()
 
     Dialog(
         onDismissRequest = onDismissRequest,

@@ -17,10 +17,6 @@ class ReaderPreferences(
 
     val pageTransitions: Preference<Boolean> = preferenceStore.getBoolean("pref_enable_transitions_key", true)
 
-    val pageTransitionDistance: Preference<Int> = preferenceStore.getInt("pref_page_transition_distance", 0)
-
-    val pageTransitionSpeed: Preference<Int> = preferenceStore.getInt("pref_page_transition_speed", 0)
-
     val flashOnPageChange: Preference<Boolean> = preferenceStore.getBoolean("pref_reader_flash", false)
 
     val flashDurationMillis: Preference<Int> = preferenceStore.getInt("pref_reader_flash_duration", MILLI_CONVERSION)
@@ -219,7 +215,7 @@ class ReaderPreferences(
 
     companion object {
         const val WEBTOON_PADDING_MIN = 0
-        const val WEBTOON_PADDING_MAX = 40
+        const val WEBTOON_PADDING_MAX = 25
 
         const val MILLI_CONVERSION = 100
 

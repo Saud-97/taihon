@@ -25,6 +25,7 @@ import tachiyomi.presentation.core.components.SettingsChipRow
 import tachiyomi.presentation.core.components.SliderItem
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
+import taihon.core.common.TaihonConstants
 import java.text.NumberFormat
 
 @Composable
@@ -157,7 +158,7 @@ private fun ColumnScope.WebtoonViewerSettings(viewModel: ReaderSettingsViewModel
     val webtoonSidePadding by viewModel.preferences.webtoonSidePadding.collectAsState()
     SliderItem(
         value = webtoonSidePadding,
-        valueRange = ReaderPreferences.let { it.WEBTOON_PADDING_MIN..it.WEBTOON_PADDING_MAX },
+        valueRange = ReaderPreferences.WEBTOON_PADDING_MIN..TaihonConstants.WEBTOON_PADDING_MAX,
         label = stringResource(MR.strings.pref_webtoon_side_padding),
         valueString = numberFormat.format(webtoonSidePadding / 100f),
         onChange = {

@@ -41,6 +41,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -54,12 +55,13 @@ object SettingsLibraryScreen : SearchableSettings {
     override fun getPreferences(): List<Preference> {
         val getCategories = remember { Injekt.get<GetCategories>() }
         val libraryPreferences = remember { Injekt.get<LibraryPreferences>() }
+        val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
         val allCategories by getCategories.subscribe().collectAsState(initial = emptyList())
 
         return listOf(
             getCategoriesGroup(LocalNavigator.currentOrThrow, allCategories, libraryPreferences),
             getGlobalUpdateGroup(allCategories, libraryPreferences),
-            getBehaviorGroup(libraryPreferences),
+            getBehaviorGroup(libraryPreferences, taihonPreferences),
         )
     }
 
@@ -214,6 +216,7 @@ object SettingsLibraryScreen : SearchableSettings {
     @Composable
     private fun getBehaviorGroup(
         libraryPreferences: LibraryPreferences,
+        taihonPreferences: TaihonPreferences,
     ): Preference.PreferenceGroup {
         return Preference.PreferenceGroup(
             title = stringResource(MR.strings.pref_behavior),
@@ -261,7 +264,7 @@ object SettingsLibraryScreen : SearchableSettings {
                     title = stringResource(MR.strings.pref_hide_missing_chapter_indicators),
                 ),
                 Preference.PreferenceItem.SwitchPreference(
-                    preference = libraryPreferences.resumeLastSeenPage,
+                    preference = taihonPreferences.resumeLastSeenPage,
                     title = stringResource(MR.strings.pref_resume_last_seen_page),
                     subtitle = stringResource(MR.strings.pref_resume_last_seen_page_summary),
                     badge = ImageVector.vectorResource(R.drawable.ic_taihon),

@@ -33,6 +33,7 @@ import tachiyomi.domain.manga.interactor.NetworkToLocalManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaUpdate
 import tachiyomi.domain.source.service.SourceManager
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.time.Instant
@@ -41,6 +42,7 @@ import java.util.concurrent.Executors
 abstract class SearchViewModel(
     initialState: State = State(),
     sourcePreferences: SourcePreferences = Injekt.get(),
+    private val taihonPreferences: TaihonPreferences = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
     private val extensionManager: ExtensionManager = Injekt.get(),
     private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
@@ -250,8 +252,8 @@ abstract class SearchViewModel(
         }
 
         searchJob = viewModelScope.launchIO {
-            val smartNormalizationEnabled = preferences.smartApostropheNormalization.get()
-            val exceptions = preferences.smartApostropheNormalizationExceptions.get()
+            val smartNormalizationEnabled = taihonPreferences.smartApostropheNormalization.get()
+            val exceptions = taihonPreferences.smartApostropheNormalizationExceptions.get()
 
             sources.map { source ->
                 async {
@@ -279,7 +281,7 @@ abstract class SearchViewModel(
 
                         if (isActive) {
                             updateItem(source, SearchItemResult.Success(titles))
-                            if (preferences.globalSearchEnrichResults.get()) {
+                            if (taihonPreferences.globalSearchEnrichResults.get()) {
                                 titles.forEach { title ->
                                     viewModelScope.launchIO {
                                         fetchMangaDetails(title)

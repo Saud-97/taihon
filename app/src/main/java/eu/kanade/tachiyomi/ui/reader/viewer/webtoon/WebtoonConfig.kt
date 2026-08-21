@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -22,7 +23,8 @@ import uy.kohesive.injekt.api.get
 class WebtoonConfig(
     scope: CoroutineScope,
     readerPreferences: ReaderPreferences = Injekt.get(),
-) : ViewerConfig(readerPreferences, scope) {
+    taihonPreferences: TaihonPreferences = Injekt.get(),
+) : ViewerConfig(readerPreferences, taihonPreferences, scope) {
 
     var themeChangedListener: (() -> Unit)? = null
 

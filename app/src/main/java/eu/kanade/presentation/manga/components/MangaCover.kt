@@ -17,10 +17,10 @@ import androidx.compose.ui.semantics.Role
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
-import eu.kanade.domain.base.BasePreferences
 import eu.kanade.presentation.util.rememberResourceBitmapPainter
 import eu.kanade.tachiyomi.R
 import tachiyomi.presentation.core.util.collectAsState
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -38,8 +38,8 @@ enum class MangaCover(val ratio: Float) {
         onClick: (() -> Unit)? = null,
     ) {
         val context = LocalContext.current
-        val basePreferences = remember { Injekt.get<BasePreferences>() }
-        val allowHardware by basePreferences.allowHardwareBitmapForCovers.collectAsState()
+        val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
+        val allowHardware by taihonPreferences.allowHardwareBitmapForCovers.collectAsState()
 
         val model = remember(data, allowHardware) {
             if (data is ImageRequest) {

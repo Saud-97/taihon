@@ -75,6 +75,7 @@ import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.source.local.isLocal
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Date
@@ -101,6 +102,7 @@ class ReaderViewModel @JvmOverloads constructor(
     private val updateChapter: UpdateChapter = Injekt.get(),
     private val setMangaViewerFlags: SetMangaViewerFlags = Injekt.get(),
     private val getIncognitoState: GetIncognitoState = Injekt.get(),
+    private val taihonPreferences: TaihonPreferences = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
 ) : ViewModel() {
 
@@ -246,7 +248,7 @@ class ReaderViewModel @JvmOverloads constructor(
                 if (chapterPageIndex >= 0) {
                     // Restore from SavedState
                     currentChapter.requestedPage = chapterPageIndex
-                } else if (!currentChapter.chapter.read || libraryPreferences.resumeLastSeenPage.get()) {
+                } else if (!currentChapter.chapter.read || taihonPreferences.resumeLastSeenPage.get()) {
                     currentChapter.requestedPage = currentChapter.chapter.last_page_read
                 }
                 chapterId = currentChapter.chapter.id!!
@@ -297,7 +299,7 @@ class ReaderViewModel @JvmOverloads constructor(
                     downloadProvider,
                     manga,
                     source,
-                    libraryPreferences.resumeLastSeenPage.get(),
+                    taihonPreferences.resumeLastSeenPage.get(),
                 )
 
                 loadChapter(loader!!, chapterList.first { chapterId == it.chapter.id })
