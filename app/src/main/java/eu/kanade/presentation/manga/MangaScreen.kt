@@ -44,7 +44,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastMap
@@ -63,7 +62,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.getNameForMangaInfo
 import eu.kanade.tachiyomi.ui.manga.ChapterList
 import eu.kanade.tachiyomi.ui.manga.MangaViewModel
-import eu.kanade.tachiyomi.util.chapter.getNextUnread
 import eu.kanade.tachiyomi.util.system.copyToClipboard
 import kotlinx.coroutines.launch
 import tachiyomi.domain.chapter.model.Chapter
@@ -79,6 +77,7 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.shouldExpandFAB
 import tachiyomi.source.local.isLocal
+import taihon.feature.manga.ui.TaihonMangaHooks.rememberScrollStateInfo
 import taihon.feature.manga.ui.components.TaihonMangaScrollControls
 import kotlin.time.Instant
 
@@ -273,25 +272,7 @@ private fun MangaScreenSmallImpl(
         )
     }
 
-    val nextUnreadChapter = remember(state) {
-        state.chapters.getNextUnread(state.manga)
-    }
-
-    val currentlyReadingIndex = remember(listItem, nextUnreadChapter) {
-        val index = listItem.indexOfFirst { it is ChapterList.Item && it.chapter.id == nextUnreadChapter?.id }
-        if (index != -1) index + 4 else -1
-    }
-
-    val isReading = remember(state.chapters) {
-        state.chapters.fastAny { it.chapter.read }
-    }
-
-    val density = LocalDensity.current
-    val centerOffset = remember {
-        derivedStateOf {
-            -(chapterListState.layoutInfo.viewportSize.height / 2 - with(density) { 72.dp.roundToPx() } / 2)
-        }
-    }
+    val scrollStateInfo = rememberScrollStateInfo(state, listItem, chapterListState)
 
     BackHandler(enabled = isAnySelected) {
         onAllChapterSelected(false)
@@ -359,7 +340,9 @@ private fun MangaScreenSmallImpl(
             SmallExtendedFloatingActionButton(
                 text = {
                     Text(
-                        text = stringResource(if (isReading) MR.strings.action_resume else MR.strings.action_start),
+                        text = stringResource(
+                            if (scrollStateInfo.isReading) MR.strings.action_resume else MR.strings.action_start,
+                        ),
                     )
                 },
                 icon = { Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = null) },
@@ -441,7 +424,7 @@ private fun MangaScreenSmallImpl(
                                 onTagSearch = onTagSearch,
                                 onCopyTagToClipboard = onCopyTagToClipboard,
                                 onEditNotes = onEditNotesClicked,
-                                nextUnreadChapter = nextUnreadChapter,
+                                nextUnreadChapter = scrollStateInfo.nextUnreadChapter,
                                 onResumeClicked = onContinueReading,
                             )
                         }
@@ -477,10 +460,10 @@ private fun MangaScreenSmallImpl(
 
                 TaihonMangaScrollControls(
                     chapterListState = chapterListState,
-                    currentlyReadingIndex = currentlyReadingIndex,
+                    currentlyReadingIndex = scrollStateInfo.currentlyReadingIndex,
                     isAnySelected = isAnySelected,
                     topPadding = topPadding,
-                    centerOffset = centerOffset.value,
+                    centerOffset = scrollStateInfo.centerOffset.value,
                 )
             }
         }
@@ -553,24 +536,7 @@ fun MangaScreenLargeImpl(
     val chapterListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
-    val nextUnreadChapter = remember(state) {
-        state.chapters.getNextUnread(state.manga)
-    }
-
-    val currentlyReadingIndex = remember(listItem, nextUnreadChapter) {
-        val index = listItem.indexOfFirst { it is ChapterList.Item && it.chapter.id == nextUnreadChapter?.id }
-        if (index != -1) index + 1 else -1
-    }
-
-    val isReading = remember(state.chapters) {
-        state.chapters.fastAny { it.chapter.read }
-    }
-
-    val centerOffset = remember {
-        derivedStateOf {
-            -(chapterListState.layoutInfo.viewportSize.height / 2 - with(density) { 72.dp.roundToPx() } / 2)
-        }
-    }
+    val scrollStateInfo = rememberScrollStateInfo(state, listItem, chapterListState, headerOffset = 1)
 
     BackHandler(enabled = isAnySelected) {
         onAllChapterSelected(false)
@@ -631,7 +597,7 @@ fun MangaScreenLargeImpl(
                 text = {
                     Text(
                         text = stringResource(
-                            if (isReading) MR.strings.action_resume else MR.strings.action_start,
+                            if (scrollStateInfo.isReading) MR.strings.action_resume else MR.strings.action_start,
                         ),
                     )
                 },
@@ -695,7 +661,7 @@ fun MangaScreenLargeImpl(
                             onTagSearch = onTagSearch,
                             onCopyTagToClipboard = onCopyTagToClipboard,
                             onEditNotes = onEditNotesClicked,
-                            nextUnreadChapter = nextUnreadChapter,
+                            nextUnreadChapter = scrollStateInfo.nextUnreadChapter,
                             onResumeClicked = onContinueReading,
                         )
                     }
@@ -745,10 +711,10 @@ fun MangaScreenLargeImpl(
 
                         TaihonMangaScrollControls(
                             chapterListState = chapterListState,
-                            currentlyReadingIndex = currentlyReadingIndex,
+                            currentlyReadingIndex = scrollStateInfo.currentlyReadingIndex,
                             isAnySelected = isAnySelected,
                             topPadding = contentPadding.calculateTopPadding(),
-                            centerOffset = centerOffset.value,
+                            centerOffset = scrollStateInfo.centerOffset.value,
                         )
                     }
                 },

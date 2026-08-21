@@ -43,6 +43,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.BadgeGroup
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.selectedBackground
+import taihon.feature.library.ui.LibraryHooks.TaihonComfortableGridItemOverlay
 import tachiyomi.domain.manga.model.MangaCover as MangaCoverModel
 
 object CommonMangaItemDefaults {
@@ -121,7 +122,7 @@ fun MangaCompactGridItem(
  * Title overlay for [MangaCompactGridItem]
  */
 @Composable
-private fun BoxScope.CoverTextOverlay(
+internal fun BoxScope.CoverTextOverlay(
     title: String,
     onClickContinueReading: (() -> Unit)? = null,
     style: TextStyle = MaterialTheme.typography.titleSmall.copy(
@@ -208,22 +209,8 @@ fun MangaComfortableGridItem(
                 badgesStart = coverBadgeStart,
                 badgesEnd = coverBadgeEnd,
                 content = {
-                    if (coverText != null) {
-                        CoverTextOverlay(
-                            title = coverText,
-                            onClickContinueReading = onClickContinueReading,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                color = Color.White.copy(alpha = 0.85f),
-                                shadow = Shadow(
-                                    color = Color.Black,
-                                    blurRadius = 4f,
-                                ),
-                                fontSize = 6.sp,
-                            ),
-                            padding = 2.dp,
-                            fillMaxHeight = 0.25f,
-                        )
-                    } else if (onClickContinueReading != null) {
+                    TaihonComfortableGridItemOverlay(coverText, onClickContinueReading)
+                    if (coverText == null && onClickContinueReading != null) {
                         ContinueReadingButton(
                             size = ContinueReadingButtonSizeLarge,
                             iconSize = ContinueReadingButtonIconSizeLarge,

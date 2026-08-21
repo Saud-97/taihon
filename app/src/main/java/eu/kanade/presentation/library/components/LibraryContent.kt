@@ -16,7 +16,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalViewConfiguration
 import eu.kanade.core.preference.PreferenceMutableState
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import kotlinx.coroutines.delay
@@ -25,8 +24,8 @@ import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.model.LibraryDisplayMode
 import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.presentation.core.components.material.PullRefresh
-import taihon.feature.library.ui.dismissSearchOnTouchOrScroll
-import taihon.feature.library.ui.dismissSearchOnTouchOrScrollDetailed
+import taihon.feature.library.ui.LibraryHooks.taihonLibrarySearchDismiss
+import taihon.feature.library.ui.LibraryHooks.taihonLibrarySearchDismissDetailed
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -61,7 +60,6 @@ fun LibraryContent(
         val pagerState = rememberPagerState(currentPage) { categories.size }
 
         val scope = rememberCoroutineScope()
-        val viewConfiguration = LocalViewConfiguration.current
         var isRefreshing by remember(pagerState.currentPage) { mutableStateOf(false) }
 
         val currentSearchQuery by rememberUpdatedState(searchQuery)
@@ -72,7 +70,7 @@ fun LibraryContent(
                 }
             }
             LibraryTabs(
-                modifier = Modifier.dismissSearchOnTouchOrScroll(
+                modifier = Modifier.taihonLibrarySearchDismiss(
                     enabled = currentSearchQuery == "",
                     onDismissSearch = onDismissSearch,
                 ),
@@ -91,9 +89,8 @@ fun LibraryContent(
         PullRefresh(
             modifier = Modifier
                 .weight(1f)
-                .dismissSearchOnTouchOrScrollDetailed(
+                .taihonLibrarySearchDismissDetailed(
                     enabled = currentSearchQuery == "",
-                    viewConfiguration = viewConfiguration,
                     onDismissSearch = onDismissSearch,
                 ),
             refreshing = isRefreshing,

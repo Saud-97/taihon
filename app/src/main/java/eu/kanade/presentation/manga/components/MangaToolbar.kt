@@ -26,7 +26,7 @@ import eu.kanade.presentation.manga.DownloadAction
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.theme.active
-import tachiyomi.presentation.core.util.clickableNoIndication
+import taihon.feature.manga.ui.TaihonMangaHooks.taihonMangaToolbarClick
 
 @Composable
 fun MangaToolbar(
@@ -61,13 +61,7 @@ fun MangaToolbar(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .then(
-                            if (onClickTitle != null) {
-                                Modifier.clickableNoIndication(onClick = onClickTitle)
-                            } else {
-                                Modifier
-                            },
-                        ),
+                        .taihonMangaToolbarClick(onClickTitle),
                 ) {
                     AppBarTitle(
                         title = title,

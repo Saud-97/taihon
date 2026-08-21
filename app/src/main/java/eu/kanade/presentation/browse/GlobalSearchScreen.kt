@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.ui.browse.source.globalsearch.SourceFilter
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.presentation.core.components.material.Scaffold
-import taihon.feature.browse.TaihonSearchEnricher
 
 @Composable
 fun GlobalSearchScreen(
@@ -28,7 +27,7 @@ fun GlobalSearchScreen(
     onChangeSearchFilter: (SourceFilter) -> Unit,
     onToggleResults: () -> Unit,
     getManga: @Composable (Manga) -> State<Manga>,
-    getMangaDetails: @Composable (Manga) -> State<TaihonSearchEnricher.MangaDetails?>,
+    getMangaDetails: @Composable (Manga) -> State<taihon.feature.browse.TaihonSearchEnricher.MangaDetails?>,
     onClickSource: (Source) -> Unit,
     onClickItem: (Manga) -> Unit,
     onLongClickItem: (Manga) -> Unit,
@@ -68,7 +67,7 @@ internal fun GlobalSearchContent(
     items: Map<Source, SearchItemResult>,
     contentPadding: PaddingValues,
     getManga: @Composable (Manga) -> State<Manga>,
-    getMangaDetails: @Composable (Manga) -> State<TaihonSearchEnricher.MangaDetails?>,
+    getMangaDetails: @Composable (Manga) -> State<taihon.feature.browse.TaihonSearchEnricher.MangaDetails?>,
     onClickSource: (Source) -> Unit,
     onClickItem: (Manga) -> Unit,
     onLongClickItem: (Manga) -> Unit,

@@ -33,7 +33,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.TabNavigator
-import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.presentation.util.Screen
 import eu.kanade.presentation.util.isTabletUi
 import eu.kanade.tachiyomi.ui.browse.BrowseTab
@@ -56,7 +55,7 @@ import tachiyomi.presentation.core.components.material.NavigationBar
 import tachiyomi.presentation.core.components.material.NavigationRail
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.pluralStringResource
-import taihon.domain.preferences.TaihonPreferences
+import taihon.feature.home.ui.TaihonHomeHooks.extensionUpdatesCount
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -263,15 +262,7 @@ object HomeScreen : Screen() {
                         }
                     }
                     BrowseTab::class.isInstance(tab) -> {
-                        val count by produceState(initialValue = 0) {
-                            val pref = Injekt.get<SourcePreferences>()
-                            val taihonPref = Injekt.get<TaihonPreferences>()
-                            combine(
-                                taihonPref.hideExtensionUpdatesCount.changes(),
-                                pref.extensionUpdatesCount.changes(),
-                            ) { hide, count -> if (!hide) count else 0 }
-                                .collectLatest { value = it }
-                        }
+                        val count by extensionUpdatesCount()
                         if (count > 0) {
                             Badge {
                                 val desc = pluralStringResource(
