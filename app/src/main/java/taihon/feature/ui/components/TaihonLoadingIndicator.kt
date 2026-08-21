@@ -15,10 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.R
 
 @Composable
 fun TaihonLoadingBadge(modifier: Modifier = Modifier) {
@@ -38,7 +35,7 @@ fun TaihonLoadingBadge(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            imageVector = ImageVector.vectorResource(R.drawable.ic_taihon),
+            imageVector = taihonBadge(),
             contentDescription = null,
             modifier = Modifier
                 .size(12.dp)

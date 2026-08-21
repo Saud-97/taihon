@@ -5,16 +5,13 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
 import androidx.fragment.app.FragmentActivity
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.screen.browse.ExtensionStoresScreen
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.authenticate
 import mihon.domain.extension.interactor.GetExtensionStoreCountAsFlow
@@ -24,6 +21,7 @@ import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 import taihon.domain.preferences.TaihonPreferences
+import taihon.feature.ui.components.taihonBadge
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -88,7 +86,7 @@ object SettingsBrowseScreen : SearchableSettings {
                     Preference.PreferenceItem.SwitchPreference(
                         preference = taihonPreferences.hideExtensionUpdatesCount,
                         title = stringResource(MR.strings.pref_extension_update_hide_browse_badge),
-                        badge = ImageVector.vectorResource(R.drawable.ic_taihon),
+                        badge = taihonBadge(),
                     ),
                 ),
             ),
@@ -100,7 +98,7 @@ object SettingsBrowseScreen : SearchableSettings {
                         preference = taihonPreferences.smartApostropheNormalization,
                         title = stringResource(MR.strings.pref_smart_apostrophe_normalization),
                         subtitle = stringResource(MR.strings.pref_smart_apostrophe_normalization_summary),
-                        badge = ImageVector.vectorResource(R.drawable.ic_taihon),
+                        badge = taihonBadge(),
                     ),
                     Preference.PreferenceItem.MultiSelectListPreference(
                         preference = taihonPreferences.smartApostropheNormalizationExceptions,
@@ -108,13 +106,13 @@ object SettingsBrowseScreen : SearchableSettings {
                         title = stringResource(MR.strings.pref_smart_apostrophe_normalization_exceptions),
                         subtitle = stringResource(MR.strings.exclude),
                         enabled = smartApostropheNormalization,
-                        badge = ImageVector.vectorResource(R.drawable.ic_taihon),
+                        badge = taihonBadge(),
                     ),
                     Preference.PreferenceItem.SwitchPreference(
                         preference = taihonPreferences.globalSearchEnrichResults,
                         title = stringResource(MR.strings.pref_global_search_enrich_results),
                         subtitle = stringResource(MR.strings.pref_global_search_enrich_results_summary),
-                        badge = ImageVector.vectorResource(R.drawable.ic_taihon),
+                        badge = taihonBadge(),
                     ),
                 ),
             ),

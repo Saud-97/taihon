@@ -8,13 +8,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.util.fastMap
 import eu.kanade.presentation.category.visualName
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.widget.TriStateListDialog
-import eu.kanade.tachiyomi.R
 import tachiyomi.domain.category.interactor.GetCategories
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.download.service.DownloadPreferences
@@ -23,6 +20,7 @@ import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 import taihon.domain.preferences.TaihonPreferences
+import taihon.feature.ui.components.taihonBadge
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -68,7 +66,7 @@ object SettingsDownloadScreen : SearchableSettings {
                 title = stringResource(MR.strings.pref_download_concurrent_chapters),
                 subtitle = stringResource(MR.strings.pref_download_concurrent_chapters_summary),
                 onValueChanged = { taihonPreferences.parallelChapterLimit.set(it) },
-                badge = ImageVector.vectorResource(R.drawable.ic_taihon),
+                badge = taihonBadge(),
             ),
             Preference.PreferenceItem.SliderPreference(
                 value = parallelPageLimit,

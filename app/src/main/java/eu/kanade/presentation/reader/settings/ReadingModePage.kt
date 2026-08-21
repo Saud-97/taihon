@@ -8,11 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import eu.kanade.domain.manga.model.readerOrientation
 import eu.kanade.domain.manga.model.readingMode
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderSettingsViewModel
@@ -26,6 +23,7 @@ import tachiyomi.presentation.core.components.SliderItem
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 import taihon.core.common.TaihonConstants
+import taihon.feature.ui.components.taihonBadge
 import java.text.NumberFormat
 
 @Composable
@@ -165,7 +163,7 @@ private fun ColumnScope.WebtoonViewerSettings(viewModel: ReaderSettingsViewModel
             viewModel.preferences.webtoonSidePadding.set(it)
         },
         pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        badge = ImageVector.vectorResource(R.drawable.ic_taihon),
+        badge = taihonBadge(),
     )
 
     CheckboxItem(

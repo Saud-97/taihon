@@ -19,10 +19,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.vectorResource
 import androidx.core.net.toUri
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -31,7 +29,6 @@ import eu.kanade.domain.extension.interactor.TrustExtension
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.screen.advanced.ClearDatabaseScreen
 import eu.kanade.presentation.more.settings.screen.debug.DebugInfoScreen
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.data.library.MetadataUpdateJob
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -69,6 +66,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 import taihon.domain.preferences.TaihonPreferences
+import taihon.feature.ui.components.taihonBadge
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -308,7 +306,7 @@ object SettingsAdvancedScreen : SearchableSettings {
                     preference = taihonPreferences.allowHardwareBitmapForCovers,
                     title = stringResource(MR.strings.pref_allow_hardware_bitmap_covers),
                     subtitle = stringResource(MR.strings.pref_allow_hardware_bitmap_covers_summary),
-                    badge = ImageVector.vectorResource(R.drawable.ic_taihon),
+                    badge = taihonBadge(),
                 ),
                 Preference.PreferenceItem.TextPreference(
                     title = stringResource(MR.strings.pref_reset_viewer_flags),

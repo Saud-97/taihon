@@ -4,11 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.vectorResource
 import eu.kanade.presentation.more.settings.Preference
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
@@ -19,6 +16,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 import taihon.core.common.TaihonConstants
 import taihon.domain.preferences.TaihonPreferences
+import taihon.feature.ui.components.taihonBadge
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.text.NumberFormat
@@ -90,7 +88,7 @@ object SettingsReaderScreen : SearchableSettings {
                         readerPref.pageTransitions.set(true)
                     }
                 },
-                badge = ImageVector.vectorResource(R.drawable.ic_taihon),
+                badge = taihonBadge(),
             ),
             Preference.PreferenceItem.SliderPreference(
                 value = when (pageTransitionDistance) {
@@ -109,7 +107,7 @@ object SettingsReaderScreen : SearchableSettings {
                     val newDistance = if (sliderValue == 0) 0 else sliderValue * 5 + 5
                     taihonPref.pageTransitionDistance.set(newDistance)
                 },
-                badge = ImageVector.vectorResource(R.drawable.ic_taihon),
+                badge = taihonBadge(),
             ),
             getDisplayGroup(readerPreferences = readerPref),
             getEInkGroup(readerPreferences = readerPref),
@@ -375,7 +373,7 @@ object SettingsReaderScreen : SearchableSettings {
                     title = stringResource(MR.strings.pref_webtoon_side_padding),
                     valueString = numberFormat.format(webtoonSidePadding / 100f),
                     onValueChanged = { webtoonSidePaddingPref.set(it) },
-                    badge = ImageVector.vectorResource(R.drawable.ic_taihon),
+                    badge = taihonBadge(),
                 ),
                 Preference.PreferenceItem.ListPreference(
                     preference = readerPreferences.readerHideThreshold,
