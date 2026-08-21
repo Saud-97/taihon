@@ -17,6 +17,8 @@ import coil3.transform.CircleCropTransformation
 import eu.kanade.presentation.util.formatChapterNumber
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
+import eu.kanade.tachiyomi.data.download.Downloader
+import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.source.UnmeteredSource
@@ -35,6 +37,7 @@ import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.MR
+import taihon.feature.services.shouldShowTaihonLibraryQueueSizeWarning
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.math.RoundingMode
@@ -112,30 +115,29 @@ class LibraryUpdateNotifier(
      * Warn when excessively checking any single source.
      */
     fun showQueueSizeWarningNotificationIfNeeded(mangaToUpdate: List<LibraryManga>) {
+        if (!shouldShowTaihonLibraryQueueSizeWarning()) return
+
         val maxUpdatesFromSource = mangaToUpdate
             .groupBy { it.manga.source }
             .filterKeys { sourceManager.get(it) !is UnmeteredSource }
             .maxOfOrNull { it.value.size } ?: 0
 
-        return
+        if (maxUpdatesFromSource <= MANGA_PER_SOURCE_QUEUE_WARNING_THRESHOLD) {
+            return
+        }
 
-        /*     REMOVE THRESHOLD WARNINGS
-           if (maxUpdatesFromSource <= MANGA_PER_SOURCE_QUEUE_WARNING_THRESHOLD) {
-                    return
-                }
-
-                context.notify(
-                    Notifications.ID_LIBRARY_SIZE_WARNING,
-                    Notifications.CHANNEL_LIBRARY_PROGRESS,
-                ) {
-                    setContentTitle(context.stringResource(MR.strings.label_warning))
-                    setStyle(
-                        NotificationCompat.BigTextStyle().bigText(context.stringResource(MR.strings.notification_size_warning)),
-                    )
-                    setSmallIcon(R.drawable.ic_warning_white_24dp)
-                    setTimeoutAfter(Downloader.WARNING_NOTIF_TIMEOUT_MS)
-                    setContentIntent(NotificationHandler.openUrl(context, HELP_WARNING_URL))
-                }*/
+        context.notify(
+            Notifications.ID_LIBRARY_SIZE_WARNING,
+            Notifications.CHANNEL_LIBRARY_PROGRESS,
+        ) {
+            setContentTitle(context.stringResource(MR.strings.label_warning))
+            setStyle(
+                NotificationCompat.BigTextStyle().bigText(context.stringResource(MR.strings.notification_size_warning)),
+            )
+            setSmallIcon(R.drawable.ic_warning_white_24dp)
+            setTimeoutAfter(Downloader.WARNING_NOTIF_TIMEOUT_MS)
+            setContentIntent(NotificationHandler.openUrl(context, HELP_WARNING_URL))
+        }
     }
 
     /**

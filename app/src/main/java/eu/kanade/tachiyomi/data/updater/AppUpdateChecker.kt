@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.util.system.isFossBuildType
 import eu.kanade.tachiyomi.util.system.isPreviewBuildType
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.release.interactor.GetApplicationRelease
+import taihon.feature.services.TAIHON_GITHUB_REPO
 import uy.kohesive.injekt.injectLazy
 
 class AppUpdateChecker {
@@ -34,7 +35,7 @@ class AppUpdateChecker {
     }
 }
 
-val GITHUB_REPO = "Saud-97/taihon"
+val GITHUB_REPO = TAIHON_GITHUB_REPO
 
 val RELEASE_TAG: String by lazy {
     if (isPreviewBuildType) {

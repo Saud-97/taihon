@@ -4,7 +4,6 @@ import android.content.Context
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.util.lang.compareToCaseInsensitiveNaturalOrder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.drop
@@ -26,6 +25,7 @@ import tachiyomi.domain.download.service.DownloadPreferences
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.MR
+import taihon.feature.data.sortedByTaihonName
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -168,7 +168,7 @@ class DownloadManager(
             throw Exception(context.stringResource(MR.strings.page_list_empty_error))
         }
 
-        return files.sortedWith(compareBy(String::compareToCaseInsensitiveNaturalOrder) { it.name })
+        return files.sortedByTaihonName()
             .mapIndexed { i, file ->
                 Page(i, uri = file.uri).apply { status = Page.State.Ready }
             }
