@@ -59,17 +59,18 @@ import tachiyomi.domain.manga.interactor.GetLibraryManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaUpdate
 import tachiyomi.domain.manga.model.applyFilter
-import tachiyomi.domain.source.model.StubSource
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.track.interactor.GetTracksPerManga
 import tachiyomi.domain.track.model.Track
 import tachiyomi.source.local.isLocal
 import taihon.domain.preferences.TaihonPreferences
+import taihon.feature.library.createLibraryBadgeSource
+import taihon.feature.library.getTaihonSourceFiltersFlow
+import taihon.feature.library.libraryItemTaihonSourceFilter
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
-import tachiyomi.domain.source.model.Source as DomainSource
 
 class LibraryViewModel(
     private val getLibraryManga: GetLibraryManga = Injekt.get(),
@@ -259,27 +260,6 @@ class LibraryViewModel(
             !isExcluded && isIncluded
         }
 
-        val excludedSources = sourceFilter.filter { it.value == TriState.ENABLED_NOT }.keys
-        val includedSources = sourceFilter.filter { it.value == TriState.ENABLED_IS }.keys
-        val orphanedIsExcluded = orphanedSourceFilter == TriState.ENABLED_NOT
-        val orphanedIsIncluded = orphanedSourceFilter == TriState.ENABLED_IS
-
-        val filterFnSource: (LibraryItem) -> Boolean = { item ->
-            val sourceId = item.libraryManga.manga.source
-            val source = sourceManager.get(sourceId)
-            val isOrphaned = source == null || source is StubSource
-
-            val isExcluded = if (isOrphaned) orphanedIsExcluded else sourceId in excludedSources
-            val isAnyIncluded = includedSources.isNotEmpty() || orphanedIsIncluded
-            val isIncluded = if (isAnyIncluded) {
-                if (isOrphaned) orphanedIsIncluded else sourceId in includedSources
-            } else {
-                true
-            }
-
-            !isExcluded && isIncluded
-        }
-
         return fastFilter {
             filterFnDownloaded(it) &&
                 filterFnUnread(it) &&
@@ -288,7 +268,7 @@ class LibraryViewModel(
                 filterFnCompleted(it) &&
                 filterFnIntervalCustom(it) &&
                 filterFnTracking(it) &&
-                filterFnSource(it)
+                libraryItemTaihonSourceFilter(it, sourceManager, sourceFilter, orphanedSourceFilter)
         }
     }
 
@@ -459,23 +439,12 @@ class LibraryViewModel(
                         } else {
                             ""
                         },
-                        source = sourceManager.getOrStub(manga.manga.source).let {
-                            val isStub = it is StubSource
-                            val showSource =
-                                (isStub && preferences.sourceOrphanedBadge) ||
-                                    (!isStub && preferences.sourceInstalledBadge)
-                            if (showSource) {
-                                DomainSource(
-                                    id = it.id,
-                                    lang = it.lang,
-                                    name = it.name,
-                                    supportsLatest = it.supportsLatest,
-                                    isStub = isStub,
-                                )
-                            } else {
-                                null
-                            }
-                        },
+                        source = createLibraryBadgeSource(
+                            sourceManager = sourceManager,
+                            sourceId = manga.manga.source,
+                            sourceInstalledBadge = preferences.sourceInstalledBadge,
+                            sourceOrphanedBadge = preferences.sourceOrphanedBadge,
+                        ),
                     ),
                 )
             }
@@ -501,20 +470,7 @@ class LibraryViewModel(
     }
 
     private fun getSourceFiltersFlow(): Flow<Pair<Map<Long, TriState>, TriState>> {
-        return sourceManager.sources
-            .map { sources -> sources.filterNot { it is StubSource }.map { it.id }.toSet() }
-            .distinctUntilChanged()
-            .flatMapLatest { sourceIds ->
-                if (sourceIds.isEmpty()) {
-                    taihonPreferences.filterOrphanedSources.changes().map { emptyMap<Long, TriState>() to it }
-                } else {
-                    val filterFlows = sourceIds.map { id ->
-                        taihonPreferences.filterSource(id).changes().map { id to it }
-                    }
-                    combine(filterFlows) { it.toMap() }
-                        .combine(taihonPreferences.filterOrphanedSources.changes(), ::Pair)
-                }
-            }
+        return getTaihonSourceFiltersFlow(sourceManager, taihonPreferences)
     }
 
     /**

@@ -12,7 +12,7 @@ import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.domain.manga.model.MangaCover
 import tachiyomi.presentation.core.components.FastScrollLazyColumn
 import tachiyomi.presentation.core.util.plus
-import taihon.feature.ui.components.TaihonSourceBadge
+import taihon.feature.library.ui.TaihonSourceBadge
 
 @Composable
 internal fun LibraryList(

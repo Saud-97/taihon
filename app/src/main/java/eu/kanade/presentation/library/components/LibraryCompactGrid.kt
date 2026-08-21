@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.domain.manga.model.MangaCover
-import taihon.feature.ui.components.TaihonSourceBadge
+import taihon.feature.library.ui.TaihonSourceBadge
 
 @Composable
 internal fun LibraryCompactGrid(

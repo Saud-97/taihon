@@ -1,4 +1,4 @@
-package taihon.feature.ui.components
+package taihon.feature.library.ui
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
