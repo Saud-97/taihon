@@ -14,12 +14,11 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import taihon.core.common.TaihonConstants
-import taihon.domain.preferences.TaihonPreferences
-import taihon.feature.ui.components.taihonBadge
+import taihon.feature.settings.getTaihonReaderItems
+import taihon.feature.settings.getTaihonWebtoonPaddingItem
+import taihon.feature.settings.taihonOnPageTransitionsChanged
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.text.NumberFormat
 
 object SettingsReaderScreen : SearchableSettings {
 
@@ -30,10 +29,6 @@ object SettingsReaderScreen : SearchableSettings {
     @Composable
     override fun getPreferences(): List<Preference> {
         val readerPref = remember { Injekt.get<ReaderPreferences>() }
-        val taihonPref = remember { Injekt.get<TaihonPreferences>() }
-
-        val pageTransitionDistance by taihonPref.pageTransitionDistance.collectAsState()
-        val pageTransitionSpeed by taihonPref.pageTransitionSpeed.collectAsState()
 
         return listOf(
             Preference.PreferenceItem.ListPreference(
@@ -65,50 +60,11 @@ object SettingsReaderScreen : SearchableSettings {
                 preference = readerPref.pageTransitions,
                 title = stringResource(MR.strings.pref_page_transitions),
                 onValueChanged = { newValue ->
-                    if (!newValue) {
-                        taihonPref.pageTransitionSpeed.set(0)
-                    }
+                    taihonOnPageTransitionsChanged(newValue)
                     true
                 },
             ),
-            Preference.PreferenceItem.SliderPreference(
-                value = if (pageTransitionSpeed == 0) 0 else (1050 - pageTransitionSpeed) / 50,
-                valueRange = 0..20,
-                steps = 19,
-                title = stringResource(MR.strings.pref_page_transition_speed),
-                valueString = if (pageTransitionSpeed == 0) {
-                    stringResource(MR.strings.label_default)
-                } else {
-                    stringResource(MR.strings.pref_flash_duration_summary, pageTransitionSpeed)
-                },
-                onValueChanged = { sliderValue ->
-                    val newSpeed = if (sliderValue == 0) 0 else 1050 - sliderValue * 50
-                    taihonPref.pageTransitionSpeed.set(newSpeed)
-                    if (newSpeed > 0) {
-                        readerPref.pageTransitions.set(true)
-                    }
-                },
-                badge = taihonBadge(),
-            ),
-            Preference.PreferenceItem.SliderPreference(
-                value = when (pageTransitionDistance) {
-                    0 -> 0
-                    else -> (pageTransitionDistance - 5) / 5
-                },
-                valueRange = 0..19,
-                steps = 18,
-                title = stringResource(MR.strings.pref_page_transition_distance),
-                valueString = if (pageTransitionDistance == 0 || pageTransitionDistance == 75) {
-                    stringResource(MR.strings.label_default)
-                } else {
-                    "$pageTransitionDistance%"
-                },
-                onValueChanged = { sliderValue ->
-                    val newDistance = if (sliderValue == 0) 0 else sliderValue * 5 + 5
-                    taihonPref.pageTransitionDistance.set(newDistance)
-                },
-                badge = taihonBadge(),
-            ),
+        ) + getTaihonReaderItems() + listOf(
             getDisplayGroup(readerPreferences = readerPref),
             getEInkGroup(readerPreferences = readerPref),
             getReadingGroup(readerPreferences = readerPref),
@@ -333,17 +289,13 @@ object SettingsReaderScreen : SearchableSettings {
 
     @Composable
     private fun getWebtoonGroup(readerPreferences: ReaderPreferences): Preference.PreferenceGroup {
-        val numberFormat = remember { NumberFormat.getPercentInstance() }
-
         val navModePref = readerPreferences.navigationModeWebtoon
         val dualPageSplitPref = readerPreferences.dualPageSplitWebtoon
         val rotateToFitPref = readerPreferences.dualPageRotateToFitWebtoon
-        val webtoonSidePaddingPref = readerPreferences.webtoonSidePadding
 
         val navMode by navModePref.collectAsState()
         val dualPageSplit by dualPageSplitPref.collectAsState()
         val rotateToFit by rotateToFitPref.collectAsState()
-        val webtoonSidePadding by webtoonSidePaddingPref.collectAsState()
 
         return Preference.PreferenceGroup(
             title = stringResource(MR.strings.webtoon_viewer),
@@ -367,14 +319,7 @@ object SettingsReaderScreen : SearchableSettings {
                     title = stringResource(MR.strings.pref_read_with_tapping_inverted),
                     enabled = navMode != 5,
                 ),
-                Preference.PreferenceItem.SliderPreference(
-                    value = webtoonSidePadding,
-                    valueRange = ReaderPreferences.WEBTOON_PADDING_MIN..TaihonConstants.WEBTOON_PADDING_MAX,
-                    title = stringResource(MR.strings.pref_webtoon_side_padding),
-                    valueString = numberFormat.format(webtoonSidePadding / 100f),
-                    onValueChanged = { webtoonSidePaddingPref.set(it) },
-                    badge = taihonBadge(),
-                ),
+                getTaihonWebtoonPaddingItem(),
                 Preference.PreferenceItem.ListPreference(
                     preference = readerPreferences.readerHideThreshold,
                     entries = mapOf(

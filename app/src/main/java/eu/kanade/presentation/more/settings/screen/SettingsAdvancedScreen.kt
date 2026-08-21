@@ -65,8 +65,7 @@ import tachiyomi.domain.manga.interactor.ResetViewerFlags
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import taihon.domain.preferences.TaihonPreferences
-import taihon.feature.ui.components.taihonBadge
+import taihon.feature.settings.getTaihonAdvancedLibraryItems
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -84,7 +83,6 @@ object SettingsAdvancedScreen : SearchableSettings {
         val navigator = LocalNavigator.currentOrThrow
 
         val basePreferences = remember { Injekt.get<BasePreferences>() }
-        val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
         val networkPreferences = remember { Injekt.get<NetworkPreferences>() }
         val libraryPreferences = remember { Injekt.get<LibraryPreferences>() }
 
@@ -127,7 +125,7 @@ object SettingsAdvancedScreen : SearchableSettings {
             getBackgroundActivityGroup(),
             getDataGroup(),
             getNetworkGroup(networkPreferences = networkPreferences),
-            getLibraryGroup(libraryPreferences = libraryPreferences, taihonPreferences = taihonPreferences),
+            getLibraryGroup(libraryPreferences = libraryPreferences),
             getReaderGroup(basePreferences = basePreferences),
             getExtensionsGroup(basePreferences = basePreferences),
         )
@@ -290,7 +288,6 @@ object SettingsAdvancedScreen : SearchableSettings {
     @Composable
     private fun getLibraryGroup(
         libraryPreferences: LibraryPreferences,
-        taihonPreferences: TaihonPreferences,
     ): Preference.PreferenceGroup {
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
@@ -302,12 +299,7 @@ object SettingsAdvancedScreen : SearchableSettings {
                     title = stringResource(MR.strings.pref_refresh_library_covers),
                     onClick = { MetadataUpdateJob.startNow(context) },
                 ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = taihonPreferences.allowHardwareBitmapForCovers,
-                    title = stringResource(MR.strings.pref_allow_hardware_bitmap_covers),
-                    subtitle = stringResource(MR.strings.pref_allow_hardware_bitmap_covers_summary),
-                    badge = taihonBadge(),
-                ),
+            ) + getTaihonAdvancedLibraryItems() + listOf(
                 Preference.PreferenceItem.TextPreference(
                     title = stringResource(MR.strings.pref_reset_viewer_flags),
                     subtitle = stringResource(MR.strings.pref_reset_viewer_flags_summary),

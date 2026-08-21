@@ -73,8 +73,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import taihon.domain.preferences.TaihonPreferences
-import taihon.feature.ui.components.taihonBadge
+import taihon.feature.settings.getTaihonBackupGroupItems
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -101,14 +100,13 @@ object SettingsDataScreen : SearchableSettings {
     @Composable
     override fun getPreferences(): List<Preference> {
         val backupPreferences = Injekt.get<BackupPreferences>()
-        val taihonPreferences = Injekt.get<TaihonPreferences>()
         val storagePreferences = Injekt.get<StoragePreferences>()
 
         return listOf(
             getStorageLocationPref(storagePreferences = storagePreferences),
             Preference.PreferenceItem.InfoPreference(stringResource(MR.strings.pref_storage_location_info)),
 
-            getBackupAndRestoreGroup(backupPreferences = backupPreferences, taihonPreferences = taihonPreferences),
+            getBackupAndRestoreGroup(backupPreferences = backupPreferences),
             getDataGroup(),
             getExportGroup(),
         )
@@ -184,16 +182,11 @@ object SettingsDataScreen : SearchableSettings {
     }
 
     @Composable
-    private fun getBackupAndRestoreGroup(
-        backupPreferences: BackupPreferences,
-        taihonPreferences: TaihonPreferences,
-    ): Preference.PreferenceGroup {
+    private fun getBackupAndRestoreGroup(backupPreferences: BackupPreferences): Preference.PreferenceGroup {
         val context = LocalContext.current
         val navigator = LocalNavigator.currentOrThrow
 
         val lastAutoBackup by backupPreferences.lastAutoBackupTimestamp.collectAsState()
-        val backupRetention by taihonPreferences.backupRetention.collectAsState()
-        val backupInterval by backupPreferences.backupInterval.collectAsState()
 
         val chooseBackup = rememberLauncherForActivityResult(
             object : ActivityResultContracts.GetContent() {
@@ -275,18 +268,8 @@ object SettingsDataScreen : SearchableSettings {
                         BackupCreateJob.setupTask(context, it)
                         true
                     },
-                    badge = taihonBadge(),
                 ),
-                Preference.PreferenceItem.SliderPreference(
-                    value = backupRetention,
-                    valueRange = 4..100,
-                    title = stringResource(MR.strings.pref_backup_retention),
-                    subtitle = stringResource(MR.strings.pref_backup_retention_info),
-                    onValueChanged = { taihonPreferences.backupRetention.set(it) },
-                    badge = taihonBadge(),
-                    steps = 0,
-                    enabled = backupInterval > 0,
-                ),
+            ) + getTaihonBackupGroupItems() + listOf(
                 Preference.PreferenceItem.InfoPreference(
                     stringResource(MR.strings.backup_info) + "\n\n" +
                         stringResource(MR.strings.last_auto_backup_info, relativeTimeSpanString(lastAutoBackup)),

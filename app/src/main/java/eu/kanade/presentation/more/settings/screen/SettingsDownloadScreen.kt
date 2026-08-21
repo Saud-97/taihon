@@ -19,8 +19,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import taihon.domain.preferences.TaihonPreferences
-import taihon.feature.ui.components.taihonBadge
+import taihon.feature.settings.getTaihonDownloadItems
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -36,9 +35,7 @@ object SettingsDownloadScreen : SearchableSettings {
         val allCategories by getCategories.subscribe().collectAsState(initial = emptyList())
 
         val downloadPreferences = remember { Injekt.get<DownloadPreferences>() }
-        val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
         val parallelSourceLimit by downloadPreferences.parallelSourceLimit.collectAsState()
-        val parallelChapterLimit by taihonPreferences.parallelChapterLimit.collectAsState()
         val parallelPageLimit by downloadPreferences.parallelPageLimit.collectAsState()
         return listOf(
             Preference.PreferenceItem.SwitchPreference(
@@ -60,14 +57,7 @@ object SettingsDownloadScreen : SearchableSettings {
                 title = stringResource(MR.strings.pref_download_concurrent_sources),
                 onValueChanged = { downloadPreferences.parallelSourceLimit.set(it) },
             ),
-            Preference.PreferenceItem.SliderPreference(
-                value = parallelChapterLimit,
-                valueRange = 1..5,
-                title = stringResource(MR.strings.pref_download_concurrent_chapters),
-                subtitle = stringResource(MR.strings.pref_download_concurrent_chapters_summary),
-                onValueChanged = { taihonPreferences.parallelChapterLimit.set(it) },
-                badge = taihonBadge(),
-            ),
+        ) + getTaihonDownloadItems() + listOf(
             Preference.PreferenceItem.SliderPreference(
                 value = parallelPageLimit,
                 valueRange = 1..15,

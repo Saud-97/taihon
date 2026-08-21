@@ -12,16 +12,14 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.screen.browse.ExtensionStoresScreen
-import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.authenticate
 import mihon.domain.extension.interactor.GetExtensionStoreCountAsFlow
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.util.collectAsState
-import taihon.domain.preferences.TaihonPreferences
-import taihon.feature.ui.components.taihonBadge
+import taihon.feature.settings.getTaihonBrowseGroups
+import taihon.feature.settings.getTaihonExtensionItems
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -37,13 +35,9 @@ object SettingsBrowseScreen : SearchableSettings {
         val navigator = LocalNavigator.currentOrThrow
 
         val sourcePreferences = remember { Injekt.get<SourcePreferences>() }
-        val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
-        val extensionManager = remember { Injekt.get<ExtensionManager>() }
         val getExtensionStoreCountAsFlow = remember { Injekt.get<GetExtensionStoreCountAsFlow>() }
 
         val reposCount by getExtensionStoreCountAsFlow().collectAsState(0)
-        val installedExtensions by extensionManager.installedExtensionsFlow.collectAsState()
-        val smartApostropheNormalization by taihonPreferences.smartApostropheNormalization.collectAsState()
 
         return listOf(
             Preference.PreferenceGroup(
@@ -83,39 +77,9 @@ object SettingsBrowseScreen : SearchableSettings {
                             navigator.push(ExtensionStoresScreen())
                         },
                     ),
-                    Preference.PreferenceItem.SwitchPreference(
-                        preference = taihonPreferences.hideExtensionUpdatesCount,
-                        title = stringResource(MR.strings.pref_extension_update_hide_browse_badge),
-                        badge = taihonBadge(),
-                    ),
-                ),
+                ) + getTaihonExtensionItems(),
             ),
 
-            Preference.PreferenceGroup(
-                title = stringResource(MR.strings.action_global_search),
-                preferenceItems = listOf(
-                    Preference.PreferenceItem.SwitchPreference(
-                        preference = taihonPreferences.smartApostropheNormalization,
-                        title = stringResource(MR.strings.pref_smart_apostrophe_normalization),
-                        subtitle = stringResource(MR.strings.pref_smart_apostrophe_normalization_summary),
-                        badge = taihonBadge(),
-                    ),
-                    Preference.PreferenceItem.MultiSelectListPreference(
-                        preference = taihonPreferences.smartApostropheNormalizationExceptions,
-                        entries = installedExtensions.associate { it.pkgName to it.name },
-                        title = stringResource(MR.strings.pref_smart_apostrophe_normalization_exceptions),
-                        subtitle = stringResource(MR.strings.exclude),
-                        enabled = smartApostropheNormalization,
-                        badge = taihonBadge(),
-                    ),
-                    Preference.PreferenceItem.SwitchPreference(
-                        preference = taihonPreferences.globalSearchEnrichResults,
-                        title = stringResource(MR.strings.pref_global_search_enrich_results),
-                        subtitle = stringResource(MR.strings.pref_global_search_enrich_results_summary),
-                        badge = taihonBadge(),
-                    ),
-                ),
-            ),
-        )
+        ) + getTaihonBrowseGroups()
     }
 }

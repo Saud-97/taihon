@@ -70,6 +70,7 @@ data object MoreTab : Tab {
             onClickStats = { navigator.push(StatsScreen()) },
             onClickDataAndStorage = { navigator.push(SettingsScreen(SettingsScreen.Destination.DataAndStorage)) },
             onClickSettings = { navigator.push(SettingsScreen()) },
+            onClickSupport = {},
             onClickAbout = { navigator.push(SettingsScreen(SettingsScreen.Destination.About)) },
         )
     }

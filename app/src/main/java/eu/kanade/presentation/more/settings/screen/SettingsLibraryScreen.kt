@@ -38,8 +38,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import taihon.domain.preferences.TaihonPreferences
-import taihon.feature.ui.components.taihonBadge
+import taihon.feature.settings.getTaihonLibraryBehaviorItems
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -52,14 +51,13 @@ object SettingsLibraryScreen : SearchableSettings {
     @Composable
     override fun getPreferences(): List<Preference> {
         val getCategories = remember { Injekt.get<GetCategories>() }
-        val libraryPreferences = remember { Injekt.get<LibraryPreferences>() }
-        val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
+        val libraryPreferences = Injekt.get<LibraryPreferences>()
         val allCategories by getCategories.subscribe().collectAsState(initial = emptyList())
 
         return listOf(
             getCategoriesGroup(LocalNavigator.currentOrThrow, allCategories, libraryPreferences),
             getGlobalUpdateGroup(allCategories, libraryPreferences),
-            getBehaviorGroup(libraryPreferences, taihonPreferences),
+            getBehaviorGroup(libraryPreferences),
         )
     }
 
@@ -214,7 +212,6 @@ object SettingsLibraryScreen : SearchableSettings {
     @Composable
     private fun getBehaviorGroup(
         libraryPreferences: LibraryPreferences,
-        taihonPreferences: TaihonPreferences,
     ): Preference.PreferenceGroup {
         return Preference.PreferenceGroup(
             title = stringResource(MR.strings.pref_behavior),
@@ -261,13 +258,7 @@ object SettingsLibraryScreen : SearchableSettings {
                     preference = libraryPreferences.hideMissingChapters,
                     title = stringResource(MR.strings.pref_hide_missing_chapter_indicators),
                 ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = taihonPreferences.resumeLastSeenPage,
-                    title = stringResource(MR.strings.pref_resume_last_seen_page),
-                    subtitle = stringResource(MR.strings.pref_resume_last_seen_page_summary),
-                    badge = taihonBadge(),
-                ),
-            ),
+            ) + getTaihonLibraryBehaviorItems(),
         )
     }
 }

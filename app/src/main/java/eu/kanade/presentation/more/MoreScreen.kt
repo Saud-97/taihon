@@ -27,6 +27,7 @@ import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
+import taihon.feature.settings.isSupportItemVisible
 
 @Composable
 fun MoreScreen(
@@ -40,6 +41,7 @@ fun MoreScreen(
     onClickStats: () -> Unit,
     onClickDataAndStorage: () -> Unit,
     onClickSettings: () -> Unit,
+    onClickSupport: () -> Unit,
     onClickAbout: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -131,6 +133,15 @@ fun MoreScreen(
                     icon = Icons.Outlined.Settings,
                     onPreferenceClick = onClickSettings,
                 )
+            }
+            if (isSupportItemVisible()) {
+                item {
+                    TextPreferenceWidget(
+                        title = "Support Us",
+                        icon = Icons.Default.VolunteerActivism,
+                        onPreferenceClick = onClickSupport,
+                    )
+                }
             }
             item {
                 TextPreferenceWidget(

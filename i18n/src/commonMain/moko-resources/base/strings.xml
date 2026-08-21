@@ -560,8 +560,7 @@
 
       <!-- Browse section -->
     <string name="pref_hide_in_library_items">Hide entries already in library</string>
-    <string name="pref_global_search_enrich_results">Enrich global search results with manga
-        details
+    <string name="pref_global_search_enrich_results">Enrich search results with manga details
     </string>
     <string name="pref_global_search_enrich_results_summary">Search results are progressively
         enriched with the latest available chapter, total chapter count, and comprehensive manga
