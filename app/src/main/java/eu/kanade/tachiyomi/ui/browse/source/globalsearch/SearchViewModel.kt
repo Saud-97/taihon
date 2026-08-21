@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.util.lang.normalizeApostrophe
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
@@ -17,10 +16,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import mihon.core.viewmodel.StateViewModel
 import mihon.domain.manga.model.toDomainManga
@@ -31,12 +26,12 @@ import tachiyomi.domain.chapter.interactor.SetMangaDefaultChapterFlags
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.NetworkToLocalManga
 import tachiyomi.domain.manga.model.Manga
-import tachiyomi.domain.manga.model.MangaUpdate
 import tachiyomi.domain.source.service.SourceManager
 import taihon.domain.preferences.TaihonPreferences
+import taihon.feature.browse.TaihonSearchEnricher
+import taihon.feature.browse.util.normalizeSearchQuery
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.time.Instant
 import java.util.concurrent.Executors
 
 abstract class SearchViewModel(
@@ -57,9 +52,18 @@ abstract class SearchViewModel(
     private val coroutineDispatcher = Executors.newFixedThreadPool(10).asCoroutineDispatcher()
     private var searchJob: Job? = null
 
-    private val globalSemaphore = Semaphore(10)
-    private val sourceMutexes = mutableMapOf<Long, Mutex>()
-    private val sessionCache = mutableSetOf<Long>()
+    private val taihonSearchEnricher = TaihonSearchEnricher(
+        updateMangaFromRemote = updateMangaFromRemote,
+        getChaptersByMangaId = getChaptersByMangaId,
+        updateManga = updateManga,
+        setMangaDefaultChapterFlags = setMangaDefaultChapterFlags,
+        getCurrentDetails = { state.value.mangaDetails[it] },
+        onUpdateDetails = { mangaId, details ->
+            mutableState.update {
+                it.copy(mangaDetails = it.mangaDetails + (mangaId to details))
+            }
+        },
+    )
 
     private val enabledLanguages = sourcePreferences.enabledLanguages.get()
     private val disabledSources = sourcePreferences.disabledSources.get()
@@ -86,86 +90,9 @@ abstract class SearchViewModel(
         }
     }
 
-    private suspend fun fetchMangaDetails(manga: Manga) {
-        if (manga.id in sessionCache) {
-            val chapters = getChaptersByMangaId.await(manga.id)
-            updateMangaDetails(
-                manga.id,
-                MangaDetails(
-                    chapterCount = chapters.size,
-                    latestChapter = chapters.maxOfOrNull { it.chapterNumber },
-                    isLoading = false,
-                ),
-            )
-            return
-        }
-
-        val isCacheValid = Instant.now().toEpochMilli() < manga.nextUpdate
-
-        if (isCacheValid) {
-            val chapters = getChaptersByMangaId.await(manga.id)
-            updateMangaDetails(
-                manga.id,
-                MangaDetails(
-                    chapterCount = chapters.size,
-                    latestChapter = chapters.maxOfOrNull { it.chapterNumber },
-                    isLoading = false,
-                ),
-            )
-            sessionCache.add(manga.id)
-            return
-        }
-
-        updateMangaDetails(
-            manga.id,
-            state.value.mangaDetails[manga.id]?.copy(isLoading = true) ?: MangaDetails(0, null, true),
-        )
-
-        val mutex = synchronized(sourceMutexes) {
-            sourceMutexes.getOrPut(manga.source) { Mutex() }
-        }
-
-        mutex.withLock {
-            globalSemaphore.withPermit {
-                try {
-                    updateMangaFromRemote(manga, fetchDetails = true, fetchChapters = true).getOrThrow()
-                    setMangaDefaultChapterFlags.await(manga)
-                    updateManga.await(
-                        MangaUpdate(
-                            id = manga.id,
-                            nextUpdate = Instant.now().toEpochMilli() + 60 * 60 * 1000L,
-                        ),
-                    )
-
-                    val chapters = getChaptersByMangaId.await(manga.id)
-                    updateMangaDetails(
-                        manga.id,
-                        MangaDetails(
-                            chapterCount = chapters.size,
-                            latestChapter = chapters.maxOfOrNull { it.chapterNumber },
-                            isLoading = false,
-                        ),
-                    )
-                    sessionCache.add(manga.id)
-                } catch (e: Exception) {
-                    updateMangaDetails(
-                        manga.id,
-                        state.value.mangaDetails[manga.id]?.copy(isLoading = false) ?: MangaDetails(0, null, false),
-                    )
-                }
-            }
-        }
-    }
-
-    private fun updateMangaDetails(mangaId: Long, details: MangaDetails) {
-        mutableState.update {
-            it.copy(mangaDetails = it.mangaDetails + (mangaId to details))
-        }
-    }
-
     @Composable
-    fun getMangaDetails(manga: Manga): androidx.compose.runtime.State<MangaDetails?> {
-        return produceState<MangaDetails?>(initialValue = null, manga.id) {
+    fun getMangaDetails(manga: Manga): androidx.compose.runtime.State<TaihonSearchEnricher.MangaDetails?> {
+        return produceState<TaihonSearchEnricher.MangaDetails?>(initialValue = null, manga.id) {
             state.collectLatest {
                 value = it.mangaDetails[manga.id]
             }
@@ -263,12 +190,11 @@ abstract class SearchViewModel(
 
                     try {
                         val pkgName = extensionManager.getExtensionPackage(source.id)
-                        val isNormalized = smartNormalizationEnabled && pkgName !in exceptions
-                        val normalizedQuery = if (isNormalized) {
-                            query.normalizeApostrophe(fuzzy = true)
-                        } else {
-                            query
-                        }
+                        val normalizedQuery = query.normalizeSearchQuery(
+                            pkgName = pkgName,
+                            smartNormalizationEnabled = smartNormalizationEnabled,
+                            exceptions = exceptions,
+                        )
 
                         val page = withContext(coroutineDispatcher) {
                             source.getSearchManga(1, normalizedQuery, source.getFilterList())
@@ -284,7 +210,7 @@ abstract class SearchViewModel(
                             if (taihonPreferences.globalSearchEnrichResults.get()) {
                                 titles.forEach { title ->
                                     viewModelScope.launchIO {
-                                        fetchMangaDetails(title)
+                                        taihonSearchEnricher.fetchMangaDetails(title)
                                     }
                                 }
                             }
@@ -331,19 +257,13 @@ abstract class SearchViewModel(
         val sourceFilter: SourceFilter = SourceFilter.PinnedOnly,
         val onlyShowHasResults: Boolean = false,
         val items: Map<Source, SearchItemResult> = mapOf(),
-        val mangaDetails: Map<Long, MangaDetails> = mapOf(),
+        val mangaDetails: Map<Long, TaihonSearchEnricher.MangaDetails> = mapOf(),
         val dialog: Dialog? = null,
     ) {
         val progress: Int = items.count { it.value !is SearchItemResult.Loading }
         val total: Int = items.size
         val filteredItems = items.filter { (_, result) -> result.isVisible(onlyShowHasResults) }
     }
-
-    data class MangaDetails(
-        val chapterCount: Int,
-        val latestChapter: Double?,
-        val isLoading: Boolean = false,
-    )
 
     sealed interface Dialog {
         data class Migrate(val target: Manga, val current: Manga) : Dialog
