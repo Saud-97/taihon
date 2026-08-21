@@ -21,10 +21,9 @@ import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NavigationRegion
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import tachiyomi.core.common.util.system.logcat
-import taihon.domain.preferences.TaihonPreferences
+import taihon.feature.reader.performTaihonSmoothScroll
+import taihon.feature.reader.setupTaihonWebtoonConfig
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -86,9 +85,7 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
             .threshold
 
     init {
-        Injekt.get<TaihonPreferences>().pageTransitionDistance.changes()
-            .onEach { layoutManager.extraLayoutSpace = scrollDistance }
-            .launchIn(scope)
+        setupTaihonWebtoonConfig(scope, layoutManager) { scrollDistance }
 
         recycler.setItemViewCacheSize(RECYCLER_VIEW_CACHE_SIZE)
         recycler.isVisible = false // Don't let the recycler layout yet
@@ -313,21 +310,7 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
     }
 
     private fun smoothScrollBy(distance: Int) {
-        if (config.pageTransitionDuration == 0) {
-            recycler.smoothScrollBy(0, distance)
-            return
-        }
-        android.animation.ValueAnimator.ofInt(0, distance).apply {
-            duration = config.pageTransitionDuration.toLong()
-            interpolator = android.view.animation.DecelerateInterpolator()
-            var lastValue = 0
-            addUpdateListener {
-                val currentValue = it.animatedValue as Int
-                recycler.scrollBy(0, currentValue - lastValue)
-                lastValue = currentValue
-            }
-            start()
-        }
+        performTaihonSmoothScroll(distance)
     }
 
     /**

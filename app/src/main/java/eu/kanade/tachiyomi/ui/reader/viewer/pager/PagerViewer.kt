@@ -21,12 +21,8 @@ import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NavigationRegion
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import tachiyomi.core.common.util.system.logcat
-import taihon.domain.preferences.TaihonPreferences
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
+import taihon.feature.reader.setupTaihonScroller
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.min
 
@@ -51,45 +47,8 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
      */
     val config = PagerConfig(this, scope)
 
-    private var originalScroller: android.widget.Scroller? = null
-
     init {
-        try {
-            val scrollerField = ViewPager::class.java.getDeclaredField("mScroller")
-            scrollerField.isAccessible = true
-            originalScroller = scrollerField.get(pager) as? android.widget.Scroller
-        } catch (_: Exception) {
-        }
-
-        Injekt.get<TaihonPreferences>().pageTransitionSpeed.changes()
-            .onEach { setNextTransitionSpeed(it) }
-            .launchIn(scope)
-    }
-
-    private fun setNextTransitionSpeed(duration: Int) {
-        try {
-            val scrollerField = ViewPager::class.java.getDeclaredField("mScroller")
-            scrollerField.isAccessible = true
-            val scroller = if (duration > 0) {
-                CustomScroller(activity, duration)
-            } else {
-                originalScroller
-            }
-            scrollerField.set(pager, scroller)
-        } catch (_: Exception) {
-            // ignore
-        }
-    }
-
-    class CustomScroller(context: android.content.Context, private val scrollDuration: Int) :
-        android.widget.Scroller(context, android.view.animation.AccelerateDecelerateInterpolator()) {
-        override fun startScroll(startX: Int, startY: Int, dx: Int, dy: Int, duration: Int) {
-            super.startScroll(startX, startY, dx, dy, scrollDuration)
-        }
-
-        override fun startScroll(startX: Int, startY: Int, dx: Int, dy: Int) {
-            super.startScroll(startX, startY, dx, dy, scrollDuration)
-        }
+        setupTaihonScroller(scope)
     }
 
     /**
