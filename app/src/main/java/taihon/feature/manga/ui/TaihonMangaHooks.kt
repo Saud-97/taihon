@@ -1,5 +1,7 @@
 package taihon.feature.manga.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -7,9 +9,9 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
 import coil3.request.ImageRequest
@@ -21,10 +23,10 @@ import eu.kanade.tachiyomi.util.chapter.getNextUnread
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.util.clickableNoIndication
 import tachiyomi.presentation.core.util.collectAsState
 import taihon.domain.preferences.TaihonPreferences
 import taihon.feature.manga.ui.components.TaihonMangaContinueChip
+import taihon.feature.manga.ui.components.TaihonMangaScrollControls
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -47,11 +49,25 @@ object TaihonMangaHooks {
         }
     }
 
-    fun Modifier.taihonMangaToolbarClick(onClickTitle: (() -> Unit)?): Modifier = composed {
-        if (onClickTitle != null) {
-            Modifier.clickableNoIndication(onClick = onClickTitle)
-        } else {
-            Modifier
+    @Composable
+    fun MangaScreenOverlay(
+        chapterListState: LazyListState,
+        currentlyReadingIndex: Int,
+        isAnySelected: Boolean,
+        topPadding: Dp,
+        centerOffset: Int,
+        content: @Composable () -> Unit,
+    ) {
+        Box(modifier = Modifier.fillMaxHeight()) {
+            content()
+
+            TaihonMangaScrollControls(
+                chapterListState = chapterListState,
+                currentlyReadingIndex = currentlyReadingIndex,
+                isAnySelected = isAnySelected,
+                topPadding = topPadding,
+                centerOffset = centerOffset,
+            )
         }
     }
 

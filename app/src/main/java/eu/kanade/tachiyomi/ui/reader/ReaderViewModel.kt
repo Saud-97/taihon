@@ -75,7 +75,7 @@ import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.source.local.isLocal
-import taihon.domain.preferences.TaihonPreferences
+import taihon.feature.reader.TaihonReaderHooks
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Date
@@ -102,7 +102,6 @@ class ReaderViewModel @JvmOverloads constructor(
     private val updateChapter: UpdateChapter = Injekt.get(),
     private val setMangaViewerFlags: SetMangaViewerFlags = Injekt.get(),
     private val getIncognitoState: GetIncognitoState = Injekt.get(),
-    private val taihonPreferences: TaihonPreferences = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
 ) : ViewModel() {
 
@@ -153,6 +152,8 @@ class ReaderViewModel @JvmOverloads constructor(
      * The time the chapter was started reading
      */
     private var chapterReadStartTime: Long? = null
+
+    private val readerStartTime = TaihonReaderHooks.getReaderStartTime()
 
     private var chapterToDownload: Download? = null
 
@@ -248,7 +249,7 @@ class ReaderViewModel @JvmOverloads constructor(
                 if (chapterPageIndex >= 0) {
                     // Restore from SavedState
                     currentChapter.requestedPage = chapterPageIndex
-                } else if (!currentChapter.chapter.read || taihonPreferences.resumeLastSeenPage.get()) {
+                } else if (!currentChapter.chapter.read || TaihonReaderHooks.shouldResumeLastSeenPage()) {
                     currentChapter.requestedPage = currentChapter.chapter.last_page_read
                 }
                 chapterId = currentChapter.chapter.id!!
@@ -299,7 +300,7 @@ class ReaderViewModel @JvmOverloads constructor(
                     downloadProvider,
                     manga,
                     source,
-                    taihonPreferences.resumeLastSeenPage.get(),
+                    TaihonReaderHooks.shouldResumeLastSeenPage(),
                 )
 
                 loadChapter(loader!!, chapterList.first { chapterId == it.chapter.id })
@@ -601,7 +602,7 @@ class ReaderViewModel @JvmOverloads constructor(
         getCurrentChapter()?.let { readerChapter ->
             val endTime = Date()
             val sessionReadDuration = chapterReadStartTime?.let { endTime.time - it } ?: 0
-            if (incognitoMode || sessionReadDuration < 1000) return@let
+            if (incognitoMode || TaihonReaderHooks.shouldSkipHistoryUpdate(readerStartTime)) return@let
 
             val chapterId = readerChapter.chapter.id!!
             upsertHistory.await(HistoryUpdate(chapterId, endTime, sessionReadDuration))

@@ -77,8 +77,7 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.shouldExpandFAB
 import tachiyomi.source.local.isLocal
-import taihon.feature.manga.ui.TaihonMangaHooks.rememberScrollStateInfo
-import taihon.feature.manga.ui.components.TaihonMangaScrollControls
+import taihon.feature.manga.ui.TaihonMangaHooks
 import kotlin.time.Instant
 
 @Composable
@@ -272,7 +271,7 @@ private fun MangaScreenSmallImpl(
         )
     }
 
-    val scrollStateInfo = rememberScrollStateInfo(state, listItem, chapterListState)
+    val scrollStateInfo = TaihonMangaHooks.rememberScrollStateInfo(state, listItem, chapterListState)
 
     BackHandler(enabled = isAnySelected) {
         onAllChapterSelected(false)
@@ -364,7 +363,13 @@ private fun MangaScreenSmallImpl(
             indicatorPadding = PaddingValues(top = topPadding),
         ) {
             val layoutDirection = LocalLayoutDirection.current
-            Box(modifier = Modifier.fillMaxHeight()) {
+            TaihonMangaHooks.MangaScreenOverlay(
+                chapterListState = chapterListState,
+                currentlyReadingIndex = scrollStateInfo.currentlyReadingIndex,
+                isAnySelected = isAnySelected,
+                topPadding = topPadding,
+                centerOffset = scrollStateInfo.centerOffset.value,
+            ) {
                 VerticalFastScroller(
                     listState = chapterListState,
                     topContentPadding = topPadding,
@@ -457,14 +462,6 @@ private fun MangaScreenSmallImpl(
                         )
                     }
                 }
-
-                TaihonMangaScrollControls(
-                    chapterListState = chapterListState,
-                    currentlyReadingIndex = scrollStateInfo.currentlyReadingIndex,
-                    isAnySelected = isAnySelected,
-                    topPadding = topPadding,
-                    centerOffset = scrollStateInfo.centerOffset.value,
-                )
             }
         }
     }
@@ -536,7 +533,7 @@ fun MangaScreenLargeImpl(
     val chapterListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
-    val scrollStateInfo = rememberScrollStateInfo(state, listItem, chapterListState, headerOffset = 1)
+    val scrollStateInfo = TaihonMangaHooks.rememberScrollStateInfo(state, listItem, chapterListState, headerOffset = 1)
 
     BackHandler(enabled = isAnySelected) {
         onAllChapterSelected(false)
@@ -667,7 +664,13 @@ fun MangaScreenLargeImpl(
                     }
                 },
                 endContent = {
-                    Box(modifier = Modifier.fillMaxHeight()) {
+                    TaihonMangaHooks.MangaScreenOverlay(
+                        chapterListState = chapterListState,
+                        currentlyReadingIndex = scrollStateInfo.currentlyReadingIndex,
+                        isAnySelected = isAnySelected,
+                        topPadding = contentPadding.calculateTopPadding(),
+                        centerOffset = scrollStateInfo.centerOffset.value,
+                    ) {
                         VerticalFastScroller(
                             listState = chapterListState,
                             topContentPadding = contentPadding.calculateTopPadding(),
@@ -708,14 +711,6 @@ fun MangaScreenLargeImpl(
                                 )
                             }
                         }
-
-                        TaihonMangaScrollControls(
-                            chapterListState = chapterListState,
-                            currentlyReadingIndex = scrollStateInfo.currentlyReadingIndex,
-                            isAnySelected = isAnySelected,
-                            topPadding = contentPadding.calculateTopPadding(),
-                            centerOffset = scrollStateInfo.centerOffset.value,
-                        )
                     }
                 },
             )

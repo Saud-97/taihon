@@ -36,7 +36,7 @@ import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.theme.header
 import tachiyomi.presentation.core.util.plus
-import taihon.feature.browse.ui.SourcesTaihonHooks.SourceOptionsButtons
+import taihon.feature.browse.ui.TaihonSourcesHooks
 
 @Composable
 fun SourcesScreen(
@@ -176,7 +176,7 @@ fun SourceOptionsDialog(
         },
         text = {
             Column {
-                SourceOptionsButtons(onClickSettings, onClickUninstall)
+                TaihonSourcesHooks.SourceOptionsButtons(onClickSettings)
 
                 val textId = if (Pin.Pinned in source.pin) MR.strings.action_unpin else MR.strings.action_pin
                 Text(
@@ -193,6 +193,8 @@ fun SourceOptionsDialog(
                         .fillMaxWidth()
                         .padding(vertical = 16.dp),
                 )
+
+                TaihonSourcesHooks.SourceOptionsButtons(onClickUninstall = onClickUninstall)
             }
         },
         onDismissRequest = onDismiss,

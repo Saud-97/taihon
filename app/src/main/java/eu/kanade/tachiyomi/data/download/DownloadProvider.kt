@@ -5,13 +5,15 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.util.lang.Hash.md5
 import eu.kanade.tachiyomi.util.storage.DiskUtil
+import logcat.LogPriority
 import tachiyomi.core.common.i18n.stringResource
+import tachiyomi.core.common.storage.displayablePath
+import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.storage.service.StorageManager
 import tachiyomi.i18n.MR
-import taihon.feature.data.getTaihonMangaDir
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.IOException
@@ -31,6 +33,8 @@ class DownloadProvider(
     private val downloadsDir: UniFile?
         get() = storageManager.getDownloadsDirectory()
 
+    private val lock = Any()
+
     /**
      * Returns the download directory for a manga. For internal use only.
      *
@@ -38,14 +42,39 @@ class DownloadProvider(
      * @param source the source of the manga.
      */
     internal fun getMangaDir(mangaTitle: String, source: Source): Result<UniFile> {
-        return downloadsDir?.getTaihonMangaDir(
-            context = context,
-            mangaTitle = mangaTitle,
-            source = source,
-            getSourceDirName = ::getSourceDirName,
-            getMangaDirName = ::getMangaDirName,
-            findMangaDir = ::findMangaDir,
-        ) ?: Result.failure(IOException(context.stringResource(MR.strings.storage_failed_to_create_download_directory)))
+        findMangaDir(mangaTitle, source)?.let { return Result.success(it) }
+
+        return synchronized(lock) {
+            val downloadsDir = downloadsDir
+            if (downloadsDir == null) {
+                logcat(LogPriority.ERROR) { "Failed to create download directory" }
+                return@synchronized Result.failure(
+                    IOException(context.stringResource(MR.strings.storage_failed_to_create_download_directory)),
+                )
+            }
+
+            val sourceDirName = getSourceDirName(source)
+            val sourceDir = downloadsDir.findFile(sourceDirName) ?: downloadsDir.createDirectory(sourceDirName)
+            if (sourceDir == null) {
+                val displayablePath = downloadsDir.displayablePath + "/$sourceDirName"
+                logcat(LogPriority.ERROR) { "Failed to create source download directory: $displayablePath" }
+                return@synchronized Result.failure(
+                    IOException(context.stringResource(MR.strings.storage_failed_to_create_directory, displayablePath)),
+                )
+            }
+
+            val mangaDirName = getMangaDirName(mangaTitle)
+            val mangaDir = sourceDir.findFile(mangaDirName) ?: sourceDir.createDirectory(mangaDirName)
+            if (mangaDir == null) {
+                val displayablePath = sourceDir.displayablePath + "/$mangaDirName"
+                logcat(LogPriority.ERROR) { "Failed to create manga download directory: $displayablePath" }
+                return@synchronized Result.failure(
+                    IOException(context.stringResource(MR.strings.storage_failed_to_create_directory, displayablePath)),
+                )
+            }
+
+            Result.success(mangaDir)
+        }
     }
 
     /**

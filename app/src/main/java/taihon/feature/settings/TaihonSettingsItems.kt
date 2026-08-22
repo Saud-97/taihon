@@ -12,7 +12,6 @@ import tachiyomi.domain.backup.service.BackupPreferences
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import taihon.core.common.TaihonConstants
 import taihon.domain.preferences.TaihonPreferences
 import taihon.feature.ui.components.taihonBadge
 import uy.kohesive.injekt.Injekt
@@ -189,7 +188,7 @@ fun getTaihonWebtoonPaddingItem(): Preference.PreferenceItem<Int, Unit> {
 
     return Preference.PreferenceItem.SliderPreference(
         value = webtoonSidePadding,
-        valueRange = ReaderPreferences.WEBTOON_PADDING_MIN..TaihonConstants.WEBTOON_PADDING_MAX,
+        valueRange = ReaderPreferences.WEBTOON_PADDING_MIN..ReaderPreferences.WEBTOON_PADDING_MAX,
         title = stringResource(MR.strings.pref_webtoon_side_padding),
         valueString = numberFormat.format(webtoonSidePadding / 100f),
         onValueChanged = { readerPreferences.webtoonSidePadding.set(it) },

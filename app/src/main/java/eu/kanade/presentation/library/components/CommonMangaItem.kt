@@ -43,7 +43,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.BadgeGroup
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.selectedBackground
-import taihon.feature.library.ui.LibraryHooks.TaihonComfortableGridItemOverlay
+import taihon.feature.library.ui.TaihonLibraryHooks
 import tachiyomi.domain.manga.model.MangaCover as MangaCoverModel
 
 object CommonMangaItemDefaults {
@@ -209,7 +209,7 @@ fun MangaComfortableGridItem(
                 badgesStart = coverBadgeStart,
                 badgesEnd = coverBadgeEnd,
                 content = {
-                    TaihonComfortableGridItemOverlay(coverText, onClickContinueReading)
+                    TaihonLibraryHooks.TaihonComfortableGridItemOverlay(this, coverText, onClickContinueReading)
                     if (coverText == null && onClickContinueReading != null) {
                         ContinueReadingButton(
                             size = ContinueReadingButtonSizeLarge,

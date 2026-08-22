@@ -55,7 +55,7 @@ import tachiyomi.presentation.core.components.material.NavigationBar
 import tachiyomi.presentation.core.components.material.NavigationRail
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.pluralStringResource
-import taihon.feature.home.ui.TaihonHomeHooks.extensionUpdatesCount
+import taihon.feature.home.ui.TaihonHomeHooks
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -262,7 +262,7 @@ object HomeScreen : Screen() {
                         }
                     }
                     BrowseTab::class.isInstance(tab) -> {
-                        val count by extensionUpdatesCount()
+                        val count by TaihonHomeHooks.extensionUpdatesCount()
                         if (count > 0) {
                             Badge {
                                 val desc = pluralStringResource(

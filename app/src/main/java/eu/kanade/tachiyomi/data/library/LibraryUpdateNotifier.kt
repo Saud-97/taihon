@@ -37,7 +37,7 @@ import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.MR
-import taihon.feature.services.shouldShowTaihonLibraryQueueSizeWarning
+import taihon.feature.services.TaihonServiceHooks
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.math.RoundingMode
@@ -115,7 +115,7 @@ class LibraryUpdateNotifier(
      * Warn when excessively checking any single source.
      */
     fun showQueueSizeWarningNotificationIfNeeded(mangaToUpdate: List<LibraryManga>) {
-        if (!shouldShowTaihonLibraryQueueSizeWarning()) return
+        if (!TaihonServiceHooks.shouldShowTaihonLibraryQueueSizeWarning()) return
 
         val maxUpdatesFromSource = mangaToUpdate
             .groupBy { it.manga.source }

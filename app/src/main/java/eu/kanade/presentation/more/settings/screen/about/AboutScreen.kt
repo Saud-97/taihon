@@ -59,7 +59,7 @@ import tachiyomi.presentation.core.icons.Facebook
 import tachiyomi.presentation.core.icons.Github
 import tachiyomi.presentation.core.icons.Reddit
 import tachiyomi.presentation.core.icons.X
-import taihon.feature.settings.TAIHON_GITHUB_URL
+import taihon.feature.settings.TaihonSettingsHooks
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.time.Instant
@@ -201,7 +201,7 @@ object AboutScreen : Screen() {
                         LinkIcon(
                             label = "GitHub",
                             icon = CustomIcons.Github,
-                            url = TAIHON_GITHUB_URL,
+                            url = TaihonSettingsHooks.TAIHON_GITHUB_URL,
                         )
                     }
                 }

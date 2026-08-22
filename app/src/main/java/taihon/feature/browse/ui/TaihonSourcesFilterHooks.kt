@@ -7,13 +7,14 @@ import eu.kanade.presentation.browse.components.BaseSourceItem
 import eu.kanade.tachiyomi.ui.browse.source.SourcesFilterViewModel
 import tachiyomi.domain.source.model.Source
 
-object SourcesFilterTaihonHooks {
-    fun LazyListScope.localSourceItem(
+object TaihonSourcesFilterHooks {
+    fun localSourceItem(
+        scope: LazyListScope,
         state: SourcesFilterViewModel.State.Success,
         onClickSource: (Source) -> Unit,
     ) {
         state.localSource?.let { source ->
-            item(
+            scope.item(
                 key = "source-filter-local",
                 contentType = "source-filter-item",
             ) {

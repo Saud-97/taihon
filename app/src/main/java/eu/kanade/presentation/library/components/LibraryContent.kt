@@ -24,8 +24,7 @@ import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.model.LibraryDisplayMode
 import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.presentation.core.components.material.PullRefresh
-import taihon.feature.library.ui.LibraryHooks.taihonLibrarySearchDismiss
-import taihon.feature.library.ui.LibraryHooks.taihonLibrarySearchDismissDetailed
+import taihon.feature.library.ui.TaihonLibraryHooks
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -70,7 +69,8 @@ fun LibraryContent(
                 }
             }
             LibraryTabs(
-                modifier = Modifier.taihonLibrarySearchDismiss(
+                modifier = TaihonLibraryHooks.taihonLibrarySearchDismiss(
+                    modifier = Modifier,
                     enabled = currentSearchQuery == "",
                     onDismissSearch = onDismissSearch,
                 ),
@@ -87,12 +87,11 @@ fun LibraryContent(
         }
 
         PullRefresh(
-            modifier = Modifier
-                .weight(1f)
-                .taihonLibrarySearchDismissDetailed(
-                    enabled = currentSearchQuery == "",
-                    onDismissSearch = onDismissSearch,
-                ),
+            modifier = TaihonLibraryHooks.taihonLibrarySearchDismissDetailed(
+                modifier = Modifier.weight(1f),
+                enabled = currentSearchQuery == "",
+                onDismissSearch = onDismissSearch,
+            ),
             refreshing = isRefreshing,
             enabled = selection.isEmpty(),
             onRefresh = {

@@ -1,6 +1,5 @@
 package taihon.feature.library.ui
 
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -13,9 +12,9 @@ import tachiyomi.presentation.core.components.TriStateItem
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 
-object LibrarySettingsTaihonHooks {
+object TaihonLibrarySettingsHooks {
     @Composable
-    fun ColumnScope.FilterPageSources(viewModel: LibrarySettingsViewModel) {
+    fun FilterPageSources(viewModel: LibrarySettingsViewModel) {
         val sources by viewModel.sourcesFlow.collectAsState()
         if (sources.isNotEmpty()) {
             HeadingItem(MR.strings.label_sources)
@@ -43,7 +42,7 @@ object LibrarySettingsTaihonHooks {
     }
 
     @Composable
-    fun ColumnScope.DisplayPageSources(viewModel: LibrarySettingsViewModel) {
+    fun DisplayPageSources(viewModel: LibrarySettingsViewModel) {
         CheckboxItem(
             label = stringResource(MR.strings.label_sources) + " (${stringResource(MR.strings.ext_installed)})",
             pref = viewModel.taihonPreferences.sourceInstalledBadge,

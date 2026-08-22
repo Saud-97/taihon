@@ -37,8 +37,7 @@ import tachiyomi.presentation.core.components.SortItem
 import tachiyomi.presentation.core.components.TriStateItem
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import taihon.feature.library.ui.LibrarySettingsTaihonHooks.DisplayPageSources
-import taihon.feature.library.ui.LibrarySettingsTaihonHooks.FilterPageSources
+import taihon.feature.library.ui.TaihonLibrarySettingsHooks
 
 @Composable
 fun LibrarySettingsDialog(
@@ -154,7 +153,7 @@ private fun ColumnScope.FilterPage(
         }
     }
 
-    FilterPageSources(viewModel)
+    TaihonLibrarySettingsHooks.FilterPageSources(viewModel)
 }
 
 @Composable
@@ -281,7 +280,7 @@ private fun ColumnScope.DisplayPage(
         label = stringResource(MR.strings.action_display_local_badge),
         pref = viewModel.libraryPreferences.localBadge,
     )
-    DisplayPageSources(viewModel)
+    TaihonLibrarySettingsHooks.DisplayPageSources(viewModel)
     CheckboxItem(
         label = stringResource(MR.strings.action_display_language_badge),
         pref = viewModel.libraryPreferences.languageBadge,

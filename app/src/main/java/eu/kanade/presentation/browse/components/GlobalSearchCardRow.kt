@@ -22,6 +22,7 @@ import tachiyomi.domain.manga.model.asMangaCover
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
+import taihon.feature.browse.TaihonSearchEnricher
 import taihon.feature.browse.ui.TaihonSearchBadgeOverlay
 import taihon.feature.browse.ui.rememberTaihonSearchCoverText
 
@@ -29,7 +30,7 @@ import taihon.feature.browse.ui.rememberTaihonSearchCoverText
 fun GlobalSearchCardRow(
     titles: List<Manga>,
     getManga: @Composable (Manga) -> State<Manga>,
-    getMangaDetails: @Composable (Manga) -> State<taihon.feature.browse.TaihonSearchEnricher.MangaDetails?>,
+    getMangaDetails: @Composable (Manga) -> State<TaihonSearchEnricher.MangaDetails?>,
     onClick: (Manga) -> Unit,
     onLongClick: (Manga) -> Unit,
 ) {

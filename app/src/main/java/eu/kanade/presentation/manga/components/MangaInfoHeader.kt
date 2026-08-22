@@ -106,7 +106,7 @@ import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.clickableNoIndication
 import tachiyomi.presentation.core.util.secondaryItemAlpha
-import taihon.feature.manga.ui.TaihonMangaHooks.ContinueReadingHeader
+import taihon.feature.manga.ui.TaihonMangaHooks
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.math.roundToInt
@@ -262,7 +262,7 @@ fun ExpandableMangaDescription(
     onResumeClicked: () -> Unit = {},
 ) {
     Column(modifier = modifier) {
-        ContinueReadingHeader(nextUnreadChapter, onResumeClicked)
+        TaihonMangaHooks.ContinueReadingHeader(nextUnreadChapter, onResumeClicked)
 
         val (expanded, onExpanded) = rememberSaveable {
             mutableStateOf(defaultExpandState)

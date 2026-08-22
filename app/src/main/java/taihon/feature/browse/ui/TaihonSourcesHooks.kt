@@ -1,7 +1,6 @@
 package taihon.feature.browse.ui
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
@@ -11,11 +10,11 @@ import androidx.compose.ui.unit.dp
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
-object SourcesTaihonHooks {
+object TaihonSourcesHooks {
     @Composable
-    fun ColumnScope.SourceOptionsButtons(
-        onClickSettings: (() -> Unit)?,
-        onClickUninstall: (() -> Unit)?,
+    fun SourceOptionsButtons(
+        onClickSettings: (() -> Unit)? = null,
+        onClickUninstall: (() -> Unit)? = null,
     ) {
         onClickSettings?.let {
             Text(

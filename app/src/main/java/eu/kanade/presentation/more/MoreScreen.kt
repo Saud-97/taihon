@@ -27,7 +27,7 @@ import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
-import taihon.feature.settings.isSupportItemVisible
+import taihon.feature.settings.TaihonSettingsHooks
 
 @Composable
 fun MoreScreen(
@@ -134,7 +134,7 @@ fun MoreScreen(
                     onPreferenceClick = onClickSettings,
                 )
             }
-            if (isSupportItemVisible()) {
+            if (TaihonSettingsHooks.isSupportItemVisible()) {
                 item {
                     TextPreferenceWidget(
                         title = "Support Us",

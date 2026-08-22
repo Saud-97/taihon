@@ -36,6 +36,7 @@
     <string name="label_extensions">Extensions</string>
     <string name="label_extension_info">Extension info</string>
     <string name="label_help">Help</string>
+    <string name="label_support_us">Support Us</string>
     <string name="label_default">Default</string>
     <string name="label_warning">Warning</string>
     <string name="label_auto">Auto</string>
@@ -321,10 +322,6 @@
     <string name="pref_mark_duplicate_read_chapter_read_new">After fetching new chapter</string>
 
     <string name="pref_hide_missing_chapter_indicators">Hide missing chapter indicators</string>
-    <string name="pref_resume_last_seen_page">Resume last seen page</string>
-    <string name="pref_resume_last_seen_page_summary">Resuming from History tab returns to the last
-        seen page, even the chapter was fully read, instead of opening next chapter.
-    </string>
     <string name="pref_disallow_non_ascii_filenames">Disallow non-ASCII filenames</string>
     <string name="pref_disallow_non_ascii_filenames_details">Ensures compatibility with certain storage media that don't support Unicode. When this is enabled, you'll need to manually rename source and manga folders by replacing non-ASCII characters with their lowercase UTF-8 hexadecimal representations. Chapter files don't need to be renamed.</string>
 
@@ -394,8 +391,6 @@
     <string name="pref_double_tap_zoom">Double tap to zoom</string>
     <string name="pref_cutout_short">Show content in cutout area</string>
     <string name="pref_page_transitions">Animate page transitions</string>
-    <string name="pref_page_transition_distance">Scroll distance</string>
-    <string name="pref_page_transition_speed">Animation speed</string>
     <string name="pref_flash_page">Flash on page change</string>
     <string name="pref_flash_page_summ">Reduces ghosting on e-ink displays</string>
     <string name="pref_flash_duration">Flash duration</string>
@@ -415,10 +410,6 @@
     <string name="pref_hardware_bitmap_threshold">Custom hardware bitmap threshold</string>
     <string name="pref_hardware_bitmap_threshold_default">Default (%d)</string>
     <string name="pref_hardware_bitmap_threshold_summary">If reader loads a blank image incrementally reduce the threshold.\nSelected: %s</string>
-    <string name="pref_allow_hardware_bitmap_covers">Allow hardware bitmaps for covers</string>
-    <string name="pref_allow_hardware_bitmap_covers_summary">Disable this if covers periodically
-        appear blank on your library
-    </string>
     <string name="pref_always_decode_long_strip_with_ssiv_2">Use legacy decoder for long strip reader</string>
     <string name="pref_always_decode_long_strip_with_ssiv_summary">Affects performance. Only enable if reducing bitmap threshold doesn\'t fix blank image issues</string>
     <string name="pref_display_profile">Custom display profile</string>
@@ -542,10 +533,6 @@
     <string name="pref_download_concurrent_pages_summary">Pages downloaded simultaneously per
         chapter
     </string>
-    <string name="pref_download_concurrent_chapters">Concurrent chapter downloads</string>
-    <string name="pref_download_concurrent_chapters_summary">Chapters downloaded simultaneously per
-        source
-    </string>
 
     <!-- Tracking section -->
     <string name="tracking_guide">Tracking guide</string>
@@ -560,22 +547,6 @@
 
       <!-- Browse section -->
     <string name="pref_hide_in_library_items">Hide entries already in library</string>
-    <string name="pref_global_search_enrich_results">Enrich search results with manga details
-    </string>
-    <string name="pref_global_search_enrich_results_summary">Search results are progressively
-        enriched with the latest available chapter, total chapter count, and comprehensive manga
-        metadata.
-    </string>
-    <string name="pref_extension_update_hide_browse_badge">Hide pending extension update badge on
-        the Browse tab
-    </string>
-    <string name="pref_smart_apostrophe_normalization">Smart apostrophe matching</string>
-    <string name="pref_smart_apostrophe_normalization_summary">Find more search results by matching
-        apostrophe variations and fuzzy forms (e.g. JoJo's = JoJo’s = JoJo).
-    </string>
-    <string name="pref_smart_apostrophe_normalization_exceptions">Extensions excluded from smart
-        apostrophe matching
-    </string>
       <!-- Data and storage section -->
     <string name="pref_storage_location">Storage location</string>
     <string name="pref_storage_location_info">Used for automatic backups, chapter downloads, and local source.</string>
@@ -584,8 +555,6 @@
     <string name="pref_restore_backup">Restore backup</string>
     <string name="pref_restore_backup_summ">Restore library from backup file</string>
     <string name="pref_backup_interval">Automatic backup frequency</string>
-    <string name="pref_backup_retention">Backup retention</string>
-    <string name="pref_backup_retention_info">Number of automatic backups to keep</string>
     <string name="action_create">Create</string>
     <string name="backup_created">Backup created</string>
     <string name="invalid_backup_file">Invalid backup file:</string>
@@ -1086,4 +1055,79 @@
     <string name="migrationListScreen.migrateDialog.cancelLabel">Cancel</string>
     <string name="migrationListScreen.progressDialog.cancelLabel">Cancel</string>
     <string name="migrationListScreen.matchWithoutChapterToast">No chapters found, this entry cannot be used for migration</string>
+
+    <string name="supportUsScreen.perks">Patrons get access to exclusive channels, with more perks
+        to come.
+    </string>
+    <string name="supportUsScreen.donationPlatform.patreon">Patreon (preferred)</string>
+    <string name="supportUsScreen.donationPlatform.opencollective">OpenCollective</string>
+    <string name="supportUsScreen.currentlySupportedBy">Mihon is currently backed by %d+ patrons. We
+        want to thank each and everyone of you. Let\'s make Mihon even better together.
+    </string>
+    <string name="supportUsScreen.contactForDetailsMessage">For alternative options or any related
+        questions, join our Discord server.
+    </string>
+    <string name="supportUsScreen.contactPlatform">Discord</string>
+    <string name="donationCampaign.title">Enjoying the app?</string>
+    <string name="donationCampaign.paragraph1">Hi! I’m the main developer behind Mihon, and I’d like
+        to ask you to consider supporting its development financially. With enough support, I’ll be
+        able to work on Mihon full-time and focus on long-standing issues as well as highly
+        requested features.
+    </string>
+    <string name="donationCampaign.paragraph2">You can donate through either Patreon (preferred) or
+        OpenCollective. If you have questions or would like to support using alternative methods,
+        feel free to reach out to me through Mihon\'s Discord server.
+    </string>
+    <string name="donationCampaign.paragraph3">Regardless, Mihon will continue to be maintained by
+        me and the volunteers, and it will stay open source.
+    </string>
+    <string name="donationCampaign.contactPlatform">Discord</string>
+    <string name="donationCampaign.dismiss">Dismiss</string>
+
+
+
+
+    <!-- Taihon-specific strings -->
+
+    <!-- Library section -->
+    <string name="pref_resume_last_seen_page">Resume last seen page</string>
+    <string name="pref_resume_last_seen_page_summary">Resuming from History tab returns to the last
+        seen page, even the chapter was fully read, instead of opening next chapter.
+    </string>
+    <string name="pref_allow_hardware_bitmap_covers">Allow hardware bitmaps for covers</string>
+    <string name="pref_allow_hardware_bitmap_covers_summary">Disable this if covers periodically
+        appear blank on your library
+    </string>
+
+    <!-- Reader section -->
+    <string name="pref_page_transition_distance">Scroll distance</string>
+    <string name="pref_page_transition_speed">Animation speed</string>
+
+    <!-- Downloads section -->
+    <string name="pref_download_concurrent_chapters">Concurrent chapter downloads</string>
+    <string name="pref_download_concurrent_chapters_summary">Chapters downloaded simultaneously per
+        source
+    </string>
+
+    <!-- Browse section -->
+    <string name="pref_global_search_enrich_results">Enrich search results with manga details
+    </string>
+    <string name="pref_global_search_enrich_results_summary">Search results are progressively
+        enriched with the latest available chapter, total chapter count, and comprehensive manga
+        metadata.
+    </string>
+    <string name="pref_extension_update_hide_browse_badge">Hide pending extension update badge on
+        the Browse tab
+    </string>
+    <string name="pref_smart_apostrophe_normalization">Smart apostrophe matching</string>
+    <string name="pref_smart_apostrophe_normalization_summary">Find more search results by matching
+        apostrophe variations and fuzzy forms (e.g. JoJo's = JoJo’s = JoJo).
+    </string>
+    <string name="pref_smart_apostrophe_normalization_exceptions">Extensions excluded from smart
+        apostrophe matching
+    </string>
+
+    <!-- Data section -->
+    <string name="pref_backup_retention">Backup retention</string>
+    <string name="pref_backup_retention_info">Number of automatic backups to keep</string>
 </resources>

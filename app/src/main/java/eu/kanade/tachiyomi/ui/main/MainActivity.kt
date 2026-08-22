@@ -96,6 +96,7 @@ import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.release.interactor.GetApplicationRelease
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.util.collectAsState
+import taihon.feature.settings.TaihonSettingsHooks
 import uy.kohesive.injekt.injectLazy
 
 class MainActivity : BaseActivity() {
@@ -235,6 +236,7 @@ class MainActivity : BaseActivity() {
                 if (!isBenchmarkBuildType) {
                     CheckForUpdates()
                     ShowOnboarding()
+                    ShowDonationCampaign()
                 }
             }
         }
@@ -319,6 +321,11 @@ class MainActivity : BaseActivity() {
                 navigator.push(OnboardingScreen())
             }
         }
+    }
+
+    @Composable
+    private fun ShowDonationCampaign() {
+        if (!TaihonSettingsHooks.shouldShowDonationCampaign()) return
     }
 
     /**
