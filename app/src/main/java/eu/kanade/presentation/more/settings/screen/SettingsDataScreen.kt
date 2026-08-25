@@ -73,6 +73,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
+import taihon.feature.cloud.ui.TaihonCloudSettingsHooks
 import taihon.feature.settings.getTaihonBackupGroupItems
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -105,9 +106,9 @@ object SettingsDataScreen : SearchableSettings {
         return listOf(
             getStorageLocationPref(storagePreferences = storagePreferences),
             Preference.PreferenceItem.InfoPreference(stringResource(MR.strings.pref_storage_location_info)),
-
-            getBackupAndRestoreGroup(backupPreferences = backupPreferences),
             getDataGroup(),
+            getBackupAndRestoreGroup(backupPreferences = backupPreferences),
+            TaihonCloudSettingsHooks.getGroup(),
             getExportGroup(),
         )
     }

@@ -19,6 +19,7 @@ import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.storage.service.StoragePreferences
 import tachiyomi.domain.upcoming.service.UpcomingPreferences
 import tachiyomi.domain.updates.service.UpdatesPreferences
+import taihon.domain.preferences.CloudPreferences
 import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
@@ -79,8 +80,12 @@ class PreferenceModule(val app: Application) : InjektModule {
         addSingletonFactory {
             BasePreferences(app, get())
         }
+
         addSingletonFactory {
             TaihonPreferences(get())
+        }
+        addSingletonFactory {
+            CloudPreferences(get())
         }
     }
 }

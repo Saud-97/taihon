@@ -54,6 +54,8 @@ object Notifications {
     const val CHANNEL_BACKUP_RESTORE_PROGRESS = "backup_restore_progress_channel"
     const val ID_BACKUP_PROGRESS = -501
     const val ID_RESTORE_PROGRESS = -503
+    const val ID_CLOUD_MIRROR_PROGRESS = -505
+    const val ID_CLOUD_MIRROR_ERROR = -506
     const val CHANNEL_BACKUP_RESTORE_COMPLETE = "backup_restore_complete_channel_v2"
     const val ID_BACKUP_COMPLETE = -502
     const val ID_RESTORE_COMPLETE = -504

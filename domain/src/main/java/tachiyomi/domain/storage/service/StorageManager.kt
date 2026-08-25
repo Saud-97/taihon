@@ -76,8 +76,11 @@ class StorageManager(
     fun getLocalSourceDirectory(): UniFile? {
         return localSourceDir ?: baseDir?.createDirectory(LOCAL_SOURCE_PATH).also { localSourceDir = it }
     }
+
+    companion object {
+        const val AUTOMATIC_BACKUPS_PATH = "autobackup"
+    }
 }
 
-private const val AUTOMATIC_BACKUPS_PATH = "autobackup"
 private const val DOWNLOADS_PATH = "downloads"
 private const val LOCAL_SOURCE_PATH = "local"

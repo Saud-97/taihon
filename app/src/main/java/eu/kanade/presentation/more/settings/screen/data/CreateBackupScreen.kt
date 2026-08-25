@@ -30,8 +30,9 @@ import tachiyomi.presentation.core.components.LazyColumnWithAction
 import tachiyomi.presentation.core.components.SectionCard
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
+import taihon.feature.cloud.TaihonCloudHooks
 
-class CreateBackupScreen : Screen() {
+class CreateBackupScreen(private val isCloudBackup: Boolean = false) : Screen() {
 
     @Composable
     override fun Content() {
@@ -68,6 +69,10 @@ class CreateBackupScreen : Screen() {
                 actionLabel = stringResource(MR.strings.action_create),
                 actionEnabled = state.options.canCreate(),
                 onClickAction = {
+                    if (isCloudBackup) {
+                        TaihonCloudHooks.onManualBackupClick(navigator, state.options)
+                        return@LazyColumnWithAction
+                    }
                     if (!BackupCreateJob.isManualJobRunning(context)) {
                         try {
                             chooseBackupDir.launch(BackupCreator.getFilename())

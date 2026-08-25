@@ -27,6 +27,7 @@ import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.backup.service.BackupPreferences
 import tachiyomi.domain.storage.service.StorageManager
+import taihon.feature.cloud.TaihonCloudHooks
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
@@ -55,6 +56,9 @@ class BackupCreateJob(private val context: Context, workerParams: WorkerParamete
             if (!isAutoBackup) {
                 notifier.showBackupComplete(UniFile.fromUri(context, location.toUri())!!)
             }
+
+            TaihonCloudHooks.onBackupCreated(context, location)
+
             Result.success()
         } catch (e: Exception) {
             logcat(LogPriority.ERROR, e)

@@ -24,6 +24,10 @@ if (Config.includeTelemetry) {
     }
 }
 
+if (Config.includeCloud) {
+    pluginManager.apply(libs.plugins.google.services.get().pluginId)
+}
+
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 
 android {
@@ -39,6 +43,7 @@ android {
         buildConfigField("String", "COMMIT_SHA", "\"${getLatestCommitSha()}\"")
         buildConfigField("String", "BUILD_TIME", "\"${getBuildTime(useLatestCommitTime = false)}\"")
         buildConfigField("boolean", "TELEMETRY_INCLUDED", "${Config.includeTelemetry}")
+        buildConfigField("boolean", "CLOUD_INCLUDED", "${Config.includeCloud}")
         buildConfigField("boolean", "UPDATER_ENABLED", "${Config.enableUpdater}")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -154,6 +159,7 @@ android {
                 "META-INF/**/LICENSE.txt",
                 "META-INF/*.properties",
                 "META-INF/*.version",
+                "META-INF/INDEX.LIST",
                 "META-INF/DEPENDENCIES",
                 "META-INF/LICENSE",
                 "META-INF/NOTICE",
@@ -218,6 +224,7 @@ dependencies {
     implementation(projects.presentationCore)
     implementation(projects.presentationWidget)
     implementation(projects.telemetry)
+    implementation(projects.cloudFeature)
 
     // Compose
     implementation(libs.androidx.activity.compose)

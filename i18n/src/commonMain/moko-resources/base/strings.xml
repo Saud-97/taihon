@@ -1130,4 +1130,26 @@
     <!-- Data section -->
     <string name="pref_backup_retention">Backup retention</string>
     <string name="pref_backup_retention_info">Number of automatic backups to keep</string>
+
+    <!-- Cloud strings -->
+    <string name="cloud_backups_label">Cloud Backups</string>
+    <string name="cloud_backup_error">Cloud Backup Error</string>
+    <string name="pref_auto_mirror_to_cloud">Auto mirror to Google Drive</string>
+    <string name="pref_auto_mirror_to_cloud_summary">Automatically sync your automatic backups to
+        Google Drive
+    </string>
+    <string name="label_google_drive">Google Drive</string>
+    <string name="cloud_backup_not_supported">Google Drive is not available in FOSS builds.</string>
+    <string name="delete_folder_confirmation">Are you sure you want to delete the folder \"%s\" and
+        all its contents?
+    </string>
+    <string name="delete_file_confirmation">Are you sure you want to delete the file \"%s\"?
+    </string>
+    <string name="deleting">Deleting…</string>
+    <string name="cloud_marker_content">This folder is used by %1$s to store cloud backups. The
+        folder can be moved or renamed in Google Drive without breaking backups, because %1$s stores
+        the folder ID and re-links to it automatically based on this marker file. Keep in mind %1$s
+        has restrictions on Google
+        Drive and can only see folders and files created by %1$s.
+    </string>
 </resources>
