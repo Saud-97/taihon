@@ -63,10 +63,7 @@ import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.track.interactor.GetTracksPerManga
 import tachiyomi.domain.track.model.Track
 import tachiyomi.source.local.isLocal
-import taihon.domain.preferences.TaihonPreferences
-import taihon.feature.library.createLibraryBadgeSource
-import taihon.feature.library.getTaihonSourceFiltersFlow
-import taihon.feature.library.libraryItemTaihonSourceFilter
+import taihon.feature.library.TaihonLibraryHelper
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.random.Random
@@ -88,7 +85,6 @@ class LibraryViewModel(
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
     private val downloadCache: DownloadCache = Injekt.get(),
-    private val taihonPreferences: TaihonPreferences = Injekt.get(),
     private val trackerManager: TrackerManager = Injekt.get(),
 ) : StateViewModel<LibraryViewModel.State>(State()) {
 
@@ -102,14 +98,11 @@ class LibraryViewModel(
                 getCategories.subscribe(),
                 getFavoritesFlow(),
                 combine(getTracksPerManga.subscribe(), getTrackingFiltersFlow(), ::Pair),
-                combine(getSourceFiltersFlow(), getLibraryItemPreferencesFlow(), ::Pair),
-            ) { searchQuery, categories, favorites, tracksData, sourceData ->
-                val (tracksMap, trackingFilters) = tracksData
-                val (sourceFiltersPair, itemPreferences) = sourceData
-                val (sourceFilters, orphanedSourceFilter) = sourceFiltersPair
+                getLibraryItemPreferencesFlow(),
+            ) { searchQuery, categories, favorites, (tracksMap, trackingFilters), itemPreferences ->
                 val showSystemCategory = favorites.any { it.libraryManga.categories.contains(0) }
                 val filteredFavorites = favorites
-                    .applyFilters(tracksMap, trackingFilters, sourceFilters, orphanedSourceFilter, itemPreferences)
+                    .applyFilters(tracksMap, trackingFilters, itemPreferences)
                     .let { libraryItems ->
                         if (searchQuery.isNullOrEmpty()) {
                             libraryItems
@@ -175,8 +168,7 @@ class LibraryViewModel(
         combine(
             getLibraryItemPreferencesFlow(),
             getTrackingFiltersFlow(),
-            getSourceFiltersFlow(),
-        ) { prefs, trackFilters, (sourceFilters, orphanedSourceFilter) ->
+        ) { prefs, trackFilters ->
             listOf(
                 prefs.filterDownloaded,
                 prefs.filterUnread,
@@ -185,10 +177,9 @@ class LibraryViewModel(
                 prefs.filterCompleted,
                 prefs.filterIntervalCustom,
                 *trackFilters.values.toTypedArray(),
-                *sourceFilters.values.toTypedArray(),
-                orphanedSourceFilter,
             )
-                .any { it != TriState.DISABLED }
+                .any { it != TriState.DISABLED } ||
+                TaihonLibraryHelper.isAnyFilterEnabled(prefs.filterSource)
         }
             .distinctUntilChanged()
             .onEach {
@@ -202,8 +193,6 @@ class LibraryViewModel(
     private fun List<LibraryItem>.applyFilters(
         trackMap: Map<Long, List<Track>>,
         trackingFilter: Map<Long, TriState>,
-        sourceFilter: Map<Long, TriState>,
-        orphanedSourceFilter: TriState,
         preferences: ItemPreferences,
     ): List<LibraryItem> {
         val downloadedOnly = preferences.globalFilterDownloaded
@@ -268,7 +257,7 @@ class LibraryViewModel(
                 filterFnCompleted(it) &&
                 filterFnIntervalCustom(it) &&
                 filterFnTracking(it) &&
-                libraryItemTaihonSourceFilter(it, sourceManager, sourceFilter, orphanedSourceFilter)
+                TaihonLibraryHelper.filterFnSource(it, preferences.filterSource)
         }
     }
 
@@ -373,8 +362,6 @@ class LibraryViewModel(
             libraryPreferences.unreadBadge.changes(),
             libraryPreferences.localBadge.changes(),
             libraryPreferences.languageBadge.changes(),
-            taihonPreferences.sourceInstalledBadge.changes(),
-            taihonPreferences.sourceOrphanedBadge.changes(),
             libraryPreferences.autoUpdateMangaRestrictions.changes(),
 
             preferences.downloadedOnly.changes(),
@@ -384,22 +371,22 @@ class LibraryViewModel(
             libraryPreferences.filterBookmarked.changes(),
             libraryPreferences.filterCompleted.changes(),
             libraryPreferences.filterIntervalCustom.changes(),
+            TaihonLibraryHelper.getStateFlow(),
         ) {
             ItemPreferences(
                 downloadBadge = it[0] as Boolean,
                 unreadBadge = it[1] as Boolean,
                 localBadge = it[2] as Boolean,
                 languageBadge = it[3] as Boolean,
-                sourceInstalledBadge = it[4] as Boolean,
-                sourceOrphanedBadge = it[5] as Boolean,
-                skipOutsideReleasePeriod = LibraryPreferences.MANGA_OUTSIDE_RELEASE_PERIOD in (it[6] as Set<*>),
-                globalFilterDownloaded = it[7] as Boolean,
-                filterDownloaded = it[8] as TriState,
-                filterUnread = it[9] as TriState,
-                filterStarted = it[10] as TriState,
-                filterBookmarked = it[11] as TriState,
-                filterCompleted = it[12] as TriState,
-                filterIntervalCustom = it[13] as TriState,
+                skipOutsideReleasePeriod = LibraryPreferences.MANGA_OUTSIDE_RELEASE_PERIOD in (it[4] as Set<*>),
+                globalFilterDownloaded = it[5] as Boolean,
+                filterDownloaded = it[6] as TriState,
+                filterUnread = it[7] as TriState,
+                filterStarted = it[8] as TriState,
+                filterBookmarked = it[9] as TriState,
+                filterCompleted = it[10] as TriState,
+                filterIntervalCustom = it[11] as TriState,
+                filterSource = it[12] as TaihonLibraryHelper.State,
             )
         }
     }
@@ -439,11 +426,9 @@ class LibraryViewModel(
                         } else {
                             ""
                         },
-                        source = createLibraryBadgeSource(
-                            sourceManager = sourceManager,
+                        source = TaihonLibraryHelper.createBadge(
                             sourceId = manga.manga.source,
-                            sourceInstalledBadge = preferences.sourceInstalledBadge,
-                            sourceOrphanedBadge = preferences.sourceOrphanedBadge,
+                            state = preferences.filterSource,
                         ),
                     ),
                 )
@@ -467,10 +452,6 @@ class LibraryViewModel(
                 combine(filterFlows) { it.toMap() }
             }
         }
-    }
-
-    private fun getSourceFiltersFlow(): Flow<Pair<Map<Long, TriState>, TriState>> {
-        return getTaihonSourceFiltersFlow(sourceManager, taihonPreferences)
     }
 
     /**
@@ -776,8 +757,6 @@ class LibraryViewModel(
         val unreadBadge: Boolean,
         val localBadge: Boolean,
         val languageBadge: Boolean,
-        val sourceInstalledBadge: Boolean,
-        val sourceOrphanedBadge: Boolean,
         val skipOutsideReleasePeriod: Boolean,
 
         val globalFilterDownloaded: Boolean,
@@ -787,6 +766,7 @@ class LibraryViewModel(
         val filterBookmarked: TriState,
         val filterCompleted: TriState,
         val filterIntervalCustom: TriState,
+        val filterSource: TaihonLibraryHelper.State,
     )
 
     @Immutable
