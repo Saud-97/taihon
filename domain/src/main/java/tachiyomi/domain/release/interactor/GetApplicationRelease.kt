@@ -23,28 +23,39 @@ class GetApplicationRelease(
     }
 
     private fun isNewVersion(
-        isPreview: Boolean,
+        isNightly: Boolean,
         commitCount: Int,
         versionName: String,
         versionTag: String,
     ): Boolean {
-        // Removes prefixes like "v" and any non-numeric characters except dots
-        val oldVersion = versionName.replace("[^\\d.]".toRegex(), "").split(".")
-        val newVersion = versionTag.replace("[^\\d.]".toRegex(), "").split(".")
+        val newVersionDigits = versionTag.replace("[^\\d.]".toRegex(), "")
 
-        val maxLength = maxOf(oldVersion.size, newVersion.size)
+        // Nightly builds: Compare commit revision directly (e.g., "r1234" -> 1234)
+        if (isNightly) {
+            val newCommitCount = newVersionDigits.toIntOrNull() ?: return false
+            return newCommitCount > commitCount
+        }
+
+        // Release builds: Compare semantic versioning segments (e.g., "v1.2.3" -> [1, 2, 3])
+        val oldParts = versionName.extractVersionParts()
+        val newParts = newVersionDigits.extractVersionParts()
+
+        val maxLength = maxOf(oldParts.size, newParts.size)
         for (i in 0 until maxLength) {
-            val oldPart = oldVersion.getOrNull(i)?.toIntOrNull() ?: 0
-            val newPart = newVersion.getOrNull(i)?.toIntOrNull() ?: 0
+            val oldPart = oldParts.getOrElse(i) { 0 }
+            val newPart = newParts.getOrElse(i) { 0 }
 
-            if (newPart > oldPart) {
-                return true
-            } else if (newPart < oldPart) {
-                return false
-            }
+            if (newPart > oldPart) return true
+            if (newPart < oldPart) return false
         }
 
         return false
+    }
+
+    private fun String.extractVersionParts(): List<Int> {
+        return this.replace("[^\\d.]".toRegex(), "")
+            .split(".")
+            .mapNotNull { it.toIntOrNull() }
     }
 
     data class Arguments(
