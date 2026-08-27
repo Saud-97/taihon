@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import eu.kanade.presentation.browse.components.BaseSourceItem
 import eu.kanade.tachiyomi.ui.browse.source.SourcesFilterViewModel
 import tachiyomi.domain.source.model.Source
+import taihon.feature.browse.TaihonSourcesFilterHelper
 
 object TaihonSourcesFilterHooks {
     fun localSourceItem(
@@ -13,7 +14,8 @@ object TaihonSourcesFilterHooks {
         state: SourcesFilterViewModel.State.Success,
         onClickSource: (Source) -> Unit,
     ) {
-        state.localSource?.let { source ->
+        val localSource = state.items[TaihonSourcesFilterHelper.TAIHON_LOCAL_KEY]?.firstOrNull()
+        localSource?.let { source ->
             scope.item(
                 key = "source-filter-local",
                 contentType = "source-filter-item",

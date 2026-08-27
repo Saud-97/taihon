@@ -21,9 +21,7 @@ import eu.kanade.domain.source.interactor.GetIncognitoState
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.domain.track.interactor.AddTracks
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.model.FilterList
-import eu.kanade.tachiyomi.util.lang.normalizeApostrophe
 import eu.kanade.tachiyomi.util.removeCovers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -49,7 +47,7 @@ import tachiyomi.domain.manga.model.MangaWithChapterCount
 import tachiyomi.domain.manga.model.toMangaUpdate
 import tachiyomi.domain.source.interactor.GetRemoteManga
 import tachiyomi.domain.source.service.SourceManager
-import taihon.domain.preferences.TaihonPreferences
+import taihon.feature.browse.TaihonBrowseSourceHelper
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.time.Clock
@@ -60,7 +58,6 @@ class BrowseSourceViewModel(
     listingQuery: String?,
     sourceManager: SourceManager = Injekt.get(),
     sourcePreferences: SourcePreferences = Injekt.get(),
-    private val taihonPreferences: TaihonPreferences = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
     private val getRemoteManga: GetRemoteManga = Injekt.get(),
@@ -72,7 +69,6 @@ class BrowseSourceViewModel(
     private val updateManga: UpdateManga = Injekt.get(),
     private val addTracks: AddTracks = Injekt.get(),
     getIncognitoState: GetIncognitoState = Injekt.get(),
-    private val extensionManager: ExtensionManager = Injekt.get(),
 ) : StateViewModel<BrowseSourceViewModel.State>(State(Listing.valueOf(listingQuery))) {
 
     companion object {
@@ -122,14 +118,10 @@ class BrowseSourceViewModel(
     val mangaPagerFlowFlow = state.map { it.listing }
         .distinctUntilChanged()
         .map { listing ->
-            val pkgName = extensionManager.getExtensionPackage(sourceId)
-            val isNormalized = taihonPreferences.smartApostropheNormalization.get() &&
-                pkgName !in taihonPreferences.smartApostropheNormalizationExceptions.get()
-            val query = if (isNormalized) {
-                listing.query?.normalizeApostrophe(fuzzy = true) ?: ""
-            } else {
-                listing.query ?: ""
-            }
+            val query = TaihonBrowseSourceHelper.normalizeQuery(
+                query = listing.query,
+                sourceId = sourceId,
+            )
 
             Pager(PagingConfig(pageSize = 25)) {
                 getRemoteManga(sourceId, query, listing.filters)

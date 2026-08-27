@@ -15,14 +15,13 @@ import eu.kanade.presentation.browse.SourceOptionsDialog
 import eu.kanade.presentation.browse.SourcesScreen
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.TabContent
-import eu.kanade.tachiyomi.ui.browse.extension.details.ExtensionDetailsScreen
-import eu.kanade.tachiyomi.ui.browse.extension.details.SourcePreferencesScreen
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen
 import eu.kanade.tachiyomi.ui.browse.source.globalsearch.GlobalSearchScreen
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
+import taihon.feature.browse.ui.TaihonSourcesHooks
 
 @Composable
 fun Screen.sourcesTab(): TabContent {
@@ -59,19 +58,7 @@ fun Screen.sourcesTab(): TabContent {
                 val source = dialog.source
                 SourceOptionsDialog(
                     source = source,
-                    onClickSettings = if (dialog.canOpenSettings) {
-                        {
-                            dialog.extensionPkgName?.let {
-                                navigator.push(ExtensionDetailsScreen(it))
-                            }
-                            if (dialog.hasCustomSettings) {
-                                navigator.push(SourcePreferencesScreen(source.id))
-                            }
-                            viewModel.closeDialog()
-                        }
-                    } else {
-                        null
-                    },
+                    onClickSettings = TaihonSourcesHooks.rememberSettingsAction(navigator, viewModel::closeDialog),
                     onClickPin = {
                         viewModel.togglePin(source)
                         viewModel.closeDialog()
@@ -80,14 +67,7 @@ fun Screen.sourcesTab(): TabContent {
                         viewModel.toggleSource(source)
                         viewModel.closeDialog()
                     },
-                    onClickUninstall = if (dialog.canUninstall) {
-                        {
-                            viewModel.uninstallExtension(source)
-                            viewModel.closeDialog()
-                        }
-                    } else {
-                        null
-                    },
+                    onClickUninstall = TaihonSourcesHooks.rememberUninstallAction(viewModel::closeDialog),
                     onDismiss = viewModel::closeDialog,
                 )
             }

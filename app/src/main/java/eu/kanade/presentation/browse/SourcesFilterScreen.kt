@@ -18,6 +18,7 @@ import tachiyomi.presentation.core.components.FastScrollLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
+import taihon.feature.browse.TaihonSourcesFilterHelper
 import taihon.feature.browse.ui.TaihonSourcesFilterHooks
 
 @Composable
@@ -65,6 +66,7 @@ private fun SourcesFilterContent(
         TaihonSourcesFilterHooks.localSourceItem(this, state, onClickSource)
 
         state.items.forEach { (language, sources) ->
+            if (language == TaihonSourcesFilterHelper.TAIHON_LOCAL_KEY) return@forEach
             val enabled = language in state.enabledLanguages
             item(
                 key = language,

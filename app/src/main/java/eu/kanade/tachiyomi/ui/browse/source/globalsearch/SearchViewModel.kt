@@ -21,15 +21,12 @@ import mihon.core.viewmodel.StateViewModel
 import mihon.domain.manga.model.toDomainManga
 import tachiyomi.core.common.preference.toggle
 import tachiyomi.core.common.util.lang.launchIO
-import tachiyomi.domain.chapter.interactor.GetChaptersByMangaId
-import tachiyomi.domain.chapter.interactor.SetMangaDefaultChapterFlags
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.NetworkToLocalManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
-import taihon.domain.preferences.TaihonPreferences
-import taihon.feature.browse.TaihonSearchEnricher
-import taihon.feature.browse.util.normalizeSearchQuery
+import taihon.feature.browse.taihonEnrich
+import taihon.feature.browse.taihonNormalize
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.Executors
@@ -37,33 +34,15 @@ import java.util.concurrent.Executors
 abstract class SearchViewModel(
     initialState: State = State(),
     sourcePreferences: SourcePreferences = Injekt.get(),
-    private val taihonPreferences: TaihonPreferences = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
     private val extensionManager: ExtensionManager = Injekt.get(),
     private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
     private val getManga: GetManga = Injekt.get(),
     private val preferences: SourcePreferences = Injekt.get(),
-    private val updateMangaFromRemote: mihon.domain.source.interactor.UpdateMangaFromRemote = Injekt.get(),
-    private val getChaptersByMangaId: GetChaptersByMangaId = Injekt.get(),
-    private val updateManga: eu.kanade.domain.manga.interactor.UpdateManga = Injekt.get(),
-    private val setMangaDefaultChapterFlags: SetMangaDefaultChapterFlags = Injekt.get(),
 ) : StateViewModel<SearchViewModel.State>(initialState) {
 
     private val coroutineDispatcher = Executors.newFixedThreadPool(10).asCoroutineDispatcher()
     private var searchJob: Job? = null
-
-    private val taihonSearchEnricher = TaihonSearchEnricher(
-        updateMangaFromRemote = updateMangaFromRemote,
-        getChaptersByMangaId = getChaptersByMangaId,
-        updateManga = updateManga,
-        setMangaDefaultChapterFlags = setMangaDefaultChapterFlags,
-        getCurrentDetails = { state.value.mangaDetails[it] },
-        onUpdateDetails = { mangaId, details ->
-            mutableState.update {
-                it.copy(mangaDetails = it.mangaDetails + (mangaId to details))
-            }
-        },
-    )
 
     private val enabledLanguages = sourcePreferences.enabledLanguages.get()
     private val disabledSources = sourcePreferences.disabledSources.get()
@@ -86,15 +65,6 @@ abstract class SearchViewModel(
         viewModelScope.launch {
             preferences.globalSearchFilterState.changes().collectLatest { state ->
                 mutableState.update { it.copy(onlyShowHasResults = state) }
-            }
-        }
-    }
-
-    @Composable
-    fun getMangaDetails(manga: Manga): androidx.compose.runtime.State<TaihonSearchEnricher.MangaDetails?> {
-        return produceState<TaihonSearchEnricher.MangaDetails?>(initialValue = null, manga.id) {
-            state.collectLatest {
-                value = it.mangaDetails[manga.id]
             }
         }
     }
@@ -179,9 +149,6 @@ abstract class SearchViewModel(
         }
 
         searchJob = viewModelScope.launchIO {
-            val smartNormalizationEnabled = taihonPreferences.smartApostropheNormalization.get()
-            val exceptions = taihonPreferences.smartApostropheNormalizationExceptions.get()
-
             sources.map { source ->
                 async {
                     if (state.value.items[source] !is SearchItemResult.Loading) {
@@ -189,12 +156,7 @@ abstract class SearchViewModel(
                     }
 
                     try {
-                        val pkgName = extensionManager.getExtensionPackage(source.id)
-                        val normalizedQuery = query.normalizeSearchQuery(
-                            pkgName = pkgName,
-                            smartNormalizationEnabled = smartNormalizationEnabled,
-                            exceptions = exceptions,
-                        )
+                        val normalizedQuery = source.taihonNormalize(query)
 
                         val page = withContext(coroutineDispatcher) {
                             source.getSearchManga(1, normalizedQuery, source.getFilterList())
@@ -207,13 +169,7 @@ abstract class SearchViewModel(
 
                         if (isActive) {
                             updateItem(source, SearchItemResult.Success(titles))
-                            if (taihonPreferences.globalSearchEnrichResults.get()) {
-                                titles.forEach { title ->
-                                    viewModelScope.launchIO {
-                                        taihonSearchEnricher.fetchMangaDetails(title)
-                                    }
-                                }
-                            }
+                            titles.taihonEnrich(viewModelScope)
                         }
                     } catch (e: Exception) {
                         if (isActive) {
@@ -257,7 +213,6 @@ abstract class SearchViewModel(
         val sourceFilter: SourceFilter = SourceFilter.PinnedOnly,
         val onlyShowHasResults: Boolean = false,
         val items: Map<Source, SearchItemResult> = mapOf(),
-        val mangaDetails: Map<Long, TaihonSearchEnricher.MangaDetails> = mapOf(),
         val dialog: Dialog? = null,
     ) {
         val progress: Int = items.count { it.value !is SearchItemResult.Loading }

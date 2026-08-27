@@ -6,10 +6,8 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import eu.kanade.domain.source.service.SourcePreferences
-import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.getNameForMangaInfo
-import eu.kanade.tachiyomi.util.lang.normalizeApostrophe
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -38,7 +36,7 @@ import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.NetworkToLocalManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
-import taihon.domain.preferences.TaihonPreferences
+import taihon.feature.browse.taihonNormalize
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -46,9 +44,7 @@ class MigrationListViewModel(
     mangaIds: Collection<Long>,
     extraSearchQuery: String?,
     private val preferences: SourcePreferences = Injekt.get(),
-    private val taihonPreferences: TaihonPreferences = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
-    private val extensionManager: ExtensionManager = Injekt.get(),
     private val getManga: GetManga = Injekt.get(),
     private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
     private val getChaptersByMangaId: GetChaptersByMangaId = Injekt.get(),
@@ -200,15 +196,7 @@ class MigrationListViewModel(
             val searchResult = if (deepSearchMode) {
                 smartSearchEngine.deepSearch(source, manga.title)
             } else {
-                val smartNormalizationEnabled = taihonPreferences.smartApostropheNormalization.get()
-                val exceptions = taihonPreferences.smartApostropheNormalizationExceptions.get()
-                val pkgName = extensionManager.getExtensionPackage(source.id)
-                val isNormalized = smartNormalizationEnabled && pkgName !in exceptions
-                val query = if (isNormalized) {
-                    manga.title.normalizeApostrophe(fuzzy = true)
-                } else {
-                    manga.title
-                }
+                val query = source.taihonNormalize(manga.title)
                 smartSearchEngine.regularSearch(source, query)
             }
 

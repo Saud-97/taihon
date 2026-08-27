@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.ui.browse.source.globalsearch.SearchViewModel
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import mihon.feature.migration.dialog.MigrateMangaDialog
 import mihon.feature.migration.list.MigrationListScreen
+import taihon.feature.browse.TaihonSearchHelper
 
 class MigrateSearchScreen(private val mangaId: Long) : Screen() {
 
@@ -35,7 +36,7 @@ class MigrateSearchScreen(private val mangaId: Long) : Screen() {
             onChangeSearchQuery = viewModel::updateSearchQuery,
             onSearch = { viewModel.search() },
             getManga = { viewModel.getManga(it) },
-            getMangaDetails = { viewModel.getMangaDetails(it) },
+            getMangaDetails = { TaihonSearchHelper.getMangaDetails(it) },
             onChangeSearchFilter = viewModel::setSourceFilter,
             onToggleResults = viewModel::toggleFilterResults,
             onClickSource = { navigator.push(MigrateSourceSearchScreen(state.from!!, it.id, state.searchQuery)) },

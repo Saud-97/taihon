@@ -17,6 +17,7 @@ import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import tachiyomi.presentation.core.screens.LoadingScreen
+import taihon.feature.browse.TaihonSearchHelper
 
 class GlobalSearchScreen(
     val searchQuery: String = "",
@@ -69,7 +70,7 @@ class GlobalSearchScreen(
                 onChangeSearchQuery = viewModel::updateSearchQuery,
                 onSearch = { viewModel.search() },
                 getManga = { viewModel.getManga(it) },
-                getMangaDetails = { viewModel.getMangaDetails(it) },
+                getMangaDetails = { TaihonSearchHelper.getMangaDetails(it) },
                 onChangeSearchFilter = viewModel::setSourceFilter,
                 onToggleResults = viewModel::toggleFilterResults,
                 onClickSource = {

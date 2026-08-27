@@ -1,0 +1,34 @@
+package taihon.feature.browse
+
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import tachiyomi.domain.source.model.Source
+import tachiyomi.domain.source.repository.SourceRepository
+import tachiyomi.source.local.LocalSource
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import java.util.SortedMap
+
+object TaihonSourcesFilterHelper {
+
+    const val TAIHON_LOCAL_KEY = "taihon_local"
+
+    fun wrapFilterFlow(flow: Flow<SortedMap<String, List<Source>>>): Flow<SortedMap<String, List<Source>>> {
+        val sourceRepository = Injekt.get<SourceRepository>()
+        val localSourceFlow = sourceRepository.getSources().map { sources ->
+            sources.find { it.id == LocalSource.ID }
+        }
+
+        return combine(flow, localSourceFlow) { items, local ->
+            if (local != null) {
+                val newMap = java.util.TreeMap<String, List<Source>>(items.comparator())
+                newMap.putAll(items)
+                newMap[TAIHON_LOCAL_KEY] = listOf(local)
+                newMap
+            } else {
+                items
+            }
+        }
+    }
+}

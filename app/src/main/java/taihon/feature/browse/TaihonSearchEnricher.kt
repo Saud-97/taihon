@@ -10,6 +10,8 @@ import tachiyomi.domain.chapter.interactor.GetChaptersByMangaId
 import tachiyomi.domain.chapter.interactor.SetMangaDefaultChapterFlags
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaUpdate
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.time.Instant
 
 /**
@@ -17,16 +19,24 @@ import java.time.Instant
  * and concurrency management.
  */
 class TaihonSearchEnricher(
-    private val updateMangaFromRemote: UpdateMangaFromRemote,
-    private val getChaptersByMangaId: GetChaptersByMangaId,
-    private val updateManga: UpdateManga,
-    private val setMangaDefaultChapterFlags: SetMangaDefaultChapterFlags,
     private val onUpdateDetails: (Long, MangaDetails) -> Unit,
     private val getCurrentDetails: (Long) -> MangaDetails?,
+    private val updateMangaFromRemote: UpdateMangaFromRemote = Injekt.get(),
+    private val getChaptersByMangaId: GetChaptersByMangaId = Injekt.get(),
+    private val updateManga: UpdateManga = Injekt.get(),
+    private val setMangaDefaultChapterFlags: SetMangaDefaultChapterFlags =
+        Injekt.get(),
 ) {
     private val globalSemaphore = Semaphore(10)
     private val sourceMutexes = mutableMapOf<Long, Mutex>()
     private val sessionCache = mutableSetOf<Long>()
+
+    fun clear() {
+        synchronized(sourceMutexes) {
+            sourceMutexes.clear()
+        }
+        sessionCache.clear()
+    }
 
     suspend fun fetchMangaDetails(manga: Manga) {
         if (manga.id in sessionCache) {
