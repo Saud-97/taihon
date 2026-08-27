@@ -21,6 +21,11 @@ object TaihonSettingsHooks {
     fun shouldShowDonationCampaign(): Boolean = false
 
     /**
+     * Whether to show the library queue size warning notification.
+     */
+    fun shouldShowTaihonLibraryQueueSizeWarning(): Boolean = false
+
+    /**
      * Hook for when page transitions are toggled.
      */
     fun taihonOnPageTransitionsChanged(newValue: Boolean) {
