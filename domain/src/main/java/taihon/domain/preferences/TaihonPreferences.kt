@@ -8,26 +8,19 @@ import tachiyomi.core.common.preference.getEnum
 class TaihonPreferences(
     private val preferenceStore: PreferenceStore,
 ) {
+    val cloud = CloudPreferences(preferenceStore)
+
+    // App Preferences
 
     val allowHardwareBitmapForCovers: Preference<Boolean> = preferenceStore.getBoolean(
-        "pref_allow_hardware_bitmap_covers",
+        PREF_ALLOW_HARDWARE_BITMAP_COVERS,
         true,
     )
 
-    val hideExtensionUpdatesCount: Preference<Boolean> = preferenceStore.getBoolean("ext_hide_updates_count", false)
+    // Library Preferences
 
-    val smartApostropheNormalization: Preference<Boolean> = preferenceStore.getBoolean(
-        "smart_apostrophe_normalization",
-        true,
-    )
-
-    val smartApostropheNormalizationExceptions: Preference<Set<String>> = preferenceStore.getStringSet(
-        "smart_apostrophe_normalization_exceptions",
-        emptySet(),
-    )
-
-    val globalSearchEnrichResults: Preference<Boolean> = preferenceStore.getBoolean(
-        "global_search_enrich_results",
+    val resumeLastSeenPage: Preference<Boolean> = preferenceStore.getBoolean(
+        PREF_RESUME_LAST_SEEN_PAGE,
         true,
     )
 
@@ -37,24 +30,65 @@ class TaihonPreferences(
     )
 
     val filterOrphanedSources: Preference<TriState> = preferenceStore.getEnum(
-        "pref_filter_library_orphaned_sources_v2",
+        PREF_FILTER_ORPHANED_SOURCES,
         TriState.DISABLED,
     )
 
-    val sourceInstalledBadge: Preference<Boolean> = preferenceStore.getBoolean("display_source_installed_badge", false)
+    val sourceInstalledBadge: Preference<Boolean> = preferenceStore.getBoolean(PREF_SOURCE_INSTALLED_BADGE, false)
 
-    val sourceOrphanedBadge: Preference<Boolean> = preferenceStore.getBoolean("display_source_orphaned_badge", true)
+    val sourceOrphanedBadge: Preference<Boolean> = preferenceStore.getBoolean(PREF_SOURCE_ORPHANED_BADGE, true)
 
-    val resumeLastSeenPage: Preference<Boolean> = preferenceStore.getBoolean(
-        "pref_resume_last_seen_page",
+    // Reader Preferences
+
+    val pageTransitionDistance: Preference<Int> = preferenceStore.getInt(PREF_PAGE_TRANSITION_DISTANCE, 0)
+
+    val pageTransitionSpeed: Preference<Int> = preferenceStore.getInt(PREF_PAGE_TRANSITION_SPEED, 0)
+
+    // Source Preferences
+
+    val hideExtensionUpdatesCount: Preference<Boolean> = preferenceStore.getBoolean(PREF_HIDE_EXT_UPDATES_COUNT, false)
+
+    val smartApostropheNormalization: Preference<Boolean> = preferenceStore.getBoolean(
+        PREF_SMART_APOSTROPHE_NORMALIZATION,
         true,
     )
 
-    val pageTransitionDistance: Preference<Int> = preferenceStore.getInt("pref_page_transition_distance", 0)
+    val smartApostropheNormalizationExceptions: Preference<Set<String>> = preferenceStore.getStringSet(
+        PREF_SMART_APOSTROPHE_NORMALIZATION_EXCEPTIONS,
+        emptySet(),
+    )
 
-    val pageTransitionSpeed: Preference<Int> = preferenceStore.getInt("pref_page_transition_speed", 0)
+    val globalSearchEnrichResults: Preference<Boolean> = preferenceStore.getBoolean(
+        PREF_GLOBAL_SEARCH_ENRICH_RESULTS,
+        true,
+    )
 
-    val parallelChapterLimit: Preference<Int> = preferenceStore.getInt("download_parallel_chapter_limit", 2)
+    // Download Preferences
 
-    val backupRetention: Preference<Int> = preferenceStore.getInt("backup_retention", 12)
+    val parallelChapterLimit: Preference<Int> = preferenceStore.getInt(PREF_PARALLEL_CHAPTER_LIMIT, 2)
+
+    // Backup Preferences
+
+    val backupRetention: Preference<Int> = preferenceStore.getInt(PREF_BACKUP_RETENTION, 12)
+
+    companion object {
+        const val PREF_ALLOW_HARDWARE_BITMAP_COVERS = "pref_allow_hardware_bitmap_covers"
+
+        const val PREF_RESUME_LAST_SEEN_PAGE = "pref_resume_last_seen_page"
+        const val PREF_FILTER_ORPHANED_SOURCES = "pref_filter_library_orphaned_sources_v2"
+        const val PREF_SOURCE_INSTALLED_BADGE = "display_source_installed_badge"
+        const val PREF_SOURCE_ORPHANED_BADGE = "display_source_orphaned_badge"
+
+        const val PREF_PAGE_TRANSITION_DISTANCE = "pref_page_transition_distance"
+        const val PREF_PAGE_TRANSITION_SPEED = "pref_page_transition_speed"
+
+        const val PREF_HIDE_EXT_UPDATES_COUNT = "ext_hide_updates_count"
+        const val PREF_SMART_APOSTROPHE_NORMALIZATION = "smart_apostrophe_normalization"
+        const val PREF_SMART_APOSTROPHE_NORMALIZATION_EXCEPTIONS = "smart_apostrophe_normalization_exceptions"
+        const val PREF_GLOBAL_SEARCH_ENRICH_RESULTS = "global_search_enrich_results"
+
+        const val PREF_PARALLEL_CHAPTER_LIMIT = "download_parallel_chapter_limit"
+
+        const val PREF_BACKUP_RETENTION = "backup_retention"
+    }
 }

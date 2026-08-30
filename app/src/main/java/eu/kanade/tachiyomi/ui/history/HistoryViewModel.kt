@@ -41,7 +41,6 @@ import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaWithChapterCount
 import tachiyomi.domain.source.service.SourceManager
-import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -54,7 +53,6 @@ class HistoryViewModel(
     private val getManga: GetManga = Injekt.get(),
     private val getNextChapters: GetNextChapters = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
-    private val taihonPreferences: TaihonPreferences = Injekt.get(),
     private val removeHistory: RemoveHistory = Injekt.get(),
     private val setMangaCategories: SetMangaCategories = Injekt.get(),
     private val updateManga: UpdateManga = Injekt.get(),
@@ -98,7 +96,7 @@ class HistoryViewModel(
 
     suspend fun getNextChapter(): Chapter? {
         return withIOContext {
-            if (taihonPreferences.resumeLastSeenPage.get()) {
+            if (libraryPreferences.taihon.resumeLastSeenPage.get()) {
                 val lastHistory = state.value.list?.filterIsInstance<HistoryUiModel.Item>()?.firstOrNull()?.item
                 if (lastHistory != null) {
                     return@withIOContext getChapter.await(lastHistory.chapterId)
@@ -110,7 +108,7 @@ class HistoryViewModel(
 
     fun getNextChapterForManga(mangaId: Long, chapterId: Long) {
         viewModelScope.launchIO {
-            val chapter = if (taihonPreferences.resumeLastSeenPage.get()) {
+            val chapter = if (libraryPreferences.taihon.resumeLastSeenPage.get()) {
                 getChapter.await(chapterId)
             } else {
                 getNextChapters.await(mangaId, chapterId, onlyUnread = false).firstOrNull()

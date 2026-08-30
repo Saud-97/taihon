@@ -67,7 +67,7 @@ import tachiyomi.presentation.core.components.FastScrollLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import taihon.domain.preferences.CloudPreferences
+import taihon.domain.preferences.TaihonPreferences
 import taihon.feature.cloud.CloudFile
 import taihon.feature.cloud.CloudService
 import uy.kohesive.injekt.Injekt
@@ -97,7 +97,7 @@ class GoogleDriveBrowserScreen(
         val navigator = LocalNavigator.currentOrThrow
         val scope = rememberCoroutineScope()
         val cloudService = remember { Injekt.get<CloudService>() }
-        val cloudPreferences = remember { Injekt.get<CloudPreferences>() }
+        val cloudPreferences = remember { Injekt.get<TaihonPreferences>().cloud }
 
         val rootLabel = context.stringResource(MR.strings.label_google_drive)
 

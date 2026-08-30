@@ -6,11 +6,16 @@ import eu.kanade.tachiyomi.util.system.GLUtil
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.i18n.MR
+import taihon.domain.preferences.TaihonPreferences
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class BasePreferences(
     val context: Context,
     preferenceStore: PreferenceStore,
 ) {
+
+    val taihon by lazy { Injekt.get<TaihonPreferences>() }
 
     val downloadedOnly: Preference<Boolean> = preferenceStore.getBoolean(
         Preference.appStateKey("pref_downloaded_only"),

@@ -22,7 +22,7 @@ object TaihonLibrarySettingsHooks {
             val hasOrphaned = remember(sources) { sources.any { it.isStub } }
 
             installedSources.forEach { source ->
-                val filterSource by viewModel.taihonPreferences.filterSource(source.id).collectAsState()
+                val filterSource by viewModel.libraryPreferences.taihon.filterSource(source.id).collectAsState()
                 TriStateItem(
                     label = source.visualName,
                     state = filterSource,
@@ -31,7 +31,7 @@ object TaihonLibrarySettingsHooks {
             }
 
             if (hasOrphaned) {
-                val filterOrphaned by viewModel.taihonPreferences.filterOrphanedSources.collectAsState()
+                val filterOrphaned by viewModel.libraryPreferences.taihon.filterOrphanedSources.collectAsState()
                 TriStateItem(
                     label = stringResource(MR.strings.ext_obsolete),
                     state = filterOrphaned,
@@ -45,11 +45,11 @@ object TaihonLibrarySettingsHooks {
     fun DisplayPageSources(viewModel: LibrarySettingsViewModel) {
         CheckboxItem(
             label = stringResource(MR.strings.label_sources) + " (${stringResource(MR.strings.ext_installed)})",
-            pref = viewModel.taihonPreferences.sourceInstalledBadge,
+            pref = viewModel.libraryPreferences.taihon.sourceInstalledBadge,
         )
         CheckboxItem(
             label = stringResource(MR.strings.label_sources) + " (${stringResource(MR.strings.ext_obsolete)})",
-            pref = viewModel.taihonPreferences.sourceOrphanedBadge,
+            pref = viewModel.libraryPreferences.taihon.sourceOrphanedBadge,
         )
     }
 }

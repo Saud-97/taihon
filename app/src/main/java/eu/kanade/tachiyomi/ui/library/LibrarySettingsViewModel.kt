@@ -18,7 +18,6 @@ import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.model.LibraryDisplayMode
 import tachiyomi.domain.library.model.LibrarySort
 import tachiyomi.domain.library.service.LibraryPreferences
-import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.time.Duration.Companion.seconds
@@ -26,7 +25,6 @@ import kotlin.time.Duration.Companion.seconds
 class LibrarySettingsViewModel(
     val preferences: BasePreferences = Injekt.get(),
     val libraryPreferences: LibraryPreferences = Injekt.get(),
-    val taihonPreferences: TaihonPreferences = Injekt.get(),
     private val setDisplayMode: SetDisplayMode = Injekt.get(),
     private val setSortModeForCategory: SetSortModeForCategory = Injekt.get(),
     trackerManager: TrackerManager = Injekt.get(),
@@ -59,11 +57,11 @@ class LibrarySettingsViewModel(
     }
 
     fun toggleSource(id: Long) {
-        taihonPreferences.filterSource(id).getAndSet { it.next() }
+        libraryPreferences.taihon.filterSource(id).getAndSet { it.next() }
     }
 
     fun toggleOrphanedSources() {
-        taihonPreferences.filterOrphanedSources.getAndSet { it.next() }
+        libraryPreferences.taihon.filterOrphanedSources.getAndSet { it.next() }
     }
 
     fun setDisplayMode(mode: LibraryDisplayMode) {

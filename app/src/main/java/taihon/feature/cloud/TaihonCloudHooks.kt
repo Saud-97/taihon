@@ -5,7 +5,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.backup.create.BackupOptions
 import tachiyomi.domain.storage.service.StorageManager
-import taihon.domain.preferences.CloudPreferences
+import taihon.domain.preferences.TaihonPreferences
 import taihon.feature.cloud.backup.CloudBackupMirrorWorker
 import taihon.feature.cloud.ui.GoogleDriveBrowserScreen
 import uy.kohesive.injekt.Injekt
@@ -30,7 +30,7 @@ object TaihonCloudHooks {
     fun init(context: Context) {
         if (!BuildConfig.CLOUD_INCLUDED) return
 
-        val cloudPreferences = Injekt.get<CloudPreferences>()
+        val cloudPreferences = Injekt.get<TaihonPreferences>().cloud
         val cloudService = Injekt.get<CloudService>()
         if (cloudPreferences.cloudEnabled.get() && cloudPreferences.cloudAutoMirror.get() &&
             cloudService.isAvailable()
@@ -42,7 +42,7 @@ object TaihonCloudHooks {
     fun onBackupCreated(context: Context, location: String) {
         if (!BuildConfig.CLOUD_INCLUDED) return
 
-        val cloudPreferences = Injekt.get<CloudPreferences>()
+        val cloudPreferences = Injekt.get<TaihonPreferences>().cloud
         val cloudService = Injekt.get<CloudService>()
         val isFileInAutoDir = location.contains(StorageManager.AUTOMATIC_BACKUPS_PATH)
 

@@ -54,7 +54,6 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.track.interactor.GetTracks
 import tachiyomi.i18n.MR
-import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -73,7 +72,6 @@ class Downloader(
     private val sourceManager: SourceManager = Injekt.get(),
     private val chapterCache: ChapterCache = Injekt.get(),
     private val downloadPreferences: DownloadPreferences = Injekt.get(),
-    private val taihonPreferences: TaihonPreferences = Injekt.get(),
     private val xml: XML = Injekt.get(),
     private val getCategories: GetCategories = Injekt.get(),
     private val getTracks: GetTracks = Injekt.get(),
@@ -194,7 +192,7 @@ class Downloader(
             val activeDownloadsFlow = combine(
                 queueState,
                 downloadPreferences.parallelSourceLimit.changes(),
-                taihonPreferences.parallelChapterLimit.changes(),
+                downloadPreferences.taihon.parallelChapterLimit.changes(),
             ) { queue, sourceLimit, chapterLimit ->
                 Triple(queue, sourceLimit, chapterLimit)
             }.transformLatest { (queue, parallelCount, chapterLimit) ->

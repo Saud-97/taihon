@@ -42,7 +42,7 @@ import kotlinx.coroutines.launch
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
-import taihon.domain.preferences.CloudPreferences
+import taihon.domain.preferences.TaihonPreferences
 import taihon.feature.cloud.CloudService
 import taihon.feature.cloud.backup.CloudBackupMirrorWorker
 import uy.kohesive.injekt.Injekt
@@ -55,7 +55,7 @@ object TaihonCloudSettingsHooks {
     fun getGroup(): Preference.PreferenceGroup {
         val context = LocalContext.current
         val navigator = LocalNavigator.currentOrThrow
-        val cloudPreferences = Injekt.get<CloudPreferences>()
+        val cloudPreferences = Injekt.get<TaihonPreferences>().cloud
         val cloudService = remember { Injekt.get<CloudService>() }
         val scope = rememberCoroutineScope()
         val account by cloudService.accountState.collectAsState()

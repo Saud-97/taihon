@@ -8,10 +8,15 @@ import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.core.common.preference.getEnum
 import tachiyomi.core.common.preference.getEnumSet
 import tachiyomi.i18n.MR
+import taihon.domain.preferences.TaihonPreferences
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class ReaderPreferences(
     preferenceStore: PreferenceStore,
 ) {
+
+    val taihon by lazy { Injekt.get<TaihonPreferences>() }
 
     // region General
 

@@ -8,10 +8,15 @@ import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.core.common.preference.getEnum
 import tachiyomi.core.common.preference.getLongArray
 import tachiyomi.domain.library.model.LibraryDisplayMode
+import taihon.domain.preferences.TaihonPreferences
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class SourcePreferences(
     preferenceStore: PreferenceStore,
 ) {
+
+    val taihon by lazy { Injekt.get<TaihonPreferences>() }
 
     val sourceDisplayMode: Preference<LibraryDisplayMode> = preferenceStore.getObjectFromString(
         "pref_display_mode_catalogue",

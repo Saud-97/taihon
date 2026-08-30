@@ -164,7 +164,7 @@ internal fun ColumnScope.GeneralPage(viewModel: ReaderSettingsViewModel) {
 
     TaihonReaderSettingsGroup(
         pageTransitionsPref = viewModel.preferences.pageTransitions,
-        pageTransitionSpeedPref = viewModel.taihonPreferences.pageTransitionSpeed,
-        pageTransitionDistancePref = viewModel.taihonPreferences.pageTransitionDistance,
+        pageTransitionSpeedPref = viewModel.preferences.taihon.pageTransitionSpeed,
+        pageTransitionDistancePref = viewModel.preferences.taihon.pageTransitionDistance,
     )
 }

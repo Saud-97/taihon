@@ -19,7 +19,6 @@ import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.storage.service.StoragePreferences
 import tachiyomi.domain.upcoming.service.UpcomingPreferences
 import tachiyomi.domain.updates.service.UpdatesPreferences
-import taihon.domain.preferences.CloudPreferences
 import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
@@ -48,7 +47,10 @@ class PreferenceModule(val app: Application) : InjektModule {
             PrivacyPreferences(get())
         }
         addSingletonFactory {
-            LibraryPreferences(get())
+            LibraryPreferences(
+                preferenceStore = get(),
+                taihon = get(),
+            )
         }
         addSingletonFactory {
             UpcomingPreferences(get())
@@ -63,10 +65,16 @@ class PreferenceModule(val app: Application) : InjektModule {
             TrackPreferences(get())
         }
         addSingletonFactory {
-            DownloadPreferences(get())
+            DownloadPreferences(
+                preferenceStore = get(),
+                taihon = get(),
+            )
         }
         addSingletonFactory {
-            BackupPreferences(get())
+            BackupPreferences(
+                preferenceStore = get(),
+                taihon = get(),
+            )
         }
         addSingletonFactory {
             StoragePreferences(
@@ -83,9 +91,6 @@ class PreferenceModule(val app: Application) : InjektModule {
 
         addSingletonFactory {
             TaihonPreferences(get())
-        }
-        addSingletonFactory {
-            CloudPreferences(get())
         }
     }
 }

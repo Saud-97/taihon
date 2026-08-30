@@ -2,9 +2,11 @@ package tachiyomi.domain.download.service
 
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
+import taihon.domain.preferences.TaihonPreferences
 
 class DownloadPreferences(
     preferenceStore: PreferenceStore,
+    val taihon: TaihonPreferences,
 ) {
 
     val downloadOnlyOverWifi: Preference<Boolean> = preferenceStore.getBoolean(

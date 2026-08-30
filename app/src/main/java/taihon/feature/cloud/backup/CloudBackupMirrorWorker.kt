@@ -27,7 +27,6 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.storage.service.StorageManager
 import tachiyomi.i18n.MR
-import taihon.domain.preferences.CloudPreferences
 import taihon.domain.preferences.TaihonPreferences
 import taihon.feature.cloud.CloudService
 import uy.kohesive.injekt.Injekt
@@ -39,7 +38,7 @@ class CloudBackupMirrorWorker(context: Context, workerParams: WorkerParameters) 
 
     override suspend fun doWork(): Result {
         val taihonPreferences = Injekt.get<TaihonPreferences>()
-        val cloudPreferences = Injekt.get<CloudPreferences>()
+        val cloudPreferences = taihonPreferences.cloud
         val cloudService = Injekt.get<CloudService>()
 
         if (!cloudService.isAvailable()) {

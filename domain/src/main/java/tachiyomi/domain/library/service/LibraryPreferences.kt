@@ -7,9 +7,11 @@ import tachiyomi.core.common.preference.getEnum
 import tachiyomi.domain.library.model.LibraryDisplayMode
 import tachiyomi.domain.library.model.LibrarySort
 import tachiyomi.domain.manga.model.Manga
+import taihon.domain.preferences.TaihonPreferences
 
 class LibraryPreferences(
     private val preferenceStore: PreferenceStore,
+    val taihon: TaihonPreferences,
 ) {
 
     val displayMode: Preference<LibraryDisplayMode> = preferenceStore.getObjectFromString(

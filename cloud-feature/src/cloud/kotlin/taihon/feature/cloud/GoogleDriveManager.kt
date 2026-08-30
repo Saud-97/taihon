@@ -43,6 +43,7 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.storage.service.StorageManager
 import tachiyomi.i18n.MR
 import taihon.domain.preferences.CloudPreferences
+import taihon.domain.preferences.TaihonPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.coroutines.resume
@@ -51,7 +52,7 @@ import kotlin.coroutines.resumeWithException
 class GoogleDriveManager(
     private val context: Context,
     private val cloudClientId: String,
-    private val cloudPreferences: CloudPreferences = Injekt.get(),
+    private val cloudPreferences: CloudPreferences = Injekt.get<TaihonPreferences>().cloud,
 ) : CloudService {
 
     private val credentialManager = CredentialManager.create(context)

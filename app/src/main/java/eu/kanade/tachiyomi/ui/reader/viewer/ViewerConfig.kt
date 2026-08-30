@@ -6,14 +6,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import tachiyomi.core.common.preference.Preference
-import taihon.domain.preferences.TaihonPreferences
 
 /**
  * Common configuration for all viewers.
  */
 abstract class ViewerConfig(
     readerPreferences: ReaderPreferences,
-    taihonPreferences: TaihonPreferences,
     private val scope: CoroutineScope,
 ) {
 
@@ -59,10 +57,10 @@ abstract class ViewerConfig(
         readerPreferences.pageTransitions
             .register({ usePageTransitions = it })
 
-        taihonPreferences.pageTransitionDistance
+        readerPreferences.taihon.pageTransitionDistance
             .register({ pageTransitionDistance = it })
 
-        taihonPreferences.pageTransitionSpeed
+        readerPreferences.taihon.pageTransitionSpeed
             .register({ pageTransitionDuration = it })
 
         readerPreferences.doubleTapAnimSpeed
