@@ -19,6 +19,7 @@ Read manga, webtoons, comics, and more with additional features built on top of 
 ## Download
 
 [![Taihon Stable](https://img.shields.io/github/release/Saud-97/taihon.svg?maxAge=3600\&label=Stable\&labelColor=06599d\&color=043b69)](https://github.com/Saud-97/taihon/releases)
+[![Taihon Nightly](https://img.shields.io/github/v/release/Saud-97/taihon-nightly.svg?maxAge=3600&label=Nightly+Build&labelColor=2c2c47&color=1c1c39)](https://github.com/Saud-97/taihon-nightly/releases)
 
 *Requires Android 8.0 or higher.*
 
