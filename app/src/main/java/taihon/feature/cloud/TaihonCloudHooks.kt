@@ -40,7 +40,7 @@ object TaihonCloudHooks {
 
         val cloudPreferences = context.appGraph.taihonPreferences.cloud
         val cloudService = context.appGraph.cloudService
-        val isFileInAutoDir = location.contains(GoogleDriveManager.AUTOMATIC_BACKUPS_PATH)
+        val isFileInAutoDir = location.contains("autobackup")
 
         if (cloudPreferences.cloudAutoMirror.get() &&
             cloudService.isAvailable() &&

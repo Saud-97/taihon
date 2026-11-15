@@ -21,6 +21,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest
 import com.google.api.client.http.FileContent
+import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.drive.Drive
@@ -44,9 +45,9 @@ import kotlinx.coroutines.withContext
 import logcat.LogPriority
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.system.logcat
-import tachiyomi.domain.storage.service.StorageManager
 import tachiyomi.i18n.MR
 import taihon.domain.preferences.TaihonPreferences
+import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -226,7 +227,11 @@ class GoogleDriveManager(
         }
 
         val content = FileContent("application/octet-stream", localFile)
-        val file = drive.files().create(metadata, content).setFields("id").executeWithAuth()
+        val createRequest = drive.files().create(metadata, content).setFields("id")
+        createRequest.mediaHttpUploader?.apply {
+            chunkSize = UPLOAD_CHUNK_SIZE
+        }
+        val file = createRequest.executeWithAuth()
         listCache.remove(folderId)
         file.id
     }
@@ -234,7 +239,11 @@ class GoogleDriveManager(
     override suspend fun downloadFile(fileId: String, localFile: java.io.File) {
         withDrive { drive ->
             localFile.outputStream().use { output ->
-                drive.files()[fileId].executeMediaAndDownloadTo(output)
+                val getRequest = drive.files()[fileId]
+                getRequest.mediaHttpDownloader?.apply {
+                    chunkSize = DOWNLOAD_CHUNK_SIZE
+                }
+                getRequest.executeMediaAndDownloadTo(output)
             }
             if (localFile.length() == 0L) {
                 throw Exception("Downloaded file is empty")
@@ -316,8 +325,8 @@ class GoogleDriveManager(
         val root = getFileInternal(drive, rootId) ?: return@withContext null
         if (root.mimeType != CloudService.MIME_TYPE_FOLDER) return@withContext null
         rootNameCache[rootId] = root.name ?: CloudService.ROOT_FOLDER
-        val autoBackupId = findFolder(drive, StorageManager.AUTOMATIC_BACKUPS_PATH, rootId)
-            ?: createFolderInternal(drive, StorageManager.AUTOMATIC_BACKUPS_PATH, rootId)
+        val autoBackupId = findFolder(drive, AUTOMATIC_BACKUPS_PATH, rootId)
+            ?: createFolderInternal(drive, AUTOMATIC_BACKUPS_PATH, rootId)
             ?: return@withContext null
         val storage = CloudStorageInfo(rootId, autoBackupId)
         storageMutex.withLock {
@@ -327,8 +336,8 @@ class GoogleDriveManager(
 
     override suspend fun updateStorageLocation(folderId: String): String? = withContext(Dispatchers.IO) {
         val drive = getDriveService() ?: return@withContext null
-        val autoBackupId = findFolder(drive, StorageManager.AUTOMATIC_BACKUPS_PATH, folderId)
-            ?: createFolderInternal(drive, StorageManager.AUTOMATIC_BACKUPS_PATH, folderId)
+        val autoBackupId = findFolder(drive, AUTOMATIC_BACKUPS_PATH, folderId)
+            ?: createFolderInternal(drive, AUTOMATIC_BACKUPS_PATH, folderId)
             ?: return@withContext null
 
         cloudPreferences.cloudStorageAutoBackupId.set(autoBackupId)
@@ -478,7 +487,13 @@ class GoogleDriveManager(
             selectedAccount = android.accounts.Account(email, "com.google")
         }
 
-        driveService = Drive.Builder(NetHttpTransport(), GsonFactory.getDefaultInstance(), credential)
+        val requestInitializer = HttpRequestInitializer { request ->
+            credential.initialize(request)
+            request.connectTimeout = CONNECT_TIMEOUT_MS
+            request.readTimeout = READ_TIMEOUT_MS
+        }
+
+        driveService = Drive.Builder(NetHttpTransport(), GsonFactory.getDefaultInstance(), requestInitializer)
             .setApplicationName(context.stringResource(MR.strings.app_name))
             .build()
 
@@ -556,10 +571,10 @@ class GoogleDriveManager(
                     if (highestId != savedStorage.rootId) {
                         if (ensureMarker(drive, highestId)) {
                             val autoBackupId =
-                                findFolder(drive, StorageManager.AUTOMATIC_BACKUPS_PATH, currentLocationId)
+                                findFolder(drive, AUTOMATIC_BACKUPS_PATH, currentLocationId)
                                     ?: createFolderInternal(
                                         drive,
-                                        StorageManager.AUTOMATIC_BACKUPS_PATH,
+                                        AUTOMATIC_BACKUPS_PATH,
                                         currentLocationId,
                                     )
                             if (autoBackupId != null) {
@@ -595,8 +610,8 @@ class GoogleDriveManager(
             val baseName = "$appName$suffix"
             val rootId = findFolder(drive, baseName) ?: createFolderInternal(drive, baseName)
             if (rootId != null) {
-                val autoBackupId = findFolder(drive, StorageManager.AUTOMATIC_BACKUPS_PATH, rootId)
-                    ?: createFolderInternal(drive, StorageManager.AUTOMATIC_BACKUPS_PATH, rootId)
+                val autoBackupId = findFolder(drive, AUTOMATIC_BACKUPS_PATH, rootId)
+                    ?: createFolderInternal(drive, AUTOMATIC_BACKUPS_PATH, rootId)
                 if (autoBackupId != null && ensureMarker(drive, rootId)) {
                     val storage = CloudStorageInfo(rootId, autoBackupId)
                     if (isUsableStorage(drive, storage)) {
@@ -652,8 +667,8 @@ class GoogleDriveManager(
         ensureMarker(drive, rootId)
         cleanupRedundantMarkers(drive, rootId)
 
-        val autoBackupId = findFolder(drive, StorageManager.AUTOMATIC_BACKUPS_PATH, rootId)
-            ?: createFolderInternal(drive, StorageManager.AUTOMATIC_BACKUPS_PATH, rootId)
+        val autoBackupId = findFolder(drive, AUTOMATIC_BACKUPS_PATH, rootId)
+            ?: createFolderInternal(drive, AUTOMATIC_BACKUPS_PATH, rootId)
         if (autoBackupId != null) {
             val storage = CloudStorageInfo(rootId, autoBackupId)
             if (isUsableStorage(drive, storage)) return persistStorage(drive, storage)
@@ -699,8 +714,7 @@ class GoogleDriveManager(
 
     private fun ensureMarker(drive: Drive, rootId: String): Boolean {
         val existingMarker = listFilesInternal(drive, rootId).firstOrNull { it.isValidMarker() }
-        if (existingMarker != null) return true
-        return try {
+        return existingMarker != null || try {
             drive.files().create(
                 File().apply {
                     name = marker.fileName
@@ -847,11 +861,30 @@ class GoogleDriveManager(
     }
 
     private fun <T> AbstractGoogleClientRequest<T>.executeWithAuth(): T {
-        return try {
-            execute()
-        } catch (e: UserRecoverableAuthIOException) {
-            markAccountUnavailable()
-            throw e
+        var attempts = 0
+        while (true) {
+            try {
+                return execute()
+            } catch (e: UserRecoverableAuthIOException) {
+                markAccountUnavailable()
+                throw e
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                val isTransientNetworkError = e is IOException
+                if (isTransientNetworkError && attempts < 2) {
+                    attempts++
+                    logcat(LogPriority.WARN, e) {
+                        "Transient network error executing Google Drive request; retrying attempt $attempts/2"
+                    }
+                    try {
+                        Thread.sleep(1000L * attempts)
+                    } catch (_: InterruptedException) {
+                        throw e
+                    }
+                } else {
+                    throw e
+                }
+            }
         }
     }
 
@@ -897,5 +930,10 @@ class GoogleDriveManager(
 
     companion object {
         private const val AUTH_REQUEST_CODE = 1001
+        const val AUTOMATIC_BACKUPS_PATH = "autobackup"
+        private const val CONNECT_TIMEOUT_MS = 60_000 // 60s connect timeout
+        private const val READ_TIMEOUT_MS = 120_000 // 120s read timeout (matches upstream network timeouts)
+        private const val UPLOAD_CHUNK_SIZE = 2 * 1024 * 1024 // 2 MiB chunks for reliable uploads
+        private const val DOWNLOAD_CHUNK_SIZE = 2 * 1024 * 1024 // 2 MiB chunks for downloads
     }
 }
