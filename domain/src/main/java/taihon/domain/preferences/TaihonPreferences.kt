@@ -70,7 +70,10 @@ class TaihonPreferences(
 
     // Download Preferences
 
-    val parallelChapterLimit: Preference<Int> = preferenceStore.getInt(PREF_PARALLEL_CHAPTER_LIMIT, 2)
+    val prefetchUpcomingChapters: Preference<Boolean> = preferenceStore.getBoolean(
+        PREF_PREFETCH_UPCOMING_CHAPTERS,
+        true,
+    )
 
     // Backup Preferences
 
@@ -92,7 +95,7 @@ class TaihonPreferences(
         const val PREF_SMART_APOSTROPHE_NORMALIZATION_EXCEPTIONS = "smart_apostrophe_normalization_exceptions"
         const val PREF_GLOBAL_SEARCH_ENRICH_RESULTS = "global_search_enrich_results"
 
-        const val PREF_PARALLEL_CHAPTER_LIMIT = "download_parallel_chapter_limit"
+        const val PREF_PREFETCH_UPCOMING_CHAPTERS = "prefetch_upcoming_chapters"
 
         const val PREF_BACKUP_RETENTION = "backup_retention"
     }

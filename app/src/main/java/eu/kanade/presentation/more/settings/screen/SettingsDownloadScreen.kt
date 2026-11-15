@@ -49,13 +49,13 @@ object SettingsDownloadScreen : SearchableSettings {
                 valueRange = 1..10,
                 title = stringResource(MR.strings.pref_download_concurrent_sources),
             ),
-        ) + getTaihonDownloadItems() + listOf(
             Preference.PreferenceItem.SliderPreference(
                 preference = downloadPreferences.parallelPageLimit,
                 valueRange = 1..15,
                 title = stringResource(MR.strings.pref_download_concurrent_pages),
                 subtitle = stringResource(MR.strings.pref_download_concurrent_pages_summary),
             ),
+        ) + getTaihonDownloadItems() + listOf(
             getDeleteChaptersGroup(
                 downloadPreferences = downloadPreferences,
                 categories = allCategories,

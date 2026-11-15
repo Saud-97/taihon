@@ -102,15 +102,11 @@ fun getTaihonBackupGroupItems(): List<Preference.PreferenceItem<out Any, out Any
 fun getTaihonDownloadItems(): List<Preference.PreferenceItem<out Any, out Any>> {
     val context = LocalContext.current
     val taihonPreferences = remember { context.appGraph.taihonPreferences }
-    val parallelChapterLimit by taihonPreferences.parallelChapterLimit.collectAsState()
-
     return listOf(
-        Preference.PreferenceItem.SliderPreference(
-            value = parallelChapterLimit,
-            valueRange = 1..5,
-            title = stringResource(MR.strings.pref_download_concurrent_chapters),
-            subtitle = stringResource(MR.strings.pref_download_concurrent_chapters_summary),
-            onValueChanged = { taihonPreferences.parallelChapterLimit.set(it) },
+        Preference.PreferenceItem.SwitchPreference(
+            preference = taihonPreferences.prefetchUpcomingChapters,
+            title = stringResource(MR.strings.pref_prefetch_upcoming_chapters),
+            subtitle = stringResource(MR.strings.pref_prefetch_upcoming_chapters_summary),
             badge = taihonBadge(),
         ),
     )

@@ -61,6 +61,7 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.track.interactor.GetTracks
 import tachiyomi.i18n.MR
+import taihon.feature.download.prefetchUpcomingChapters
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
@@ -219,10 +220,7 @@ class Downloader(
             val activeDownloadsFlow = combine(
                 queueState,
                 downloadPreferences.parallelSourceLimit.changes(),
-                downloadPreferences.taihon.parallelChapterLimit.changes(),
-            ) { queue, sourceLimit, chapterLimit ->
-                Triple(queue, sourceLimit, chapterLimit)
-            }.transformLatest { (queue, parallelCount, chapterLimit) ->
+            ) { a, b -> a to b }.transformLatest { (queue, parallelCount) ->
                 while (true) {
                     val activeDownloads = queue.asSequence()
                         // Ignore completed downloads, leave them in the queue
@@ -230,8 +228,7 @@ class Downloader(
                         .groupBy { it.source }
                         .toList()
                         .take(parallelCount)
-                        .flatMap { (_, downloads) -> downloads.take(chapterLimit) }
-                        .toList()
+                        .map { (_, downloads) -> downloads.first() }
                     emit(activeDownloads)
 
                     if (activeDownloads.isEmpty()) break
@@ -297,6 +294,7 @@ class Downloader(
                 }
                 .filterNotNull()
                 .first()
+            prefetchUpcomingChapters(queueState.value, source, downloadJobs, download, downloadPreferences)
             val pagesStarted = CompletableDeferred<Unit>()
             val job = launchDownloadJob(download, slots, pagesStarted, owner)
             downloadJobs[download] = job

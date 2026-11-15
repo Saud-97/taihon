@@ -585,7 +585,7 @@
     <string name="pref_download_concurrent_sources">Concurrent source downloads</string>
     <string name="pref_download_concurrent_pages">Concurrent page downloads</string>
     <string name="pref_download_concurrent_pages_summary">Pages downloaded simultaneously per
-        chapter
+        source
     </string>
 
     <!-- Tracking section -->
@@ -1165,9 +1165,9 @@
     <string name="pref_page_transition_speed">Animation speed</string>
 
     <!-- Downloads section -->
-    <string name="pref_download_concurrent_chapters">Concurrent chapter downloads</string>
-    <string name="pref_download_concurrent_chapters_summary">Chapters downloaded simultaneously per
-        source
+    <string name="pref_prefetch_upcoming_chapters">Faster download queue</string>
+    <string name="pref_prefetch_upcoming_chapters_summary">Prepare page lists for upcoming chapters
+        in advance to reduce waiting time between downloads
     </string>
 
     <!-- Browse section -->
