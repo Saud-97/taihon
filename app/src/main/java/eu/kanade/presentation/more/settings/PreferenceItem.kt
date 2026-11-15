@@ -11,12 +11,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.more.settings.widget.BasePreferenceWidget
 import eu.kanade.presentation.more.settings.widget.EditTextPreferenceWidget
@@ -29,7 +31,11 @@ import eu.kanade.presentation.more.settings.widget.SwitchPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.TitleFontSize
 import eu.kanade.presentation.more.settings.widget.TrackingPreferenceWidget
+import eu.kanade.tachiyomi.data.track.RefreshResult
+import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
+import tachiyomi.core.common.i18n.stringResource
+import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.BaseSliderItem
 import tachiyomi.presentation.core.util.collectAsState
 
@@ -42,7 +48,7 @@ fun StatusWrapper(
     highlightKey: String?,
     content: @Composable () -> Unit,
 ) {
-    val enabled = item.enabled
+    val enabled = item.visible
     val highlighted = item.title == highlightKey
     AnimatedVisibility(
         visible = enabled,
@@ -86,17 +92,20 @@ internal fun PreferenceItem(
                 )
             }
             is Preference.PreferenceItem.SliderPreference -> {
+                val value by item.preference.collectAsState()
                 BaseSliderItem(
-                    value = item.value,
+                    value = value,
                     valueRange = item.valueRange,
                     steps = item.steps,
                     title = item.title,
                     subtitle = item.subtitle,
-                    valueString = item.valueString.takeUnless { it.isNullOrEmpty() } ?: item.value.toString(),
+                    valueString = item.valueText(value),
                     badge = item.badge,
-                    onChange = {
+                    onChange = { newValue ->
                         scope.launch {
-                            item.onValueChanged(it)
+                            if (item.onValueChanged(newValue)) {
+                                item.preference.set(newValue)
+                            }
                         }
                     },
                     titleStyle = MaterialTheme.typography.titleLarge.copy(fontSize = TitleFontSize),
@@ -179,12 +188,28 @@ internal fun PreferenceItem(
                 )
             }
             is Preference.PreferenceItem.TrackerPreference -> {
+                val context = LocalContext.current
+                LaunchedEffect(item.tracker) {
+                    item.tracker.refreshResultFlow.collect {
+                        when (it) {
+                            RefreshResult.Success -> context.toast(
+                                context.stringResource(MR.strings.refresh_tracker_success, item.tracker.name),
+                            )
+
+                            is RefreshResult.Error -> context.toast(
+                                context.stringResource(MR.strings.refresh_tracker_error, item.tracker.name, it.msg),
+                            )
+                        }
+                    }
+                }
                 val isLoggedIn by item.tracker.let { tracker ->
                     tracker.isLoggedInFlow.collectAsState(tracker.isLoggedIn)
                 }
+                val isRefreshing by item.tracker.isRefreshingFlow.collectAsState()
                 TrackingPreferenceWidget(
                     tracker = item.tracker,
                     isLoggedIn = isLoggedIn,
+                    isRefreshing = isRefreshing,
                     badge = item.badge,
                     onClick = { if (isLoggedIn) item.logout() else item.login() },
                 )

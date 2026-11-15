@@ -9,11 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowUpward
-import androidx.compose.material.icons.outlined.CreateNewFolder
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -36,6 +31,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -45,11 +45,11 @@ import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.more.settings.screen.SettingsDataScreen
 import eu.kanade.presentation.more.settings.screen.data.RestoreBackupScreen
 import eu.kanade.presentation.util.relativeTimeSpanString
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupNotifier
+import eu.kanade.tachiyomi.data.backup.create.BackupCreateWorker
 import eu.kanade.tachiyomi.data.backup.create.BackupCreator
-import eu.kanade.tachiyomi.data.backup.create.BackupOptions
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.cancelNotification
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.notificationBuilder
@@ -60,6 +60,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
+import mihon.app.di.appGraph
+import mihon.icons.materialsymbols.MaterialSymbols
+import mihon.icons.materialsymbols.rounded.ArrowUpward
+import mihon.icons.materialsymbols.rounded.CreateNewFolder
+import mihon.icons.materialsymbols.rounded.Description
+import mihon.icons.materialsymbols.rounded.Folder
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.i18n.MR
@@ -67,19 +73,19 @@ import tachiyomi.presentation.core.components.FastScrollLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import taihon.domain.preferences.TaihonPreferences
 import taihon.feature.cloud.CloudFile
 import taihon.feature.cloud.CloudService
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
+import taihon.feature.cloud.backup.CloudBackupMirrorWorker
 import java.io.File
 import java.net.UnknownHostException
+import androidx.compose.runtime.collectAsState as collectAsStateFlow
+import mihon.icons.materialsymbols.R as MaterialSymbolsR
 
 class GoogleDriveBrowserScreen(
     private val parentId: String? = null,
     private val relativePath: String? = null,
     private val mode: Mode,
-    private val backupOptions: BackupOptions? = null,
+    private val backupOptions: BooleanArray? = null,
 ) : Screen {
 
     override val key: ScreenKey =
@@ -96,8 +102,8 @@ class GoogleDriveBrowserScreen(
         val context = LocalContext.current
         val navigator = LocalNavigator.currentOrThrow
         val scope = rememberCoroutineScope()
-        val cloudService = remember { Injekt.get<CloudService>() }
-        val cloudPreferences = remember { Injekt.get<TaihonPreferences>().cloud }
+        val cloudService = remember { context.appGraph.cloudService }
+        val cloudPreferences = remember { context.appGraph.taihonPreferences.cloud }
 
         val rootLabel = context.stringResource(MR.strings.label_google_drive)
 
@@ -150,6 +156,60 @@ class GoogleDriveBrowserScreen(
         var saveFileName by remember { mutableStateOf(BackupCreator.getFilename()) }
         var progressTitle by remember { mutableStateOf<String?>(null) }
         var fileToDelete by remember { mutableStateOf<CloudFile?>(null) }
+
+        var isManualBackupStarted by remember { mutableStateOf(false) }
+        var tempBackupFile by remember { mutableStateOf<File?>(null) }
+        val manualBackupWorkInfo by remember {
+            WorkManager.getInstance(context).getWorkInfosForUniqueWorkFlow(TAG_MANUAL)
+        }.collectAsStateFlow(initial = emptyList())
+
+        LaunchedEffect(manualBackupWorkInfo) {
+            if (isManualBackupStarted) {
+                val workInfos = manualBackupWorkInfo.filter {
+                    it.tags.contains(TAG_MANUAL) || it.tags.contains(CloudBackupMirrorWorker.TAG_MANUAL_UPLOAD)
+                }
+                if (workInfos.isEmpty()) return@LaunchedEffect
+
+                val backupInfo = workInfos.find { it.tags.contains(TAG_MANUAL) }
+                val uploadInfo = workInfos.find { it.tags.contains(CloudBackupMirrorWorker.TAG_MANUAL_UPLOAD) }
+
+                val isFinished = workInfos.all { it.state.isFinished }
+                val isFailed = workInfos.any {
+                    it.state == WorkInfo.State.FAILED || it.state == WorkInfo.State.CANCELLED
+                }
+
+                if (isFailed) {
+                    isManualBackupStarted = false
+                    progressTitle = null
+                    tempBackupFile?.delete()
+                    context.toast(MR.strings.creating_backup_error)
+                    context.cancelNotification(Notifications.ID_CLOUD_MIRROR_PROGRESS)
+                    context.cancelNotification(Notifications.ID_BACKUP_COMPLETE)
+                    return@LaunchedEffect
+                }
+
+                if (isFinished) {
+                    isManualBackupStarted = false
+                    progressTitle = null
+                    tempBackupFile = null
+                    context.toast(MR.strings.backup_created)
+                    navigator.popUntil { it is SettingsDataScreen }
+                    return@LaunchedEffect
+                }
+
+                progressTitle = when {
+                    uploadInfo?.state == WorkInfo.State.RUNNING -> {
+                        context.stringResource(MR.strings.loading) // "Uploading..."
+                    }
+
+                    backupInfo?.state == WorkInfo.State.RUNNING -> {
+                        context.stringResource(MR.strings.creating_backup)
+                    }
+
+                    else -> progressTitle
+                }
+            }
+        }
 
         val refresh = {
             scope.launch {
@@ -314,7 +374,7 @@ class GoogleDriveBrowserScreen(
                             onClick = { showCreateFolderDialog = true },
                             enabled = progressTitle == null,
                         ) {
-                            Icon(Icons.Outlined.CreateNewFolder, contentDescription = null)
+                            Icon(MaterialSymbols.Rounded.CreateNewFolder, contentDescription = null)
                         }
                     },
                 )
@@ -373,42 +433,62 @@ class GoogleDriveBrowserScreen(
                                             context.toast(MR.strings.exception_offline)
                                             return@Button
                                         }
-                                        scope.launch {
-                                            progressTitle = context.stringResource(MR.strings.creating_backup)
-                                            showNotification(context, progressTitle!!)
-                                            val tempFile = File(
-                                                context.cacheDir,
-                                                "manual_cloud_backup_${System.currentTimeMillis()}.tachibk",
-                                            )
-                                            try {
-                                                withContext(Dispatchers.IO) {
-                                                    if (!tempFile.exists()) tempFile.createNewFile()
+                                        progressTitle = context.stringResource(MR.strings.creating_backup)
+                                        showNotification(context, progressTitle!!)
+                                        val tempFile = File(
+                                            context.cacheDir,
+                                            "manual_cloud_backup_${System.currentTimeMillis()}.tachibk",
+                                        )
+                                        try {
+                                            if (!tempFile.exists()) tempFile.createNewFile()
+                                            tempBackupFile = tempFile
+                                            isManualBackupStarted = true
 
-                                                    val finalName =
-                                                        if (saveFileName.endsWith(".tachibk")) {
-                                                            saveFileName
-                                                        } else {
-                                                            "$saveFileName.tachibk"
-                                                        }
-                                                    val uniFile = UniFile.fromFile(tempFile)!!
-
-                                                    BackupCreator(context, false).backup(
-                                                        uniFile.uri,
-                                                        backupOptions ?: BackupOptions(),
-                                                    )
-                                                    cloudService.uploadFile(tempFile, finalName, parentId)
-                                                }
-                                                context.toast(MR.strings.backup_created)
-                                                navigator.popUntil { it is SettingsDataScreen }
-                                            } catch (e: Exception) {
-                                                if (e is CancellationException) throw e
-                                                logcat(LogPriority.ERROR, e)
-                                                context.toast(MR.strings.creating_backup_error)
-                                                tempFile.delete()
-                                            } finally {
-                                                progressTitle = null
-                                                context.cancelNotification(Notifications.ID_CLOUD_MIRROR_PROGRESS)
+                                            val finalName = if (saveFileName.endsWith(".tachibk")) {
+                                                saveFileName
+                                            } else {
+                                                "$saveFileName.tachibk"
                                             }
+
+                                            val backupRequest = OneTimeWorkRequestBuilder<BackupCreateWorker>()
+                                                .addTag(TAG_MANUAL)
+                                                .setInputData(
+                                                    workDataOf(
+                                                        "is_auto_backup" to false,
+                                                        "location_uri" to tempFile.getUriCompat(context).toString(),
+                                                        "options" to backupOptions,
+                                                    ),
+                                                )
+                                                .build()
+
+                                            val uploadRequest = OneTimeWorkRequestBuilder<
+                                                CloudBackupMirrorWorker,
+                                                >()
+                                                .addTag(CloudBackupMirrorWorker.TAG_MANUAL_UPLOAD)
+                                                .setInputData(
+                                                    workDataOf(
+                                                        CloudBackupMirrorWorker.EXTRA_LOCAL_URI to
+                                                            tempFile.getUriCompat(context).toString(),
+                                                        CloudBackupMirrorWorker.EXTRA_FILE_NAME to finalName,
+                                                        CloudBackupMirrorWorker.EXTRA_PARENT_ID to parentId,
+                                                    ),
+                                                )
+                                                .build()
+
+                                            WorkManager.getInstance(context)
+                                                .beginUniqueWork(
+                                                    TAG_MANUAL,
+                                                    ExistingWorkPolicy.KEEP,
+                                                    backupRequest,
+                                                )
+                                                .then(uploadRequest)
+                                                .enqueue()
+                                        } catch (e: Exception) {
+                                            logcat(LogPriority.ERROR, e)
+                                            context.toast(MR.strings.creating_backup_error)
+                                            tempFile.delete()
+                                            progressTitle = null
+                                            isManualBackupStarted = false
                                         }
                                     },
                                 ) {
@@ -461,7 +541,7 @@ class GoogleDriveBrowserScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Icon(
-                                    Icons.Outlined.ArrowUpward,
+                                    MaterialSymbols.Rounded.ArrowUpward,
                                     contentDescription = null,
                                     modifier = Modifier.padding(end = 16.dp),
                                 )
@@ -544,7 +624,10 @@ class GoogleDriveBrowserScreen(
                                                 logcat(LogPriority.ERROR, e)
                                                 val errorMsg = context.stringResource(MR.strings.restoring_backup_error)
                                                 context.toast(errorMsg)
-                                                BackupNotifier(context).showRestoreError(errorMsg)
+                                                BackupNotifier(
+                                                    context,
+                                                    context.appGraph.securityPreferences,
+                                                ).showRestoreError(errorMsg)
                                                 tempFile.delete()
                                             } finally {
                                                 progressTitle = null
@@ -586,7 +669,11 @@ class GoogleDriveBrowserScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = if (file.isFolder) Icons.Outlined.Folder else Icons.Outlined.Description,
+                imageVector = if (file.isFolder) {
+                    MaterialSymbols.Rounded.Folder
+                } else {
+                    MaterialSymbols.Rounded.Description
+                },
                 contentDescription = null,
                 modifier = Modifier.padding(end = 16.dp),
             )
@@ -623,7 +710,7 @@ class GoogleDriveBrowserScreen(
 
     private fun showNotification(context: Context, title: String) {
         val notification = context.notificationBuilder(Notifications.CHANNEL_BACKUP_RESTORE_PROGRESS) {
-            setSmallIcon(R.drawable.ic_refresh_24dp)
+            setSmallIcon(MaterialSymbolsR.drawable.rounded_refresh)
             setContentTitle(title)
             setContentText(context.stringResource(MR.strings.channel_progress))
             setOngoing(true)
@@ -636,5 +723,9 @@ class GoogleDriveBrowserScreen(
         } catch (e: Exception) {
             logcat(LogPriority.ERROR, e)
         }
+    }
+
+    companion object {
+        private const val TAG_MANUAL = "BackupCreator:manual"
     }
 }

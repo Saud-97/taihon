@@ -20,21 +20,19 @@ import eu.kanade.presentation.util.formatChapterNumber
 import eu.kanade.tachiyomi.ui.manga.ChapterList
 import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import eu.kanade.tachiyomi.util.chapter.getNextUnread
+import mihon.app.di.appGraph
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import taihon.domain.preferences.TaihonPreferences
 import taihon.feature.manga.ui.components.TaihonMangaContinueChip
 import taihon.feature.manga.ui.components.TaihonMangaScrollControls
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
 object TaihonMangaHooks {
     @Composable
     fun rememberCoverModel(data: Any?): Any {
         val context = LocalContext.current
-        val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
+        val taihonPreferences = remember { context.appGraph.taihonPreferences }
         val allowHardware by taihonPreferences.allowHardwareBitmapForCovers.collectAsState()
 
         return remember(data, allowHardware) {

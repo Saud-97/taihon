@@ -3,8 +3,6 @@ package eu.kanade.presentation.more.settings.widget
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -16,6 +14,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
+import mihon.icons.materialsymbols.MaterialSymbols
+import mihon.icons.materialsymbols.rounded.Preview
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
 @Composable
@@ -83,7 +83,7 @@ private fun TextPreferenceWidgetPreview() {
                 TextPreferenceWidget(
                     title = "Text preference with icon",
                     subtitle = "Text preference summary",
-                    icon = Icons.Filled.Preview,
+                    icon = MaterialSymbols.Rounded.Preview,
                     onPreferenceClick = {},
                 )
                 TextPreferenceWidget(

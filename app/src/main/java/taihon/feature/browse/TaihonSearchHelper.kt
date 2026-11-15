@@ -1,15 +1,18 @@
 package taihon.feature.browse
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.Source
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import tachiyomi.core.common.util.lang.launchIO
+import kotlinx.coroutines.launch
+import mihon.app.di.appGraph
 import tachiyomi.domain.manga.model.Manga
 import taihon.domain.preferences.TaihonPreferences
 import taihon.feature.browse.util.normalizeSearchQuery
@@ -62,9 +65,9 @@ object TaihonSearchHelper {
         enricher.clear()
     }
 
-    internal fun normalize(source: Source, query: String): String {
-        val extensionManager: ExtensionManager = Injekt.get()
-        val taihonPreferences: TaihonPreferences = Injekt.get()
+    internal suspend fun normalize(source: Source, query: String): String {
+        val extensionManager: ExtensionManager = Injekt.get<Context>().appGraph.extensionManager
+        val taihonPreferences: TaihonPreferences = Injekt.get<Context>().appGraph.taihonPreferences
 
         val pkgName = extensionManager.getExtensionPackage(source.id)
         return query.normalizeSearchQuery(
@@ -75,12 +78,12 @@ object TaihonSearchHelper {
     }
 
     internal fun enrich(scope: CoroutineScope, titles: List<Manga>) {
-        val taihonPreferences: TaihonPreferences = Injekt.get()
+        val taihonPreferences: TaihonPreferences = Injekt.get<Context>().appGraph.taihonPreferences
 
         if (taihonPreferences.globalSearchEnrichResults.get()) {
             scope.coroutineContext[Job]?.let { registerJob(it) }
             titles.forEach { title ->
-                scope.launchIO {
+                scope.launch(Dispatchers.IO) {
                     enricher.fetchMangaDetails(title)
                 }
             }
@@ -88,6 +91,6 @@ object TaihonSearchHelper {
     }
 }
 
-fun Source.taihonNormalize(query: String): String = TaihonSearchHelper.normalize(this, query)
+suspend fun Source.taihonNormalize(query: String): String = TaihonSearchHelper.normalize(this, query)
 
 fun List<Manga>.taihonEnrich(scope: CoroutineScope) = TaihonSearchHelper.enrich(scope, this)

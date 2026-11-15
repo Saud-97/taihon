@@ -1,6 +1,5 @@
 package tachiyomi.presentation.widget
 
-import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
@@ -23,7 +22,6 @@ import androidx.glance.layout.padding
 import androidx.glance.unit.ColorProvider
 import coil3.annotation.ExperimentalCoilApi
 import coil3.asDrawable
-import coil3.executeBlocking
 import coil3.imageLoader
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
@@ -31,13 +29,18 @@ import coil3.request.transformations
 import coil3.size.Precision
 import coil3.size.Scale
 import coil3.transform.RoundedCornersTransformation
+import dev.zacsweers.metro.HasMemberInjections
+import dev.zacsweers.metro.Inject
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
 import eu.kanade.tachiyomi.util.system.dpToPx
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
-import tachiyomi.core.common.util.lang.withIOContext
+import mihon.core.metro.metroGraph
+import mihon.presentation.widget.di.PresentationWidgetGraph
 import tachiyomi.domain.manga.model.MangaCover
 import tachiyomi.domain.updates.interactor.GetUpdates
 import tachiyomi.domain.updates.model.UpdatesWithRelations
@@ -47,16 +50,15 @@ import tachiyomi.presentation.widget.components.LockedWidget
 import tachiyomi.presentation.widget.components.UpdatesWidget
 import tachiyomi.presentation.widget.util.appWidgetBackgroundRadius
 import tachiyomi.presentation.widget.util.calculateRowAndColumnCount
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-abstract class BaseUpdatesGridGlanceWidget(
-    private val context: Context = Injekt.get<Application>(),
-    private val getUpdates: GetUpdates = Injekt.get(),
-    private val preferences: SecurityPreferences = Injekt.get(),
-) : GlanceAppWidget() {
+@HasMemberInjections
+abstract class BaseUpdatesGridGlanceWidget : GlanceAppWidget() {
+
+    @Inject private lateinit var getUpdates: GetUpdates
+
+    @Inject private lateinit var preferences: SecurityPreferences
 
     override val sizeMode = SizeMode.Exact
 
@@ -66,6 +68,7 @@ abstract class BaseUpdatesGridGlanceWidget(
     abstract val bottomPadding: Dp
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        context.metroGraph<PresentationWidgetGraph>().inject(this)
         val locked = preferences.useAuthenticator.get()
         val containerModifier = GlanceModifier
             .fillMaxSize()
@@ -93,9 +96,9 @@ abstract class BaseUpdatesGridGlanceWidget(
 
             val flow = remember {
                 getUpdates
-                    .subscribe(false, DateLimit.toEpochMilliseconds())
+                    .subscribe(false, DateLimit)
                     .map { rawData ->
-                        rawData.prepareData(rowCount, columnCount)
+                        rawData.prepareData(context, rowCount, columnCount)
                     }
             }
             val data by flow.collectAsState(initial = null)
@@ -111,6 +114,7 @@ abstract class BaseUpdatesGridGlanceWidget(
 
     @OptIn(ExperimentalCoilApi::class)
     private suspend fun List<UpdatesWithRelations>.prepareData(
+        context: Context,
         rowCount: Int,
         columnCount: Int,
     ): List<Pair<Long, Bitmap?>> {
@@ -118,7 +122,7 @@ abstract class BaseUpdatesGridGlanceWidget(
         val widthPx = CoverWidth.value.toInt().dpToPx
         val heightPx = CoverHeight.value.toInt().dpToPx
         val roundPx = context.resources.getDimension(R.dimen.appwidget_inner_radius)
-        return withIOContext {
+        return withContext(Dispatchers.Default) {
             this@prepareData
                 .distinctBy { it.mangaId }
                 .take(rowCount * columnCount)
@@ -145,7 +149,7 @@ abstract class BaseUpdatesGridGlanceWidget(
                             }
                         }
                         .build()
-                    val bitmap = context.imageLoader.executeBlocking(request)
+                    val bitmap = context.imageLoader.execute(request)
                         .image
                         ?.asDrawable(context.resources)
                         ?.toBitmap()

@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MultiChoiceSegmentedButtonRow
@@ -39,14 +37,14 @@ import eu.kanade.presentation.more.settings.widget.PrefsHorizontalPadding
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
+import mihon.app.di.appGraph
+import mihon.icons.materialsymbols.MaterialSymbols
+import mihon.icons.materialsymbols.rounded.Cloud
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
-import taihon.domain.preferences.TaihonPreferences
 import taihon.feature.cloud.CloudService
 import taihon.feature.cloud.backup.CloudBackupMirrorWorker
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import tachiyomi.presentation.core.util.collectAsState as collectAsPreferenceState
 
 object TaihonCloudSettingsHooks {
@@ -55,8 +53,9 @@ object TaihonCloudSettingsHooks {
     fun getGroup(): Preference.PreferenceGroup {
         val context = LocalContext.current
         val navigator = LocalNavigator.currentOrThrow
-        val cloudPreferences = Injekt.get<TaihonPreferences>().cloud
-        val cloudService = remember { Injekt.get<CloudService>() }
+        val graph = remember { context.appGraph }
+        val cloudPreferences = graph.taihonPreferences.cloud
+        val cloudService = remember { graph.cloudService }
         val scope = rememberCoroutineScope()
         val account by cloudService.accountState.collectAsState()
         val isCloudEnabled by cloudPreferences.cloudEnabled.collectAsPreferenceState()
@@ -101,7 +100,7 @@ object TaihonCloudSettingsHooks {
                     title = stringResource(MR.strings.label_google_drive),
                     subtitle = stringResource(MR.strings.cloud_backup_not_supported),
                     onClick = { context.toast(MR.strings.cloud_backup_not_supported) },
-                    icon = Icons.Outlined.Cloud,
+                    icon = MaterialSymbols.Rounded.Cloud,
                 ),
             )
         } else {
@@ -119,7 +118,7 @@ object TaihonCloudSettingsHooks {
                     } else {
                         stringResource(MR.strings.login)
                     },
-                    icon = Icons.Outlined.Cloud,
+                    icon = MaterialSymbols.Rounded.Cloud,
                     onValueChanged = { enabled ->
                         if (enabled && account == null) {
                             scope.launch {

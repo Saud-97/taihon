@@ -50,12 +50,13 @@ fun PreferenceScreen(
             when (preference) {
                 // Create Preference Group
                 is Preference.PreferenceGroup -> {
-                    if (!preference.enabled) return@fastForEachIndexed
+                    if (!preference.visible) return@fastForEachIndexed
 
                     item {
                         Column {
                             PreferenceGroupHeader(
                                 title = preference.title,
+                                highlighted = preference.title == highlightKey,
                                 badge = preference.badge,
                             )
                         }
@@ -89,7 +90,7 @@ private fun List<Preference>.findHighlightedIndex(highlightKey: String): Int {
     return flatMap {
         if (it is Preference.PreferenceGroup) {
             buildList<String?> {
-                add(null) // Header
+                add(it.title) // Header
                 addAll(it.preferenceItems.map { groupItem -> groupItem.title })
                 add(null) // Spacer
             }

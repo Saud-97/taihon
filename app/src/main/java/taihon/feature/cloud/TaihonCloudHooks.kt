@@ -1,37 +1,33 @@
 package taihon.feature.cloud
 
+import android.app.ActivityManager
+import android.app.Application
 import android.content.Context
+import android.os.Build
 import cafe.adriel.voyager.navigator.Navigator
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.backup.create.BackupOptions
-import tachiyomi.domain.storage.service.StorageManager
-import taihon.domain.preferences.TaihonPreferences
+import mihon.app.di.appGraph
 import taihon.feature.cloud.backup.CloudBackupMirrorWorker
 import taihon.feature.cloud.ui.GoogleDriveBrowserScreen
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
-fun CloudService(context: Context): CloudService {
-    val googleCloudClientId = context.getString(R.string.default_web_client_id)
-    return CloudService(context, googleCloudClientId)
-}
-
+@Suppress("SimplifyBooleanWithConstants")
 object TaihonCloudHooks {
 
     fun onManualBackupClick(navigator: Navigator, options: BackupOptions) {
         navigator.push(
             GoogleDriveBrowserScreen(
                 mode = GoogleDriveBrowserScreen.Mode.SAVE_FILE,
-                backupOptions = options,
+                backupOptions = options.asBooleanArray(),
             ),
         )
     }
 
     fun init(context: Context) {
-        if (!BuildConfig.CLOUD_INCLUDED) return
+        if (!BuildConfig.CLOUD_INCLUDED || !context.isMainProcess()) return
 
-        val cloudPreferences = Injekt.get<TaihonPreferences>().cloud
-        val cloudService = Injekt.get<CloudService>()
+        val cloudPreferences = context.appGraph.taihonPreferences.cloud
+        val cloudService = context.appGraph.cloudService
         if (cloudPreferences.cloudEnabled.get() && cloudPreferences.cloudAutoMirror.get() &&
             cloudService.isAvailable()
         ) {
@@ -40,11 +36,11 @@ object TaihonCloudHooks {
     }
 
     fun onBackupCreated(context: Context, location: String) {
-        if (!BuildConfig.CLOUD_INCLUDED) return
+        if (!BuildConfig.CLOUD_INCLUDED || !context.isMainProcess()) return
 
-        val cloudPreferences = Injekt.get<TaihonPreferences>().cloud
-        val cloudService = Injekt.get<CloudService>()
-        val isFileInAutoDir = location.contains(StorageManager.AUTOMATIC_BACKUPS_PATH)
+        val cloudPreferences = context.appGraph.taihonPreferences.cloud
+        val cloudService = context.appGraph.cloudService
+        val isFileInAutoDir = location.contains(GoogleDriveManager.AUTOMATIC_BACKUPS_PATH)
 
         if (cloudPreferences.cloudAutoMirror.get() &&
             cloudService.isAvailable() &&
@@ -53,5 +49,16 @@ object TaihonCloudHooks {
         ) {
             CloudBackupMirrorWorker.schedule(context, forceRestart = true)
         }
+    }
+
+    private fun Context.isMainProcess(): Boolean {
+        val processName = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            Application.getProcessName()
+        } else {
+            val am = getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+            val pid = android.os.Process.myPid()
+            am?.runningAppProcesses?.find { it.pid == pid }?.processName
+        }
+        return packageName == processName
     }
 }

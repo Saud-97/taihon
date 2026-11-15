@@ -1,10 +1,17 @@
 package taihon.feature.cloud
 
 import android.app.Activity
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 
+@Inject
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 class NoopCloudManager : CloudService {
     override val accountState: StateFlow<CloudAccount?> = MutableStateFlow(null)
 

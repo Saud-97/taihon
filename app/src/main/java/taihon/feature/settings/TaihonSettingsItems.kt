@@ -4,22 +4,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import eu.kanade.presentation.more.settings.Preference
-import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
-import tachiyomi.domain.backup.service.BackupPreferences
+import mihon.app.di.appGraph
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import taihon.domain.preferences.TaihonPreferences
 import taihon.feature.ui.components.taihonBadge
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
 @Composable
 fun getTaihonAdvancedLibraryItems(): List<Preference.PreferenceItem<out Any, out Any>> {
-    val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
+    val context = LocalContext.current
+    val taihonPreferences = remember { context.appGraph.taihonPreferences }
     return listOf(
         Preference.PreferenceItem.SwitchPreference(
             preference = taihonPreferences.allowHardwareBitmapForCovers,
@@ -32,7 +30,8 @@ fun getTaihonAdvancedLibraryItems(): List<Preference.PreferenceItem<out Any, out
 
 @Composable
 fun getTaihonExtensionItems(): List<Preference.PreferenceItem<out Any, out Any>> {
-    val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
+    val context = LocalContext.current
+    val taihonPreferences = remember { context.appGraph.taihonPreferences }
     return listOf(
         Preference.PreferenceItem.SwitchPreference(
             preference = taihonPreferences.hideExtensionUpdatesCount,
@@ -44,10 +43,11 @@ fun getTaihonExtensionItems(): List<Preference.PreferenceItem<out Any, out Any>>
 
 @Composable
 fun getTaihonBrowseGroups(): List<Preference.PreferenceGroup> {
-    val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
-    val extensionManager = remember { Injekt.get<ExtensionManager>() }
+    val context = LocalContext.current
+    val taihonPreferences = remember { context.appGraph.taihonPreferences }
+    val extensionManager = remember { context.appGraph.extensionManager }
 
-    val installedExtensions by extensionManager.installedExtensionsFlow.collectAsState(emptyList<Extension.Installed>())
+    val installedExtensions by extensionManager.loadedExtensionsFlow.collectAsState(emptyList<Extension.Installed>())
     val smartApostropheNormalization by taihonPreferences.smartApostropheNormalization.collectAsState()
 
     return listOf(
@@ -65,7 +65,7 @@ fun getTaihonBrowseGroups(): List<Preference.PreferenceGroup> {
                     entries = installedExtensions.associate { it.pkgName to it.name },
                     title = stringResource(MR.strings.pref_smart_apostrophe_normalization_exceptions),
                     subtitle = stringResource(MR.strings.exclude),
-                    enabled = smartApostropheNormalization,
+                    visible = smartApostropheNormalization,
                 ),
                 Preference.PreferenceItem.SwitchPreference(
                     preference = taihonPreferences.globalSearchEnrichResults,
@@ -79,29 +79,29 @@ fun getTaihonBrowseGroups(): List<Preference.PreferenceGroup> {
 
 @Composable
 fun getTaihonBackupGroupItems(): List<Preference.PreferenceItem<out Any, out Any>> {
-    val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
-    val backupPreferences = remember { Injekt.get<BackupPreferences>() }
+    val context = LocalContext.current
+    val taihonPreferences = remember { context.appGraph.taihonPreferences }
+    val backupPreferences = remember { context.appGraph.backupPreferences }
 
-    val backupRetention by taihonPreferences.backupRetention.collectAsState()
     val backupInterval by backupPreferences.backupInterval.collectAsState()
 
     return listOf(
         Preference.PreferenceItem.SliderPreference(
-            value = backupRetention,
+            preference = taihonPreferences.backupRetention,
             valueRange = 4..100,
             title = stringResource(MR.strings.pref_backup_retention),
             subtitle = stringResource(MR.strings.pref_backup_retention_info),
-            onValueChanged = { taihonPreferences.backupRetention.set(it) },
             badge = taihonBadge(),
             steps = 0,
-            enabled = backupInterval > 0,
+            visible = backupInterval > 0,
         ),
     )
 }
 
 @Composable
 fun getTaihonDownloadItems(): List<Preference.PreferenceItem<out Any, out Any>> {
-    val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
+    val context = LocalContext.current
+    val taihonPreferences = remember { context.appGraph.taihonPreferences }
     val parallelChapterLimit by taihonPreferences.parallelChapterLimit.collectAsState()
 
     return listOf(
@@ -118,7 +118,8 @@ fun getTaihonDownloadItems(): List<Preference.PreferenceItem<out Any, out Any>> 
 
 @Composable
 fun getTaihonLibraryBehaviorItems(): List<Preference.PreferenceItem<out Any, out Any>> {
-    val taihonPreferences = remember { Injekt.get<TaihonPreferences>() }
+    val context = LocalContext.current
+    val taihonPreferences = remember { context.appGraph.taihonPreferences }
     return listOf(
         Preference.PreferenceItem.SwitchPreference(
             preference = taihonPreferences.resumeLastSeenPage,
@@ -131,48 +132,38 @@ fun getTaihonLibraryBehaviorItems(): List<Preference.PreferenceItem<out Any, out
 
 @Composable
 fun getTaihonReaderItems(): List<Preference.PreferenceItem<out Any, out Any>> {
-    val taihonPref = remember { Injekt.get<TaihonPreferences>() }
-    val readerPref = remember { Injekt.get<ReaderPreferences>() }
-
-    val pageTransitionDistance by taihonPref.pageTransitionDistance.collectAsState()
-    val pageTransitionSpeed by taihonPref.pageTransitionSpeed.collectAsState()
+    val context = LocalContext.current
+    val taihonPref = remember { context.appGraph.taihonPreferences }
+    val readerPref = remember { context.appGraph.readerPreferences }
 
     return listOf(
         Preference.PreferenceItem.SliderPreference(
-            value = if (pageTransitionSpeed == 0) 0 else (1050 - pageTransitionSpeed) / 50,
-            valueRange = 0..20,
-            steps = 19,
+            preference = taihonPref.pageTransitionSpeed,
+            valueRange = 0..1000 step 50,
             title = stringResource(MR.strings.pref_page_transition_speed),
-            valueString = if (pageTransitionSpeed == 0) {
-                stringResource(MR.strings.label_default)
-            } else {
-                stringResource(MR.strings.pref_flash_duration_summary, pageTransitionSpeed)
-            },
-            onValueChanged = { sliderValue ->
-                val newSpeed = if (sliderValue == 0) 0 else 1050 - sliderValue * 50
-                taihonPref.pageTransitionSpeed.set(newSpeed)
-                if (newSpeed > 0) {
-                    readerPref.pageTransitions.set(true)
+            valueText = {
+                if (it == 0) {
+                    stringResource(MR.strings.label_default)
+                } else {
+                    stringResource(MR.strings.pref_flash_duration_summary, it)
                 }
+            },
+            onValueChanged = {
+                if (it > 0) readerPref.pageTransitions.set(true)
+                true
             },
             badge = taihonBadge(),
         ),
         Preference.PreferenceItem.SliderPreference(
-            value = when (pageTransitionDistance) {
-                0 -> 0
-                else -> (pageTransitionDistance - 5) / 5
-            },
-            valueRange = 0..19,
-            steps = 18,
+            preference = taihonPref.pageTransitionDistance,
+            valueRange = 0..100 step 5,
             title = stringResource(MR.strings.pref_page_transition_distance),
-            valueString = if (pageTransitionDistance == 0 || pageTransitionDistance == 75) {
-                stringResource(MR.strings.label_default)
-            } else {
-                "$pageTransitionDistance%"
-            },
-            onValueChanged = { sliderValue ->
-                val newDistance = if (sliderValue == 0) 0 else sliderValue * 5 + 5
-                taihonPref.pageTransitionDistance.set(newDistance)
+            valueText = {
+                if (it == 0 || it == 75) {
+                    stringResource(MR.strings.label_default)
+                } else {
+                    "$it%"
+                }
             },
             badge = taihonBadge(),
         ),
@@ -180,18 +171,16 @@ fun getTaihonReaderItems(): List<Preference.PreferenceItem<out Any, out Any>> {
 }
 
 @Composable
-fun getTaihonWebtoonPaddingItem(): Preference.PreferenceItem<Int, Unit> {
-    val readerPreferences = remember { Injekt.get<ReaderPreferences>() }
+fun getTaihonWebtoonPaddingItem(): Preference.PreferenceItem.SliderPreference {
+    val context = LocalContext.current
+    val readerPreferences = remember { context.appGraph.readerPreferences }
     val numberFormat = remember { java.text.NumberFormat.getPercentInstance() }
 
-    val webtoonSidePadding by readerPreferences.webtoonSidePadding.collectAsState()
-
     return Preference.PreferenceItem.SliderPreference(
-        value = webtoonSidePadding,
+        preference = readerPreferences.webtoonSidePadding,
         valueRange = ReaderPreferences.WEBTOON_PADDING_MIN..ReaderPreferences.WEBTOON_PADDING_MAX,
         title = stringResource(MR.strings.pref_webtoon_side_padding),
-        valueString = numberFormat.format(webtoonSidePadding / 100f),
-        onValueChanged = { readerPreferences.webtoonSidePadding.set(it) },
+        valueText = { numberFormat.format(it / 100f) },
         badge = taihonBadge(),
     )
 }

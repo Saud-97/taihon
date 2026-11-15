@@ -1,5 +1,6 @@
 package taihon.feature.reader
 
+import android.content.Context
 import androidx.recyclerview.widget.WebtoonLayoutManager
 import androidx.viewpager.widget.ViewPager
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
@@ -7,7 +8,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import taihon.domain.preferences.TaihonPreferences
+import mihon.app.di.appGraph
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -41,7 +42,7 @@ fun PagerViewer.setupTaihonScroller(scope: CoroutineScope) {
         }
     }
 
-    Injekt.get<TaihonPreferences>().pageTransitionSpeed.changes()
+    Injekt.get<Context>().appGraph.taihonPreferences.pageTransitionSpeed.changes()
         .onEach { setNextTransitionSpeed(it) }
         .launchIn(scope)
 }
@@ -75,12 +76,12 @@ fun WebtoonViewer.setupTaihonWebtoonConfig(
     layoutManager: WebtoonLayoutManager,
     scrollDistance: () -> Int,
 ) {
-    Injekt.get<TaihonPreferences>().pageTransitionDistance.changes()
+    Injekt.get<Context>().appGraph.taihonPreferences.pageTransitionDistance.changes()
         .onEach { layoutManager.extraLayoutSpace = scrollDistance() }
         .launchIn(scope)
 }
 
-private class CustomScroller(context: android.content.Context, private val scrollDuration: Int) :
+private class CustomScroller(context: Context, private val scrollDuration: Int) :
     android.widget.Scroller(context, android.view.animation.AccelerateDecelerateInterpolator()) {
     override fun startScroll(startX: Int, startY: Int, dx: Int, dy: Int, duration: Int) {
         super.startScroll(startX, startY, dx, dy, scrollDuration)

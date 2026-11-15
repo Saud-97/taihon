@@ -11,7 +11,7 @@ import tachiyomi.core.common.preference.Preference as PreferenceData
 
 sealed class Preference {
     abstract val title: String
-    abstract val enabled: Boolean
+    abstract val visible: Boolean
 
     sealed class PreferenceItem<T, R> : Preference() {
         abstract val subtitle: String?
@@ -26,7 +26,7 @@ sealed class Preference {
             override val title: String,
             override val subtitle: String? = null,
             override val icon: ImageVector? = null,
-            override val enabled: Boolean = true,
+            override val visible: Boolean = true,
             val widget: @Composable (() -> Unit)? = null,
             val onClick: (() -> Unit)? = null,
             override val badge: ImageVector? = null,
@@ -42,7 +42,7 @@ sealed class Preference {
             override val title: String,
             override val subtitle: String? = null,
             override val icon: ImageVector? = null,
-            override val enabled: Boolean = true,
+            override val visible: Boolean = true,
             override val onValueChanged: suspend (value: Boolean) -> Boolean = { true },
             override val badge: ImageVector? = null,
         ) : PreferenceItem<Boolean, Boolean>()
@@ -51,16 +51,16 @@ sealed class Preference {
          * A [PreferenceItem] that provides a slider to select an integer number.
          */
         data class SliderPreference(
-            val value: Int,
+            val preference: PreferenceData<Int>,
             override val title: String,
             override val subtitle: String? = null,
-            val valueString: String? = null,
+            val valueText: @Composable (Int) -> String = { it.toString() },
             val valueRange: IntProgression = 0..1,
-            @IntRange(from = 0) val steps: Int = with(valueRange) { (last - first) - 1 },
-            override val enabled: Boolean = true,
-            override val onValueChanged: suspend (value: Int) -> Unit = {},
+            @IntRange(from = 0) val steps: Int = with(valueRange) { ((last - first) / step) - 1 },
+            override val visible: Boolean = true,
+            override val onValueChanged: suspend (value: Int) -> Boolean = { true },
             override val badge: ImageVector? = null,
-        ) : PreferenceItem<Int, Unit>() {
+        ) : PreferenceItem<Int, Boolean>() {
             override val icon: ImageVector? = null
         }
 
@@ -76,7 +76,7 @@ sealed class Preference {
             val subtitleProvider: @Composable (value: T, entries: Map<T, String>) -> String? =
                 { v, e -> subtitle?.format(e[v]) },
             override val icon: ImageVector? = null,
-            override val enabled: Boolean = true,
+            override val visible: Boolean = true,
             override val onValueChanged: suspend (value: T) -> Boolean = { true },
             override val badge: ImageVector? = null,
         ) : PreferenceItem<T, Boolean>() {
@@ -99,7 +99,7 @@ sealed class Preference {
             val subtitleProvider: @Composable (value: String, entries: Map<String, String>) -> String? =
                 { v, e -> subtitle?.format(e[v]) },
             override val icon: ImageVector? = null,
-            override val enabled: Boolean = true,
+            override val visible: Boolean = true,
             override val onValueChanged: suspend (value: String) -> Unit = {},
             override val badge: ImageVector? = null,
         ) : PreferenceItem<String, Unit>()
@@ -125,7 +125,7 @@ sealed class Preference {
                     subtitle?.format(combined)
                 },
             override val icon: ImageVector? = null,
-            override val enabled: Boolean = true,
+            override val visible: Boolean = true,
             override val onValueChanged: suspend (value: Set<T>) -> Boolean = { true },
             override val badge: ImageVector? = null,
         ) : PreferenceItem<Set<T>, Boolean>() {
@@ -144,7 +144,7 @@ sealed class Preference {
             val preference: PreferenceData<String>,
             override val title: String,
             override val subtitle: String? = "%s",
-            override val enabled: Boolean = true,
+            override val visible: Boolean = true,
             override val onValueChanged: suspend (value: String) -> Boolean = { true },
             override val badge: ImageVector? = null,
         ) : PreferenceItem<String, Boolean>() {
@@ -161,7 +161,7 @@ sealed class Preference {
             override val badge: ImageVector? = null,
         ) : PreferenceItem<String, Unit>() {
             override val title: String = ""
-            override val enabled: Boolean = true
+            override val visible: Boolean = true
             override val subtitle: String? = null
             override val icon: ImageVector? = null
             override val onValueChanged: suspend (value: String) -> Unit = {}
@@ -171,7 +171,7 @@ sealed class Preference {
             override val title: String,
             override val badge: ImageVector? = null,
         ) : PreferenceItem<String, Unit>() {
-            override val enabled: Boolean = true
+            override val visible: Boolean = true
             override val subtitle: String? = null
             override val icon: ImageVector? = null
             override val onValueChanged: suspend (value: String) -> Unit = {}
@@ -182,7 +182,7 @@ sealed class Preference {
             override val badge: ImageVector? = null,
             val content: @Composable () -> Unit,
         ) : PreferenceItem<Unit, Unit>() {
-            override val enabled: Boolean = true
+            override val visible: Boolean = true
             override val subtitle: String? = null
             override val icon: ImageVector? = null
             override val onValueChanged: suspend (value: Unit) -> Unit = {}
@@ -191,7 +191,7 @@ sealed class Preference {
 
     data class PreferenceGroup(
         override val title: String,
-        override val enabled: Boolean = true,
+        override val visible: Boolean = true,
         val badge: ImageVector? = null,
 
         val preferenceItems: List<PreferenceItem<out Any, out Any>>,

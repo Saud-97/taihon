@@ -1,5 +1,6 @@
 package taihon.feature.library
 
+import android.content.Context
 import androidx.compose.runtime.Immutable
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import kotlinx.coroutines.flow.Flow
@@ -7,12 +8,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import mihon.app.di.appGraph
 import tachiyomi.core.common.preference.TriState
 import tachiyomi.domain.source.model.StubSource
 import tachiyomi.domain.source.service.SourceManager
 import taihon.domain.preferences.TaihonPreferences
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import tachiyomi.domain.source.model.Source as DomainSource
 
 object TaihonLibraryHelper {
@@ -22,6 +22,7 @@ object TaihonLibraryHelper {
         val sourceFilter: SourceFilter,
         val showInstalledBadge: Boolean,
         val showOrphanedBadge: Boolean,
+        val sourceMap: Map<Long, DomainSource>,
     )
 
     @Immutable
@@ -30,15 +31,29 @@ object TaihonLibraryHelper {
         val orphaned: TriState,
     )
 
-    fun getStateFlow(): Flow<State> {
-        val sourceManager: SourceManager = Injekt.get()
-        val taihonPreferences: TaihonPreferences = Injekt.get()
+    fun getStateFlow(context: Context): Flow<State> {
+        val sourceManager = context.appGraph.sourceManager
+        val taihonPreferences = context.appGraph.taihonPreferences
         return combine(
             getSourceFilterFlow(sourceManager, taihonPreferences),
             taihonPreferences.sourceInstalledBadge.changes(),
             taihonPreferences.sourceOrphanedBadge.changes(),
-        ) { sourceFilter, installedBadge, orphanedBadge ->
-            State(sourceFilter, installedBadge, orphanedBadge)
+            sourceManager.sources,
+        ) { sourceFilter, installedBadge, orphanedBadge, sources ->
+            State(
+                sourceFilter = sourceFilter,
+                showInstalledBadge = installedBadge,
+                showOrphanedBadge = orphanedBadge,
+                sourceMap = sources.associate {
+                    it.id to DomainSource(
+                        id = it.id,
+                        lang = it.lang,
+                        name = it.name,
+                        supportsLatest = it.supportsLatest,
+                        isStub = it is StubSource,
+                    )
+                },
+            )
         }
     }
 
@@ -70,7 +85,6 @@ object TaihonLibraryHelper {
         item: LibraryItem,
         state: State,
     ): Boolean {
-        val sourceManager: SourceManager = Injekt.get()
         val filters = state.sourceFilter
 
         val excludedSources = filters.sourceMap.filter { it.value == TriState.ENABLED_NOT }.keys
@@ -79,8 +93,8 @@ object TaihonLibraryHelper {
         val orphanedIsIncluded = filters.orphaned == TriState.ENABLED_IS
 
         val sourceId = item.libraryManga.manga.source
-        val source = sourceManager.get(sourceId)
-        val isOrphaned = source == null || source is StubSource
+        val source = state.sourceMap[sourceId]
+        val isOrphaned = source == null || source.isStub
 
         val isExcluded = if (isOrphaned) orphanedIsExcluded else sourceId in excludedSources
         val isAnyIncluded = includedSources.isNotEmpty() || orphanedIsIncluded
@@ -97,18 +111,17 @@ object TaihonLibraryHelper {
         sourceId: Long,
         state: State,
     ): DomainSource? {
-        val sourceManager: SourceManager = Injekt.get()
-        val source = sourceManager.getOrStub(sourceId)
-        val isStub = source is StubSource
-        val showSource = (isStub && state.showOrphanedBadge) || (!isStub && state.showInstalledBadge)
+        val source = state.sourceMap[sourceId]
+        val isInstalled = source != null && !source.isStub
+        val showSource = (!isInstalled && state.showOrphanedBadge) || (isInstalled && state.showInstalledBadge)
 
         return if (showSource) {
-            DomainSource(
-                id = source.id,
-                lang = source.lang,
-                name = source.name,
-                supportsLatest = source.supportsLatest,
-                isStub = isStub,
+            source ?: DomainSource(
+                id = sourceId,
+                lang = "",
+                name = "",
+                supportsLatest = false,
+                isStub = true,
             )
         } else {
             null

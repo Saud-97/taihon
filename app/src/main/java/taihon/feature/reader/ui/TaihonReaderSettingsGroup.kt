@@ -35,8 +35,8 @@ fun TaihonReaderSettingsGroup(
 
     SliderItem(
         label = stringResource(MR.strings.pref_page_transition_speed),
-        value = if (pageTransitionSpeed == 0) 0 else (1050 - pageTransitionSpeed) / 50,
-        valueRange = 0..20,
+        value = pageTransitionSpeed,
+        valueRange = 0..1000 step 50,
         steps = 19,
         valueString = if (pageTransitionSpeed == 0) {
             stringResource(MR.strings.label_default)
@@ -44,9 +44,8 @@ fun TaihonReaderSettingsGroup(
             stringResource(MR.strings.pref_flash_duration_summary, pageTransitionSpeed)
         },
         onChange = { sliderValue ->
-            val newSpeed = if (sliderValue == 0) 0 else 1050 - sliderValue * 50
-            pageTransitionSpeedPref.set(newSpeed)
-            if (newSpeed > 0 && !pageTransitions) {
+            pageTransitionSpeedPref.set(sliderValue)
+            if (sliderValue > 0 && !pageTransitions) {
                 pageTransitionsPref.set(true)
             }
         },

@@ -1,8 +1,10 @@
 package tachiyomi.domain.release.interactor
 
+import dev.zacsweers.metro.Inject
 import tachiyomi.domain.release.model.Release
 import tachiyomi.domain.release.service.ReleaseService
 
+@Inject
 class GetApplicationRelease(
     private val service: ReleaseService,
 ) {
@@ -11,7 +13,7 @@ class GetApplicationRelease(
 
         // Check if latest version is different from current version
         val isNewVersion = isNewVersion(
-            arguments.isPreview,
+            arguments.isNightly,
             arguments.commitCount,
             arguments.versionName,
             release.version,
@@ -60,7 +62,7 @@ class GetApplicationRelease(
 
     data class Arguments(
         val isFoss: Boolean,
-        val isPreview: Boolean,
+        val isNightly: Boolean,
         val commitCount: Int,
         val versionName: String,
         val repository: String,

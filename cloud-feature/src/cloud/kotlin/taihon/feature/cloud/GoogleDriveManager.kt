@@ -26,6 +26,10 @@ import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
 import com.google.api.services.drive.model.File
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,19 +46,20 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.storage.service.StorageManager
 import tachiyomi.i18n.MR
-import taihon.domain.preferences.CloudPreferences
 import taihon.domain.preferences.TaihonPreferences
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+@Inject
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 class GoogleDriveManager(
     private val context: Context,
-    private val cloudClientId: String,
-    private val cloudPreferences: CloudPreferences = Injekt.get<TaihonPreferences>().cloud,
+    taihonPreferences: TaihonPreferences,
 ) : CloudService {
 
+    private val cloudClientId = context.getString(R.string.default_web_client_id)
+    private val cloudPreferences = taihonPreferences.cloud
     private val credentialManager = CredentialManager.create(context)
     private val scope = kotlinx.coroutines.CoroutineScope(Dispatchers.Main + kotlinx.coroutines.SupervisorJob())
 

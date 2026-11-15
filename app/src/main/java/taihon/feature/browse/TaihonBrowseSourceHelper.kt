@@ -1,19 +1,19 @@
 package taihon.feature.browse
 
-import eu.kanade.tachiyomi.extension.ExtensionManager
+import android.content.Context
 import eu.kanade.tachiyomi.util.lang.normalizeApostrophe
-import taihon.domain.preferences.TaihonPreferences
+import mihon.app.di.appGraph
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 object TaihonBrowseSourceHelper {
 
-    fun normalizeQuery(
+    suspend fun normalizeQuery(
         query: String?,
         sourceId: Long,
     ): String {
-        val taihonPreferences = Injekt.get<TaihonPreferences>()
-        val extensionManager = Injekt.get<ExtensionManager>()
+        val taihonPreferences = Injekt.get<Context>().appGraph.taihonPreferences
+        val extensionManager = Injekt.get<Context>().appGraph.extensionManager
         val pkgName = extensionManager.getExtensionPackage(sourceId)
         val isNormalized = taihonPreferences.smartApostropheNormalization.get() &&
             pkgName !in taihonPreferences.smartApostropheNormalizationExceptions.get()

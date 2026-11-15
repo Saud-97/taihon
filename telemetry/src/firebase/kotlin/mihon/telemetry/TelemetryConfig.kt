@@ -62,6 +62,10 @@ object TelemetryConfig {
             else -> false
         }
     }
+
+    fun recordException(throwable: Throwable) {
+        crashlytics?.recordException(throwable)
+    }
 }
 
 private const val TAIHON_PACKAGE = "app.taihon"

@@ -9,9 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
@@ -26,6 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import mihon.icons.materialsymbols.MaterialSymbols
+import mihon.icons.materialsymbols.rounded.ArrowDownward
+import mihon.icons.materialsymbols.rounded.ArrowUpward
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
@@ -96,7 +96,7 @@ fun BoxScope.TaihonMangaScrollControls(
             label = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.ArrowUpward,
+                        imageVector = MaterialSymbols.Rounded.ArrowUpward,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
                     )
@@ -130,7 +130,7 @@ fun BoxScope.TaihonMangaScrollControls(
             label = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.ArrowDownward,
+                        imageVector = MaterialSymbols.Rounded.ArrowDownward,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
                     )

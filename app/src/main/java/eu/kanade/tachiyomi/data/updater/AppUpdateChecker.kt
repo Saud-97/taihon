@@ -1,15 +1,17 @@
 package eu.kanade.tachiyomi.data.updater
 
+import dev.zacsweers.metro.Inject
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.util.system.isFossBuildType
-import eu.kanade.tachiyomi.util.system.isPreviewBuildType
-import tachiyomi.core.common.util.lang.withIOContext
+import eu.kanade.tachiyomi.util.system.isNightlyBuildType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import tachiyomi.domain.release.interactor.GetApplicationRelease
-import uy.kohesive.injekt.injectLazy
 
-class AppUpdateChecker {
-
-    private val getApplicationRelease: GetApplicationRelease by injectLazy()
+@Inject
+class AppUpdateChecker(
+    private val getApplicationRelease: GetApplicationRelease,
+) {
 
     suspend fun checkForUpdate(forceCheck: Boolean = false): GetApplicationRelease.Result {
         // Disable app update checks for older Android versions that we're going to drop support for
@@ -17,11 +19,11 @@ class AppUpdateChecker {
         //     return GetApplicationRelease.Result.OsTooOld
         // }
 
-        return withIOContext {
+        return withContext(Dispatchers.IO) {
             val result = getApplicationRelease.await(
                 GetApplicationRelease.Arguments(
                     isFossBuildType,
-                    isPreviewBuildType,
+                    isNightlyBuildType,
                     BuildConfig.COMMIT_COUNT.toInt(),
                     BuildConfig.VERSION_NAME,
                     GITHUB_REPO,
@@ -35,7 +37,7 @@ class AppUpdateChecker {
 }
 
 val GITHUB_REPO: String by lazy {
-    if (isPreviewBuildType) {
+    if (isNightlyBuildType) {
         "Saud-97/taihon-nightly"
     } else {
         "Saud-97/taihon"
@@ -43,7 +45,7 @@ val GITHUB_REPO: String by lazy {
 }
 
 val RELEASE_TAG: String by lazy {
-    if (isPreviewBuildType) {
+    if (isNightlyBuildType) {
         "r${BuildConfig.COMMIT_COUNT}"
     } else {
         "v${BuildConfig.VERSION_NAME}"

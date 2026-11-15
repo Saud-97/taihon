@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.Navigator
 import eu.kanade.tachiyomi.ui.browse.extension.details.ExtensionDetailsScreen
 import eu.kanade.tachiyomi.ui.browse.extension.details.SourcePreferencesScreen
+import kotlinx.coroutines.launch
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import taihon.feature.browse.TaihonSourcesHelper
@@ -60,13 +62,16 @@ object TaihonSourcesHooks {
 
     @Composable
     fun rememberUninstallAction(onClose: () -> Unit): (() -> Unit)? {
+        val scope = rememberCoroutineScope()
         val taihonDialog by TaihonSourcesHelper.getDialogInfo()
         val info = taihonDialog ?: return null
         if (!info.canUninstall) return null
 
         return {
-            TaihonSourcesHelper.uninstallExtension(info.source)
-            onClose()
+            scope.launch {
+                TaihonSourcesHelper.uninstallExtension(info.source)
+                onClose()
+            }
         }
     }
 }

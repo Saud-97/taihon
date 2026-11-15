@@ -1,9 +1,14 @@
 package tachiyomi.domain.download.service
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
 import taihon.domain.preferences.TaihonPreferences
 
+@Inject
+@SingleIn(AppScope::class)
 class DownloadPreferences(
     preferenceStore: PreferenceStore,
     val taihon: TaihonPreferences,
@@ -15,8 +20,6 @@ class DownloadPreferences(
     )
 
     val saveChaptersAsCBZ: Preference<Boolean> = preferenceStore.getBoolean("save_chapter_as_cbz", true)
-
-    val splitTallImages: Preference<Boolean> = preferenceStore.getBoolean("split_tall_images", true)
 
     val autoDownloadWhileReading: Preference<Int> = preferenceStore.getInt("auto_download_while_reading", 0)
 

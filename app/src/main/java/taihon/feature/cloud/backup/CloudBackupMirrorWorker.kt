@@ -6,6 +6,7 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
@@ -15,6 +16,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import dev.zacsweers.metro.Inject
 import eu.kanade.tachiyomi.data.backup.create.BackupCreator
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.cancelNotification
@@ -22,6 +24,7 @@ import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notify
 import kotlinx.coroutines.CancellationException
 import logcat.LogPriority
+import mihon.app.di.appGraph
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.library.service.LibraryPreferences
@@ -29,17 +32,24 @@ import tachiyomi.domain.storage.service.StorageManager
 import tachiyomi.i18n.MR
 import taihon.domain.preferences.TaihonPreferences
 import taihon.feature.cloud.CloudService
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import java.io.File
 
 class CloudBackupMirrorWorker(context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
 
+    @Inject
+    private lateinit var taihonPreferences: TaihonPreferences
+
+    @Inject
+    private lateinit var cloudService: CloudService
+
+    @Inject
+    private lateinit var storageManager: StorageManager
+
     override suspend fun doWork(): Result {
-        val taihonPreferences = Injekt.get<TaihonPreferences>()
+        applicationContext.appGraph.inject(this)
+
         val cloudPreferences = taihonPreferences.cloud
-        val cloudService = Injekt.get<CloudService>()
 
         if (!cloudService.isAvailable()) {
             logcat(LogPriority.DEBUG) { "Cloud service not available, skipping mirror" }
@@ -67,7 +77,13 @@ class CloudBackupMirrorWorker(context: Context, workerParams: WorkerParameters) 
             return Result.failure()
         }
 
-        val storageManager = Injekt.get<StorageManager>()
+        val manualLocalUri = inputData.getString(EXTRA_LOCAL_URI)
+        if (!manualLocalUri.isNullOrEmpty()) {
+            return performManualUpload(manualLocalUri)
+        }
+
+        val autoBackupFolderId = cloudPreferences.cloudStorageAutoBackupId.get().takeIf { it.isNotEmpty() }
+
         val localAutoBackupDir = storageManager.getAutomaticBackupsDirectory() ?: run {
             logcat(LogPriority.ERROR) { "Automatic backups directory is not configured" }
             return Result.failure()
@@ -81,12 +97,11 @@ class CloudBackupMirrorWorker(context: Context, workerParams: WorkerParameters) 
                 return Result.failure()
             }
 
-            val allFiles = localAutoBackupDir.listFiles() ?: emptyArray()
-            val localFiles = allFiles.filter { it.name?.endsWith(".tachibk") == true }
-
-            val autoBackupFolderId = cloudPreferences.cloudStorageAutoBackupId.get().takeIf { it.isNotEmpty() }
             val cloudFiles = cloudService.listFiles(autoBackupFolderId)
             val cloudFileNames = cloudFiles.map { it.name }.toSet()
+
+            val allFiles = localAutoBackupDir.listFiles() ?: emptyArray()
+            val localFiles = allFiles.filter { it.name?.endsWith(".tachibk") == true }
 
             val missingLocalFiles = localFiles.filter { it.name != null && it.name !in cloudFileNames }
 
@@ -198,6 +213,43 @@ class CloudBackupMirrorWorker(context: Context, workerParams: WorkerParameters) 
         }
     }
 
+    private suspend fun performManualUpload(localUri: String): Result {
+        val fileName = inputData.getString(EXTRA_FILE_NAME) ?: return Result.failure()
+        val parentId = inputData.getString(EXTRA_PARENT_ID)
+
+        val uniFile = com.hippo.unifile.UniFile.fromUri(applicationContext, localUri.toUri())
+        if (uniFile == null || !uniFile.exists()) {
+            logcat(LogPriority.ERROR) { "Manual upload failed: Local file does not exist: $localUri" }
+            return Result.failure()
+        }
+
+        val tempFile = File(applicationContext.cacheDir, "manual_upload_${System.currentTimeMillis()}_$fileName")
+        return try {
+            tempFile.parentFile?.mkdirs()
+            uniFile.openInputStream().use { input ->
+                tempFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            val result = cloudService.uploadFile(tempFile, fileName, parentId)
+            if (result != null) {
+                logcat(LogPriority.INFO) { "Successfully uploaded manual backup to cloud: $fileName" }
+                Result.success()
+            } else {
+                logcat(LogPriority.ERROR) { "Failed to upload manual backup to cloud: $fileName" }
+                Result.failure()
+            }
+        } catch (e: Exception) {
+            if (e is CancellationException || isStopped) throw e
+            logcat(LogPriority.ERROR, e) { "Error during manual cloud upload of $fileName" }
+            Result.failure()
+        } finally {
+            tempFile.delete()
+            uniFile.delete()
+        }
+    }
+
     private fun showErrorNotification(message: String) {
         val notification = applicationContext.notificationBuilder(Notifications.CHANNEL_BACKUP_RESTORE_COMPLETE) {
             setSmallIcon(android.R.drawable.stat_notify_error)
@@ -231,9 +283,14 @@ class CloudBackupMirrorWorker(context: Context, workerParams: WorkerParameters) 
 
     companion object {
         private const val TAG = "CloudBackupMirror"
+        const val TAG_MANUAL_UPLOAD = "ManualCloudBackupUpload"
+
+        const val EXTRA_LOCAL_URI = "manual_local_uri"
+        const val EXTRA_FILE_NAME = "manual_file_name"
+        const val EXTRA_PARENT_ID = "manual_parent_id"
 
         fun schedule(context: Context, forceRestart: Boolean = false) {
-            val preferences = Injekt.get<LibraryPreferences>()
+            val preferences = context.appGraph.libraryPreferences
             val restrictions = preferences.autoUpdateDeviceRestrictions.get()
 
             val networkType = if (LibraryPreferences.DEVICE_NETWORK_NOT_METERED in restrictions) {

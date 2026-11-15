@@ -15,11 +15,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun PreferenceGroupHeader(title: String, badge: ImageVector? = null) {
+fun PreferenceGroupHeader(title: String, highlighted: Boolean = false, badge: ImageVector? = null) {
     Box(
         contentAlignment = Alignment.CenterStart,
         modifier = Modifier
             .fillMaxWidth()
+            .highlightBackground(highlighted)
             .padding(bottom = 8.dp, top = 14.dp),
     ) {
         Row(

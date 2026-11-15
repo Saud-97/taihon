@@ -4,6 +4,7 @@ plugins {
 
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.sqldelight)
+    alias(libs.plugins.metro)
 }
 
 android {
@@ -31,7 +32,9 @@ dependencies {
     implementation(projects.sourceApi)
     implementation(projects.domain)
     implementation(projects.core.common)
+    implementation(projects.core.metro)
 
+    implementation(libs.metro.runtime)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.serialization.jsonOkio)
     implementation(libs.kotlinx.serialization.protobuf)
@@ -40,5 +43,6 @@ dependencies {
 
     implementation(libs.kotlinx.datetime)
 
-    api(libs.bundles.sqldelight)
+    implementation(libs.androidx.sqlite.bundled)
+    implementation(libs.bundles.sqldelight)
 }
