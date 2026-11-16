@@ -95,8 +95,7 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.source.local.image.LocalCoverManager
 import tachiyomi.source.local.isLocal
-import taihon.feature.reader.TaihonReaderHooks
-import java.util.Date
+import taihon.feature.reader.applyResumeLastSeenPage
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
@@ -206,8 +205,6 @@ class ReaderViewModel(
     private var pendingProgressChapter: ReaderChapter? = null
     private var pendingProgressSave: Job? = null
 
-    private val readerStartTime = TaihonReaderHooks.getReaderStartTime()
-
     private var chapterToDownload: Download? = null
 
     private var unfilteredChapterList: List<Chapter>? = null
@@ -312,9 +309,10 @@ class ReaderViewModel(
                 if (chapterPageIndex >= 0) {
                     // Restore from SavedState
                     currentChapter.requestedPage = chapterPageIndex
-                } else if (!currentChapter.chapter.read || basePreferences.taihon.resumeLastSeenPage.get()) {
+                } else if (!currentChapter.chapter.read) {
                     currentChapter.requestedPage = currentChapter.chapter.lastPageRead
                 }
+                currentChapter.applyResumeLastSeenPage()
                 chapterId = currentChapter.chapter.id
             }
             .launchIn(viewModelScope)
@@ -751,14 +749,14 @@ class ReaderViewModel(
     private suspend fun updateHistory() {
         saveChapterProgress()
         getCurrentChapter()?.let { readerChapter ->
-            if (incognitoMode || TaihonReaderHooks.shouldSkipHistoryUpdate(readerStartTime)) return@let
+            if (incognitoMode) return@let
 
             val chapterId = readerChapter.chapter.id
             val endTime = Clock.System.now()
             val sessionReadDuration = chapterReadStartTime?.let { (endTime - it).inWholeMilliseconds } ?: 0
             chapterReadStartTime = null
 
-            val chapterId = readerChapter.chapter.id!!
+            if (chapterId == initialChapterId && sessionReadDuration < 1000) return@let
             upsertHistory.await(HistoryUpdate(chapterId, endTime, sessionReadDuration))
         }
     }

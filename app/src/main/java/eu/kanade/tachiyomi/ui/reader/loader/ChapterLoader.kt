@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import mihon.app.di.appGraph
 import mihon.core.archive.archiveReader
 import mihon.core.archive.epubReader
 import tachiyomi.core.common.i18n.stringResource
@@ -21,6 +20,7 @@ import tachiyomi.domain.source.model.StubSource
 import tachiyomi.i18n.MR
 import tachiyomi.source.local.LocalSource
 import tachiyomi.source.local.io.Format
+import taihon.feature.reader.applyResumeLastSeenPage
 
 /**
  * Loader used to retrieve the [PageLoader] for a given chapter.
@@ -61,9 +61,10 @@ class ChapterLoader(
 
                 // If the chapter is partially read, set the starting page to the last the user read
                 // otherwise use the requested page.
-                if (!chapter.chapter.read || context.appGraph.taihonPreferences.resumeLastSeenPage.get()) {
+                if (!chapter.chapter.read) {
                     chapter.requestedPage = chapter.chapter.lastPageRead
                 }
+                chapter.applyResumeLastSeenPage(pages)
 
                 chapter.state = ReaderChapter.State.Loaded(pages)
             } catch (e: Throwable) {

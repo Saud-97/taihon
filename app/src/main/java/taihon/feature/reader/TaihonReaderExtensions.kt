@@ -3,6 +3,7 @@ package taihon.feature.reader
 import android.content.Context
 import androidx.recyclerview.widget.WebtoonLayoutManager
 import androidx.viewpager.widget.ViewPager
+import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import kotlinx.coroutines.CoroutineScope
@@ -11,6 +12,21 @@ import kotlinx.coroutines.flow.onEach
 import mihon.app.di.appGraph
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+
+/**
+ * Taihon extension to apply resumeLastSeenPage preference for read chapters.
+ */
+fun ReaderChapter.applyResumeLastSeenPage(loadedPages: List<eu.kanade.tachiyomi.ui.reader.model.ReaderPage>? = pages) {
+    if (!chapter.read) return
+    val resumeLastSeenPage = Injekt.get<Context>().appGraph.taihonPreferences.resumeLastSeenPage.get()
+    if (!resumeLastSeenPage) return
+
+    val pageList = loadedPages ?: pages
+    val isLastPage = pageList?.let { chapter.lastPageRead >= it.lastIndex } ?: false
+    if (!isLastPage) {
+        requestedPage = chapter.lastPageRead
+    }
+}
 
 /**
  * Taihon-specific extensions for PagerViewer to handle custom scroll speeds.
