@@ -17,9 +17,9 @@ class TaihonPreferences(
 
     // App Preferences
 
-    val allowHardwareBitmapForCovers: Preference<Boolean> = preferenceStore.getBoolean(
-        PREF_ALLOW_HARDWARE_BITMAP_COVERS,
-        true,
+    val useSoftwareRenderingForCovers: Preference<Boolean> = preferenceStore.getBoolean(
+        PREF_USE_SOFTWARE_RENDERING_FOR_COVERS,
+        false,
     )
 
     // Library Preferences
@@ -80,7 +80,7 @@ class TaihonPreferences(
     val backupRetention: Preference<Int> = preferenceStore.getInt(PREF_BACKUP_RETENTION, 12)
 
     companion object {
-        const val PREF_ALLOW_HARDWARE_BITMAP_COVERS = "pref_allow_hardware_bitmap_covers"
+        const val PREF_USE_SOFTWARE_RENDERING_FOR_COVERS = "pref_use_software_rendering_for_covers"
 
         const val PREF_RESUME_LAST_SEEN_PAGE = "pref_resume_last_seen_page"
         const val PREF_FILTER_ORPHANED_SOURCES = "pref_filter_library_orphaned_sources_v2"

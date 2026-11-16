@@ -9,11 +9,11 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 fun ImageRequest.Builder.applyTaihonHardwareBitmapPreference(): ImageRequest.Builder {
-    val allowHardware = Injekt.get<Context>().appGraph.taihonPreferences.allowHardwareBitmapForCovers.get()
+    val allowHardware = !Injekt.get<Context>().appGraph.taihonPreferences.useSoftwareRenderingForCovers.get()
     return this.allowHardware(allowHardware)
 }
 
 fun getTaihonHardwareBitmapConfig(): Bitmap.Config {
-    val allowHardware = Injekt.get<Context>().appGraph.taihonPreferences.allowHardwareBitmapForCovers.get()
+    val allowHardware = !Injekt.get<Context>().appGraph.taihonPreferences.useSoftwareRenderingForCovers.get()
     return if (allowHardware) Bitmap.Config.HARDWARE else Bitmap.Config.ARGB_8888
 }

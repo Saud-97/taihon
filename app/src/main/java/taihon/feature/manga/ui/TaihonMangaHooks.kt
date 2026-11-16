@@ -33,7 +33,8 @@ object TaihonMangaHooks {
     fun rememberCoverModel(data: Any?): Any {
         val context = LocalContext.current
         val taihonPreferences = remember { context.appGraph.taihonPreferences }
-        val allowHardware by taihonPreferences.allowHardwareBitmapForCovers.collectAsState()
+        val useSoftwareRendering by taihonPreferences.useSoftwareRenderingForCovers.collectAsState()
+        val allowHardware = !useSoftwareRendering
 
         return remember(data, allowHardware) {
             if (data is ImageRequest) {

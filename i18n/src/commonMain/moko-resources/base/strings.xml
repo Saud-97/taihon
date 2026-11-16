@@ -1155,9 +1155,9 @@
     <string name="pref_resume_last_seen_page_summary">Resuming from History tab returns to the last
         seen page, even the chapter was fully read, instead of opening next chapter.
     </string>
-    <string name="pref_allow_hardware_bitmap_covers">Allow hardware bitmaps for covers</string>
-    <string name="pref_allow_hardware_bitmap_covers_summary">Disable this if covers periodically
-        appear blank on your library
+    <string name="pref_use_software_rendering_for_covers">Use software rendering for covers</string>
+    <string name="pref_use_software_rendering_for_covers_summary">Enable this if covers periodically
+        appear blank in your library
     </string>
 
     <!-- Reader section -->

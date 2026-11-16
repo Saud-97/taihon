@@ -20,9 +20,9 @@ fun getTaihonAdvancedLibraryItems(): List<Preference.PreferenceItem<out Any, out
     val taihonPreferences = remember { context.appGraph.taihonPreferences }
     return listOf(
         Preference.PreferenceItem.SwitchPreference(
-            preference = taihonPreferences.allowHardwareBitmapForCovers,
-            title = stringResource(MR.strings.pref_allow_hardware_bitmap_covers),
-            subtitle = stringResource(MR.strings.pref_allow_hardware_bitmap_covers_summary),
+            preference = taihonPreferences.useSoftwareRenderingForCovers,
+            title = stringResource(MR.strings.pref_use_software_rendering_for_covers),
+            subtitle = stringResource(MR.strings.pref_use_software_rendering_for_covers_summary),
             badge = taihonBadge(),
         ),
     )
