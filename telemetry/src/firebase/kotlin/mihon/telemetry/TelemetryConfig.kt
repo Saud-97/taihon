@@ -58,6 +58,7 @@ object TelemetryConfig {
 
         return when (packageName) {
             TAIHON_PACKAGE -> signatures.any { it == TAIHON_CERTIFICATE_FINGERPRINT }
+            TAIHON_NIGHTLY_PACKAGE -> signatures.any { it == TAIHON_CERTIFICATE_FINGERPRINT }
             TAIHON_DEV_PACKAGE -> signatures.any { it == TAIHON_DEV_CERTIFICATE_FINGERPRINT }
             else -> false
         }
@@ -69,6 +70,7 @@ object TelemetryConfig {
 }
 
 private const val TAIHON_PACKAGE = "app.taihon"
+private const val TAIHON_NIGHTLY_PACKAGE = "app.taihon.nightly"
 private const val TAIHON_CERTIFICATE_FINGERPRINT =
     "AD:FF:AA:D7:51:5C:B0:C6:42:44:7A:32:80:77:F1:18:B2:6B:05:17:B8:16:CC:36:68:48:6A:DF:1B:36:CF:3B"
 

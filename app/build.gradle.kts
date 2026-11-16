@@ -101,7 +101,7 @@ android {
         create("nightly") {
             initWith(release)
 
-            applicationIdSuffix = ".debug"
+            applicationIdSuffix = ".nightly"
 
             matchingFallbacks.addAll(commonMatchingFallbacks)
         }
