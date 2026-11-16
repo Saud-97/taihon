@@ -78,6 +78,43 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:860721443431:android:ba58e7c60fad60392c1ac2",
+        "android_client_info": {
+          "package_name": "app.taihon.nightly"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "860721443431-qvc5jh2s76p1e77hquii8kmref5v3c78.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.taihon.nightly",
+            "certificate_hash": "8293bf61a28c651e125be92e59249a0b09e7c08e"
+          }
+        },
+        {
+          "client_id": "860721443431-nfl3ava8u28lkndiq3vcmvjq4q7qajkj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCODWLs4CBo8hHGmfTVK3RT_nUsMo8J2Gs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "860721443431-nfl3ava8u28lkndiq3vcmvjq4q7qajkj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"
