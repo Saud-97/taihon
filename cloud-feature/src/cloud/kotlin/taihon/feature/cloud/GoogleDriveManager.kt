@@ -2,6 +2,7 @@ package taihon.feature.cloud
 
 import android.app.Activity
 import android.content.Context
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,6 +12,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.Scope
@@ -31,6 +33,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -128,12 +131,29 @@ class GoogleDriveManager(
             }
         } catch (e: Exception) {
             if (e is CancellationException) throw e
-            val message = when (e) {
-                is IllegalStateException -> "Google Sign-In configuration error or invalid credential"
-                is GetCredentialException -> "Failed to sign in with Credential Manager"
-                else -> "Unexpected error during sign-in"
+            when (e) {
+                is NoCredentialException -> {
+                    logcat(LogPriority.DEBUG, e) {
+                        "No Google account available for sign-in"
+                    }
+                    context.toast("Please add a Google account to your device and try again", Toast.LENGTH_LONG)
+                }
+
+                else -> {
+                    val message = when (e) {
+                        is IllegalStateException ->
+                            "Google Sign-In configuration error"
+
+                        is GetCredentialException ->
+                            "Failed to sign in with Credential Manager"
+
+                        else ->
+                            "Unexpected error during sign-in"
+                    }
+                    logcat(LogPriority.ERROR, e) { message }
+                }
             }
-            logcat(LogPriority.ERROR, e) { message }
+
             markAccountUnavailable()
         }
     }
