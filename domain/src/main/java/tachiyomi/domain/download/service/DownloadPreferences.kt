@@ -11,7 +11,7 @@ import taihon.domain.preferences.TaihonPreferences
 @SingleIn(AppScope::class)
 class DownloadPreferences(
     preferenceStore: PreferenceStore,
-    val taihon: TaihonPreferences,
+    val taihon: TaihonPreferences = TaihonPreferences(preferenceStore),
 ) {
 
     val downloadOnlyOverWifi: Preference<Boolean> = preferenceStore.getBoolean(

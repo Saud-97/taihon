@@ -10,11 +10,13 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import tachiyomi.core.common.preference.InMemoryPreferenceStore
 import tachiyomi.domain.library.service.LibraryPreferences
+import taihon.domain.preferences.TaihonPreferences
 
 class DownloadProviderTest {
 
     private fun provider(disallowNonAscii: Boolean): DownloadProvider {
-        val preferences = LibraryPreferences(InMemoryPreferenceStore())
+        val preferenceStore = InMemoryPreferenceStore()
+        val preferences = LibraryPreferences(preferenceStore, TaihonPreferences(preferenceStore))
         preferences.disallowNonAsciiFilenames.set(disallowNonAscii)
         preferences.enableChapterNameHash.set(true)
         return DownloadProvider(mockk(relaxed = true), mockk(relaxed = true), preferences)

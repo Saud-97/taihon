@@ -16,7 +16,7 @@ import taihon.domain.preferences.TaihonPreferences
 @SingleIn(AppScope::class)
 class LibraryPreferences(
     private val preferenceStore: PreferenceStore,
-    val taihon: TaihonPreferences,
+    val taihon: TaihonPreferences = TaihonPreferences(preferenceStore),
 ) {
 
     val displayMode: Preference<LibraryDisplayMode> = preferenceStore.getObjectFromString(

@@ -5,21 +5,18 @@ import dev.icerock.moko.resources.StringResource
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
-import mihon.app.di.appGraph
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.i18n.MR
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
+import taihon.domain.preferences.TaihonPreferences
 
 @Inject
 @SingleIn(AppScope::class)
 class BasePreferences(
     val context: Context,
     preferenceStore: PreferenceStore,
+    val taihon: TaihonPreferences = TaihonPreferences(preferenceStore),
 ) {
-
-    val taihon by lazy { Injekt.get<Context>().appGraph.taihonPreferences }
 
     val downloadedOnly: Preference<Boolean> = preferenceStore.getBoolean(
         Preference.appStateKey("pref_downloaded_only"),

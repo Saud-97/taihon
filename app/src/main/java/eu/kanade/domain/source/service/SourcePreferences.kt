@@ -1,12 +1,10 @@
 package eu.kanade.domain.source.service
 
-import android.content.Context
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import eu.kanade.domain.source.interactor.SetMigrateSorting
 import eu.kanade.tachiyomi.util.system.LocaleHelper
-import mihon.app.di.appGraph
 import mihon.domain.extension.model.ContentWarning
 import mihon.domain.migration.models.MigrationFlag
 import tachiyomi.core.common.preference.Preference
@@ -15,16 +13,14 @@ import tachiyomi.core.common.preference.getEnum
 import tachiyomi.core.common.preference.getEnumSet
 import tachiyomi.core.common.preference.getLongArray
 import tachiyomi.domain.library.model.LibraryDisplayMode
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
+import taihon.domain.preferences.TaihonPreferences
 
 @Inject
 @SingleIn(AppScope::class)
 class SourcePreferences(
     preferenceStore: PreferenceStore,
+    val taihon: TaihonPreferences = TaihonPreferences(preferenceStore),
 ) {
-
-    val taihon by lazy { Injekt.get<Context>().appGraph.taihonPreferences }
 
     val sourceDisplayMode: Preference<LibraryDisplayMode> = preferenceStore.getObjectFromString(
         "pref_display_mode_catalogue",

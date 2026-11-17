@@ -11,7 +11,7 @@ import taihon.domain.preferences.TaihonPreferences
 @SingleIn(AppScope::class)
 class BackupPreferences(
     preferenceStore: PreferenceStore,
-    val taihon: TaihonPreferences,
+    val taihon: TaihonPreferences = TaihonPreferences(preferenceStore),
 ) {
 
     val backupInterval: Preference<Int> = preferenceStore.getInt("backup_interval", 12)

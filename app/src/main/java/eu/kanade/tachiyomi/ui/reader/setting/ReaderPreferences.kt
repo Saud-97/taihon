@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.reader.setting
 
-import android.content.Context
 import android.os.Build
 import androidx.compose.ui.graphics.BlendMode
 import dev.icerock.moko.resources.StringResource
@@ -9,22 +8,19 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import eu.kanade.tachiyomi.ui.reader.viewer.webgpu.WebGpuShader
 import eu.kanade.tachiyomi.ui.reader.viewer.webgpu.WebGpuShaders
-import mihon.app.di.appGraph
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.core.common.preference.getEnum
 import tachiyomi.core.common.preference.getEnumSet
 import tachiyomi.i18n.MR
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
+import taihon.domain.preferences.TaihonPreferences
 
 @Inject
 @SingleIn(AppScope::class)
 class ReaderPreferences(
     preferenceStore: PreferenceStore,
+    val taihon: TaihonPreferences = TaihonPreferences(preferenceStore),
 ) {
-
-    val taihon by lazy { Injekt.get<Context>().appGraph.taihonPreferences }
 
     // region General
 
